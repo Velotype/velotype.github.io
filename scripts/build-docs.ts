@@ -178,9 +178,21 @@ for (const entry of nav) {
     }
 }
 lines.push("", "## Optional", "",
+    `- [llms-full.txt](${site}/llms-full.txt): this file's introduction and versions, followed by every docs page, in one file`,
     `- [Home page](${site}/): the project overview for people`,
     "- [GitHub organization](https://github.com/Velotype): every repository",
     "- [JSR scope](https://jsr.io/@velotype): every published package",
     "- [Medium articles](https://argoday.medium.com/): walkthroughs of velomicro and velomini")
 await Deno.writeTextFile(new URL("llms.txt", root), lines.join("\n") + "\n")
 console.log(`Wrote llms.txt: ${lines.length} lines, and the docs as Markdown`)
+
+// llms-full.txt: the introduction and versions, then every docs page in full, for an agent that wants
+// everything in one fetch. Each page is introduced by where it came from.
+const full: string[] = [intro, "", ...lines.slice(lines.indexOf("## Versions"), lines.indexOf("## Projects"))]
+for (const entry of nav) {
+    for (const page of readPages(entry.id)) {
+        full.push("", "---", "", `Source: ${site}${page.url}`, "", page.markdown.trim())
+    }
+}
+await Deno.writeTextFile(new URL("llms-full.txt", root), full.join("\n") + "\n")
+console.log(`Wrote llms-full.txt: ${(full.join("\n").length / 1024).toFixed(0)}KB`)
