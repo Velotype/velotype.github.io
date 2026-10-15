@@ -1,0 +1,119 @@
+# The Velocity Project
+
+> A suite of TypeScript libraries for building software platforms end to end: a browser UI framework that creates real DOM elements (no virtual DOM), a themed component library, server-side TSX rendering, a web server, and a compact binary JSON wire format. They are written for Deno, published to JSR under @velotype, and developed in the Velotype GitHub organization (https://github.com/Velotype).
+
+Each project stands on its own and they are designed to fit together: veloserver serves pages and APIs, velossr or Velotype renders them, velodesign supplies UI components for Velotype, and velojson (VSON) carries data between server and browser. The projects are pre-1.0, so APIs can change between versions: pin versions, and read each repository's release-notes.md.
+
+## Read this before writing code with these libraries
+
+- **Velotype is not React.** It has no virtual DOM, no reconciler, and no hooks (there is no useState or useEffect). A TSX tag evaluates to a real DOM element: `<div/>` is an HTMLDivElement. Components are classes that extend `Component`, state lives in class fields, and a value that changes is rendered in place by a `RenderObject`, `RenderBasic`, `RenderObjectArray`, or `RenderTemplateArray`. Do not call `refresh()` for routine updates: it throws away and rebuilds the component's children.
+- **Attributes are HTML attributes.** Write `class`, not `className`. The `style` attribute takes an object only (a string has not type-checked since Velotype 0.0.25). Event attributes start with `on`: `onClick`.
+- **Mount with `replaceElementWithRoot(<App/>, document.getElementById("app"))`.** Components are mounted by Velotype only when inserted through Velotype, not with `appendChild()`.
+- **Server and browser TSX are different packages.** Browser code uses `"jsxImportSource": "@velotype/velotype"` and server code uses `"@velotype/velossr"`, so keep them in separate directories with their own deno.json.
+- **Do not mix Velotype versions in one app.** A velodesign release is built on one Velotype version, and the Versions section below says which.
+- **Conditionals:** `{condition && <li/>}` works in Velotype and in velossr 0.0.10 or later. In velomicro and velomini (and velossr before 0.0.10) a `false` child is written as the text "false", so use `{condition ? <li/> : null}`.
+- **velodesign:** call `Theme.injectStyles()` once before any component renders. The library has no built-in text, so ARIA labels and placeholders have no defaults: pass them in.
+- **veloserver:** `new Router<Metadata>({})`, add routes with `get`, `head`, and `post`, then `new Server(router).serve("127.0.0.1", 3000)`. Serving needs `--allow-net` and nothing else.
+- **velojson:** `VSON.encode(value)` and `VSON.decode(bytes)`. The Key Table format is the default for objects and arrays. VSON Base and Key Table are smaller than JSON text but usually slower than native JSON, and VBIN (which needs agreed key IDs) is the fast one. The `/browser` module supports Key Table only.
+- **velomicro and velomini** are small teaching frameworks (about 1kb and 2.5kb), not for applications. Use Velotype for an app.
+- **Velotype DevTools** is a Chrome extension that is built from source and loaded unpacked. It is not a library.
+
+## How to use these docs
+
+Every docs page is available as Markdown at the links below. Every code example in the docs is a real file that is type-checked against the published package and then run, so prefer the docs' examples to code written from memory. If something is not in the docs, say so rather than guessing at an API.
+
+## Versions
+
+The docs and their examples were type-checked, and run, against these published versions:
+
+- @velotype/velodesign 0.1.3: https://jsr.io/@velotype/velodesign
+- @velotype/velojson 0.1.0: https://jsr.io/@velotype/velojson
+- @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
+- @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
+- @velotype/veloserver 0.3.1: https://jsr.io/@velotype/veloserver
+- @velotype/velossr 0.0.10: https://jsr.io/@velotype/velossr
+- @velotype/velotype 0.3.1: https://jsr.io/@velotype/velotype
+
+velodesign 0.1.3 is built on Velotype 0.3.1, so use that Velotype version with it.
+
+## Projects
+
+- [Velotype](https://velotype.github.io/projects/velotype/): A fast and small TSX framework that updates the DOM in place. Repository: https://github.com/Velotype/velotype Docs: https://velotype.github.io/docs/velotype/
+- [velodesign](https://velotype.github.io/projects/velodesign/): A themed component library for Velotype, built from native HTML elements. Repository: https://github.com/Velotype/velodesign Docs: https://velotype.github.io/docs/velodesign/
+- [velossr](https://velotype.github.io/projects/velossr/): TSX rendered to HTML on the server, with no virtual DOM and no client runtime. Repository: https://github.com/Velotype/velossr Docs: https://velotype.github.io/docs/velossr/
+- [Velotype DevTools](https://velotype.github.io/projects/velodevtools/): Chrome DevTools panels for debugging Velotype apps. Repository: https://github.com/Velotype/velodevtools Docs: https://velotype.github.io/docs/velodevtools/
+- [veloserver](https://velotype.github.io/projects/veloserver/): A web server framework for high-performance websites, on Deno. Repository: https://github.com/Velotype/veloserver Docs: https://velotype.github.io/docs/veloserver/
+- [velojson (VSON)](https://velotype.github.io/projects/velojson/): A compact binary encoding for JSON, and a faster one when both sides share a schema. Repository: https://github.com/Velotype/velojson Docs: https://velotype.github.io/docs/velojson/
+- [velomicro](https://velotype.github.io/projects/velomicro/): A 1kb TSX framework that shows how TSX rendering works. Repository: https://github.com/Velotype/velomicro Docs: https://velotype.github.io/docs/velomicro/
+- [velomini](https://velotype.github.io/projects/velomini/): A 2.5kb TSX framework that adds classes to velomicro. Repository: https://github.com/Velotype/velomini Docs: https://velotype.github.io/docs/velomini/
+
+## velodesign docs
+
+- [Getting started](https://velotype.github.io/docs/velodesign/getting-started.md): velodesign is a themed component library for [Velotype](/docs/velotype/). Where HTML has an element for the job (input, button, details, dialog), the component is that element, so keyboard support, form participation, and browser autofill come from the platform. Colors come from a small set of CSS custom properties, so you can re-theme the whole library without touching a component.
+- [Theming](https://velotype.github.io/docs/velodesign/theming.md): Components get their colors from CSS custom properties, set on <html> by Theme.injectStyles(). Change the palette by passing colors, and every component follows. The theme also switches between light and dark.
+- [Layout and typography](https://velotype.github.io/docs/velodesign/layout-and-typography.md): Stack and Grid, and Heading, Text, and Paragraph, are the primitives that everything else is composed from.
+- [Conventions](https://velotype.github.io/docs/velodesign/conventions.md): What every component has in common, and the functions and objects around the components.
+- [Components](https://velotype.github.io/docs/velodesign/components.md): Every velodesign component, by category. Each links to its page in the [showcase](https://velotype.github.io/velodesign/), which has a live preview, the props table, and the types it uses.
+- [API reference](https://velotype.github.io/docs/velodesign/api-reference.md): What @velotype/velodesign exports besides the [components](/docs/velodesign/components/). Each component exports its function or class and its <Name>AttrsType, and some export option types such as ButtonType and TextType.
+
+## Velotype DevTools docs
+
+- [Getting started](https://velotype.github.io/docs/velodevtools/getting-started.md): Velotype DevTools is a Chrome extension for debugging [Velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether Velotype is on the page.
+- [Panels](https://velotype.github.io/docs/velodevtools/panels.md): ## Velotype
+- [Known limitations](https://velotype.github.io/docs/velodevtools/limitations.md):  The component tree covers only the top frame. Components rendered inside an <iframe> are not merged into the tree  The Events panel is a registration snapshot, not a live trace. It does not log events as they fire. A trace needs a small hook in emitEvent() itself, which Velotype does not include to keep its bundle small. The snapshot covers most debugging needs: leaked listeners, and whether anything is listening on a key  Request body decoding is best-effort. Chrome's DevTools extension API only gives a request's postData as text, which can be lossy for binary bodies depending on the Chrome version. Response bodies are reliable, because the API says whether the content is base64 binary. Use the manual decode tool for a request payload that does not decode automatically  VSON and VBIN detection on the network tab uses the Content-Type only. There is no fallback that looks at the bytes of a body with no content type, such as application/octet-stream. Use the manual decode tool for those  VBIN is decoded in the debug format only, with KeyIDs as keys. See [VeloJSON](/docs/velodevtools/panels/#velojson)
+
+## velojson (VSON) docs
+
+- [Getting started](https://velotype.github.io/docs/velojson/getting-started.md): velojson, or VSON (Velocity JSON), is a compact binary wire format for JavaScript JSON data. Any data representable with JSON in JavaScript is representable with VSON, and the other way around. No types or capabilities are added: it is a one-to-one mapping, so it can replace JSON between two programs without changing what they send.
+- [Formats](https://velotype.github.io/docs/velojson/formats.md): VSON has three encoding formats. Each one solves a cost of the one before it. A message's format is written in its first byte, so VSON.decode() reads Base and Key Table messages without being told which.
+- [VBIN](https://velotype.github.io/docs/velojson/vbin.md): VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the fastest format, and one of the smallest.
+- [Browser module](https://velotype.github.io/docs/velojson/browser.md): @velotype/velojson/browser is the same format in a smaller module, about 4.3kb minified. It supports only the Key Table format, which VSON.encode() uses for an object or an Array, so it has no encoding format argument, and no VBIN writers or mapper.
+- [Wire format](https://velotype.github.io/docs/velojson/wire-format.md): The format of each message, for implementing VSON in another language or reading bytes by hand.
+- [API reference](https://velotype.github.io/docs/velojson/api-reference.md): ## @velotype/velojson
+
+## velomicro docs
+
+- [Getting started](https://velotype.github.io/docs/velomicro/getting-started.md): velomicro is a strictly minimal TSX framework, about 1kb, that shows how TSX rendering works. It is small enough to read in one sitting: a createElement that returns real DOM elements, and function components. The [Medium article](https://argoday.medium.com/a-1kb-tsx-framework-to-demonstrate-how-tsx-works-velotype-tsx-micro-337c32ff0648) walks through its source line by line.
+
+## velomini docs
+
+- [Getting started](https://velotype.github.io/docs/velomini/getting-started.md): velomini is a mostly minimal TSX framework, about 2.5kb, that adds class components to [velomicro](/docs/velomicro/): a Component base class with render(), mount(), unmount(), and refresh(). Its way to update what is on screen is to tear down a component's subtree and render a new one, with no diffing and no patching. The [Medium article](https://argoday.medium.com/a-2-5kb-tsx-framework-that-adds-classes-velomini-6f65cd979d40) walks through its source.
+
+## veloserver docs
+
+- [Getting started](https://velotype.github.io/docs/veloserver/getting-started.md): veloserver is a web server framework for Deno. It has a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates Velotype apps.
+- [Routes](https://velotype.github.io/docs/veloserver/routes.md): get(), head(), and post() add a handler for a path, or for several paths when given an array. A handler receives the Request and its Context, and returns a Response or a Promise of one.
+- [Request metadata](https://velotype.github.io/docs/veloserver/request-metadata.md): Context.meta holds typed metadata for each request. It is useful for data that a request needs from start to finish, such as a start time, an authenticated user, or a request id.
+- [Inspectors](https://velotype.github.io/docs/veloserver/inspectors.md): An Inspector runs before and after the handlers of a path. It is a pair of functions, and both are optional:
+- [Static files](https://velotype.github.io/docs/veloserver/static-files.md): router.mountFiles(mountPath, targetDir, memoized = true) serves a directory, and router.mountFile(mountPath, targetFile, memoized = true) serves a single file. Both serve on GET, and both are async, so await them before serving.
+- [Running the server](https://velotype.github.io/docs/veloserver/running-the-server.md): ## Shutting down
+- [API reference](https://velotype.github.io/docs/veloserver/api-reference.md): Everything @velotype/veloserver and @velotype/veloserver/dev export.
+
+## velossr docs
+
+- [Getting started](https://velotype.github.io/docs/velossr/getting-started.md): velossr renders TSX to HTML on the server. There is no virtual DOM diffing and no client runtime: components run once per request and produce bytes, either all at once or streamed as async pieces resolve.
+- [Components](https://velotype.github.io/docs/velossr/components.md): velossr has two kinds of components. A static component renders the same way every time, and a dynamic component can see the request and wait for data.
+- [Rendering](https://velotype.github.io/docs/velossr/rendering.md): Rendering a page has two steps: prepare it, which can happen once, and render it for each request.
+- [Escaping and embedding](https://velotype.github.io/docs/velossr/escaping-and-embedding.md): velossr escapes what it writes, so data from a request cannot inject markup.
+- [Islands](https://velotype.github.io/docs/velossr/islands.md): A page can be mostly static HTML from the server, with interactive parts, called islands, that Velotype takes over in the browser.
+- [API reference](https://velotype.github.io/docs/velossr/api-reference.md): Everything @velotype/velossr exports, by area.
+
+## Velotype docs
+
+- [Getting started](https://velotype.github.io/docs/velotype/getting-started.md): Velotype is a TSX framework that creates real DOM elements as your code runs. There is no virtual DOM and no reconciler, so the elements you create are the ones on the page, and a value that changes renders only the part of the page that depends on it.
+- [Components](https://velotype.github.io/docs/velotype/components.md): Components are the objects that you create as tags in TSX. Velotype has two kinds: function components for simple, stateless markup, and class components for anything with state, a lifecycle, or methods.
+- [RenderObjects](https://velotype.github.io/docs/velotype/render-objects.md): A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how Velotype updates the page in place, without a virtual DOM.
+- [Lists](https://velotype.github.io/docs/velotype/lists.md): Velotype has two list types. Both hold an Array of data points, and both render, move, and remove only the rows that changed. They have the same methods.
+- [Async data](https://velotype.github.io/docs/velotype/async-data.md): AsyncRenderObject is a RenderObject for data that arrives later. It shows pending() while a Promise is loading, then render() with its result, or onFail() when the Promise rejects.
+- [Styling and raw HTML](https://velotype.github.io/docs/velotype/styling-and-raw-html.md): ## Stylesheets
+- [Events and errors](https://velotype.github.io/docs/velotype/events-and-errors.md): ## The event bus
+- [Server rendering](https://velotype.github.io/docs/velotype/server-rendering.md): Velotype renders in the browser. To send a page's HTML from the server, render it with [velossr](/docs/velossr/), the server-side version of Velotype. It has its own components built for rendering on the server: static parts are prepared once, and async parts are streamed.
+- [Development tools](https://velotype.github.io/docs/velotype/development-tools.md): ## Hot reloading
+- [API reference](https://velotype.github.io/docs/velotype/api-reference.md): Everything @velotype/velotype exports, by area. Types are shown as they appear in the package. Each name links to the guide that covers it with an example.
+
+## Optional
+
+- [Home page](https://velotype.github.io/): the project overview for people
+- [GitHub organization](https://github.com/Velotype): every repository
+- [JSR scope](https://jsr.io/@velotype): every published package
+- [Medium articles](https://argoday.medium.com/): walkthroughs of velomicro and velomini

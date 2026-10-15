@@ -10,7 +10,9 @@ const page = (title: string, description: string, id: string | null, noscript: s
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title}</title>
 <meta name="description" content="${description}">
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="icon" type="image/png" href="/assets/logo.png">
+<link rel="apple-touch-icon" href="/assets/logo.png">
 </head>
 <body${id ? ` data-page="${id}"` : ""}>
 <div id="app"></div>

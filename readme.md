@@ -7,7 +7,9 @@ The Velocity Project site, built with [Velotype](https://github.com/Velotype/vel
 - `src/docs.tsx` - the shell around a docs page: navigation, code blocks, and the table of contents
 - `content/docs/<project>/*.md` - the developer docs, one directory per project, with pages in file name order
 - `content/examples/<project>/` - the example code that the docs show, with its own `deno.json` that pins the published package versions
-- `build/main.js`, `index.html`, `projects/`, `docs/` - generated, and committed because GitHub Pages serves the repo as-is
+- `assets/` - the Velotype logo, used as the favicon and shown on the pages
+- `content/llms-intro.md` - the hand-written part of `llms.txt`, which tells visiting agents how the projects work and what to avoid. The build adds the versions the docs were checked against, the projects, and a link to each docs page as Markdown
+- `build/main.js`, `index.html`, `projects/`, `docs/` (each page also as `.md`), `llms.txt` - generated, and committed because GitHub Pages serves the repo as-is
 
 ## Building
 

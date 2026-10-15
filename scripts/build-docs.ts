@@ -10,13 +10,13 @@
 // - The page's title is its first `# heading`, its description is its first paragraph.
 // - Each page is complete HTML, and the bundle then adds the navigation around it.
 import { marked } from "npm:marked@15.0.12"
-import { projectById } from "../src/projects.ts"
+import { projectById, projects } from "../src/projects.ts"
 
 const root = new URL("../", import.meta.url)
 const docsSource = new URL("content/docs/", root)
 const examplesSource = new URL("content/examples/", root)
 
-type Page = {slug: string, title: string, description: string, url: string, body: string}
+type Page = {slug: string, title: string, description: string, url: string, body: string, markdown: string}
 
 const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const slugify = (text: string) => text.toLowerCase().replace(/<[^>]*>/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
@@ -70,10 +70,11 @@ function readPages(project: string): Page[] {
         }
         const description = text.replace(/^# .+$/m, "").trim().split(/\n\s*\n/)[0].replace(/\s+/g, " ").replace(/[`*_]/g, "")
         const slug = file.replace(/^\d+-/, "").replace(/\.md$/, "")
+        const markdown = inlineOutputs(project, inlineExamples(project, text, source), source)
         return {
-            slug, title, description,
+            slug, title, description, markdown,
             url: index == 0 ? `/docs/${project}/` : `/docs/${project}/${slug}/`,
-            body: marked.parse(inlineOutputs(project, inlineExamples(project, text, source), source)) as string,
+            body: marked.parse(markdown) as string,
         }
     })
 }
@@ -114,6 +115,8 @@ for (const project of projectsWithDocs) {
     for (const [index, page] of pages.entries()) {
         const dir = new URL(index == 0 ? `docs/${project}/` : `docs/${project}/${page.slug}/`, root)
         await Deno.mkdir(dir, {recursive: true})
+        // The same page as Markdown, with its examples and outputs inlined, for llms.txt to link to
+        await Deno.writeTextFile(new URL(`docs/${project}/${page.slug}.md`, root), page.markdown)
         const navJson = JSON.stringify({project, nav, current: page.url}).replace(/</g, "\\u003c")
         await Deno.writeTextFile(new URL("index.html", dir), `<!doctype html>
 <html lang="en">
@@ -122,7 +125,9 @@ for (const project of projectsWithDocs) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(page.title)} - ${escapeHtml(name)} docs</title>
 <meta name="description" content="${escapeHtml(page.description)}">
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="icon" type="image/png" href="/assets/logo.png">
+<link rel="apple-touch-icon" href="/assets/logo.png">
 </head>
 <body data-doc="${project}">
 <div id="app"><article id="doc">
@@ -137,3 +142,45 @@ ${page.body}</article></div>
 // The bundle uses this to link each project to its docs
 await Deno.writeTextFile(new URL("src/docs-index.json", root), JSON.stringify(Object.fromEntries(nav.map(entry => [entry.id, entry.pages[0].url])), null, 4) + "\n")
 console.log(`Built docs for ${projectsWithDocs.join(", ") || "no projects"}`)
+
+// llms.txt: what a visiting agent should know about the projects, from content/llms-intro.md plus a
+// list of the projects, the docs pages (as Markdown), and the versions the examples were checked against
+const site = "https://velotype.github.io"
+const intro = Deno.readTextFileSync(new URL("content/llms-intro.md", root)).trimEnd()
+
+const pins = new Map<string, string>()
+for (const project of projectsWithDocs) {
+    const config = Deno.readTextFileSync(new URL(`${project}/deno.json`, examplesSource))
+    for (const [, name, version] of config.matchAll(/jsr:@velotype\/([a-z]+)@\^?(\d+\.\d+\.\d+)/g)) {
+        pins.set(name, version)
+    }
+}
+
+const lines: string[] = [intro, ""]
+lines.push("## Versions", "", "The docs and their examples were type-checked, and run, against these published versions:", "")
+for (const [name, version] of [...pins].sort()) {
+    lines.push(`- @velotype/${name} ${version}: https://jsr.io/@velotype/${name}`)
+}
+const designConfig = Deno.readTextFileSync(new URL("velodesign/deno.json", examplesSource))
+const designOn = designConfig.match(/jsr:@velotype\/velotype@\^?(\d+\.\d+\.\d+)/)?.[1]
+if (designOn) {
+    lines.push("", `velodesign ${pins.get("velodesign")} is built on Velotype ${designOn}, so use that Velotype version with it.`)
+}
+lines.push("", "## Projects", "")
+for (const project of projects) {
+    const docs = nav.find(entry => entry.id == project.id)
+    lines.push(`- [${project.name}](${site}/projects/${project.id}/): ${project.tagline} Repository: ${project.links[0].to}${docs ? ` Docs: ${site}${docs.pages[0].url}` : ""}`)
+}
+for (const entry of nav) {
+    lines.push("", `## ${entry.name} docs`, "")
+    for (const page of readPages(entry.id)) {
+        lines.push(`- [${page.title}](${site}/docs/${entry.id}/${page.slug}.md): ${page.description}`)
+    }
+}
+lines.push("", "## Optional", "",
+    `- [Home page](${site}/): the project overview for people`,
+    "- [GitHub organization](https://github.com/Velotype): every repository",
+    "- [JSR scope](https://jsr.io/@velotype): every published package",
+    "- [Medium articles](https://argoday.medium.com/): walkthroughs of velomicro and velomini")
+await Deno.writeTextFile(new URL("llms.txt", root), lines.join("\n") + "\n")
+console.log(`Wrote llms.txt: ${lines.length} lines, and the docs as Markdown`)
