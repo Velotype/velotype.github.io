@@ -59,7 +59,7 @@ server.close()
 <h3 id="attributes-are-html-attributes">Attributes are HTML attributes</h3>
 <p>velossr writes attributes as strings, so you write TSX the same as if you were writing HTML. Style objects resolve camelCase keys to kebab-case CSS. A <code>true</code> boolean attribute is written bare, and a <code>false</code> one is left out. Event listener attributes (<code>onClick</code>) cannot work on the server: they are left out and a warning is logged.</p>
 <h3 id="conditional-rendering">Conditional rendering</h3>
-<p><code>null</code> and <code>undefined</code> children render nothing, and so does a ternary that gives <code>null</code>. In velossr 0.0.9, a <code>false</code> child is written as the text <code>false</code>, so <code>{condition &amp;&amp; &lt;li/&gt;}</code> writes <code>false</code> when the condition is false. Use <code>{condition ? &lt;li/&gt; : null}</code> until the next release, which fixes this.</p>
+<p><code>false</code>, <code>null</code>, and <code>undefined</code> children render nothing, so <code>{condition &amp;&amp; &lt;li/&gt;}</code> works as it does in Velotype. <code>true</code> is written as text. Before velossr 0.0.10 a <code>false</code> child was written as the text <code>false</code>, so use <code>{condition ? &lt;li/&gt; : null}</code> if you are on an older version.</p>
 <h3 id="fragments">Fragments</h3>
 <p><code>&lt;&gt;...&lt;/&gt;</code> groups children without a wrapper element.</p>
 <pre><code class="language-tsx">import { renderServerVNode, prepareVNodeForRendering, type ServerVNode } from &quot;@velotype/velossr&quot;
@@ -82,11 +82,10 @@ await show(&lt;input type=&quot;checkbox&quot; checked={true} disabled={false}/&
 const untrusted = `&lt;script&gt;alert(&quot;hi&quot;)&lt;/script&gt; &amp; &quot;quotes&quot;`
 await show(&lt;p title={untrusted}&gt;{untrusted}&lt;/p&gt;)
 
-// Fragments group children without a wrapper element.
-// For a condition, use a ternary that gives null. A boolean child is written as text, so
-// {signedIn &amp;&amp; &lt;li/&gt;} would write &quot;false&quot; when signedIn is false.
+// Fragments group children without a wrapper element. false, null, and undefined render nothing,
+// so {condition &amp;&amp; &lt;li/&gt;} works as it does in Velotype. true is written as text.
 const signedIn = false
-await show(&lt;ul&gt;{signedIn ? &lt;li&gt;Account&lt;/li&gt; : null}&lt;&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/&gt;&lt;/ul&gt;)
+await show(&lt;ul&gt;{signedIn &amp;&amp; &lt;li&gt;Account&lt;/li&gt;}&lt;&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/&gt;&lt;/ul&gt;)
 </code></pre>
 <p>Output:</p>
 <pre><code class="language-text">&lt;div class=&quot;exampleClass&quot; id=&quot;main&quot;&gt;this is a div&lt;/div&gt;

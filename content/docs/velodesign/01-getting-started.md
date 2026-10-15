@@ -8,10 +8,10 @@ Every example in these docs is a file that is type-checked against the published
 
 ## Install
 
-velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on Velotype, and velodesign 0.1.0 uses Velotype 0.0.27, so add both and use that Velotype version. Mixing Velotype versions in one app is not supported.
+velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on Velotype, and velodesign 0.1.1 uses Velotype 0.0.27, so add both and use that Velotype version. Mixing Velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.0.27 jsr:@velotype/velodesign@0.1.0
+deno add jsr:@velotype/velotype@0.0.27 jsr:@velotype/velodesign@0.1.1
 ```
 
 ```json

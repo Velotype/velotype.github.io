@@ -47,6 +47,10 @@ An `Icon` is a width, a height, and an SVG path. `registerIcon(key, icon)` regis
 
 `History.changeLocation(path)` does a `pushState` and dispatches a `locationchange` event, which `NavLink` and `PageSelector` listen for. `History.loadNewPageLocation(path)` loads the page.
 
+### Serving from a sub-path
+
+An app that is not at the root of its domain, such as a GitHub Pages project site at `/my-repo/`, calls `History.configureBasePath("/my-repo")` once at startup. The app's own paths then leave the base path out: `Link` and `NavLink` add it to what they write, `NavLink` and `PageSelector` match against the path without it, and `changeLocation()` adds it. `History.getPathname()` is the location's path without the base path, and `History.resolveHref(path)` is a path with it.
+
 @example routing.tsx
 
 ## Updating only what changed

@@ -16,8 +16,15 @@ console.log(ColorScheme.getColorScheme())
 
 // setColorScheme() takes "light", "dark", or "default" (follow the browser's preference), and
 // remembers the choice in localStorage
+ColorScheme.setColorScheme("default")
+
+// getColorScheme() is what is in effect, so "default" has already become "light" or "dark".
+// getColorSchemePreference() is what the reader chose, "default" included, which is what a theme
+// picker needs to show as selected.
+console.log(ColorScheme.getColorScheme(), ColorScheme.getColorSchemePreference())
+
 ColorScheme.setColorScheme("dark")
-console.log(ColorScheme.getColorScheme())
+console.log(ColorScheme.getColorScheme(), ColorScheme.getColorSchemePreference())
 
 // Go back to the stored choice, or the browser's preference when there is none
 ColorScheme.resetColorScheme()
