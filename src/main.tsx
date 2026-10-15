@@ -11,9 +11,16 @@ const docsUrl = (project: Project): string | undefined => (docsIndex as Record<s
 
 const goTo = (to: string) => () => { location.assign(to) }
 
+/** The Velotype mark. It is a dark square, so it gets rounded corners to sit on either theme */
+const Logo = (attrs: {size: string}) => <img src="/assets/logo.svg" alt="" width="64" height="64"
+    style={{width: attrs.size, height: attrs.size, borderRadius: "0.2em", flexShrink: 0}}/>
+
 const Header = () => <Navbar
     style={{borderBottom: "1px solid var(--background-4)"}}
-    brand={<Link to="/" style={{fontWeight: "bold", color: "inherit", textDecoration: "none"}}>The Velocity Project</Link>}>
+    brand={<Link to="/" style={{fontWeight: "bold", color: "inherit", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5em"}}>
+        <Logo size="1.75em"/>
+        The Velocity Project
+    </Link>}>
     <Link to={docsIndex.velotype}>Docs</Link>
     <Link to="https://github.com/Velotype">GitHub</Link>
     <Link to="https://jsr.io/@velotype">JSR</Link>
@@ -48,7 +55,10 @@ const ProjectCard = (project: Project) => <Card id={project.id} header={
 
 const HomePage = () => <Stack direction="column" gap="lg">
     <Stack direction="column">
-        <Heading level={1}>The Velocity Project</Heading>
+        <Stack align="center" gap="lg">
+            <Logo size="4rem"/>
+            <Heading level={1}>The Velocity Project</Heading>
+        </Stack>
         <Paragraph style={{fontSize: "1.2em"}}>A suite of components for building software platforms end to end: the UI in the browser, the servers behind it, and the wire format between them.</Paragraph>
         <Paragraph><Text type="muted">Each piece stands on its own and is published separately. They are designed to fit together: <Link to="/projects/veloserver/">veloserver</Link> serves pages and APIs, <Link to="/projects/velossr/">velossr</Link> or <Link to="/projects/velotype/">Velotype</Link> renders them, and <Link to="/projects/velojson/">VSON</Link> carries data between the two. More pieces are on the way.</Text></Paragraph>
         <Stack>
