@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - velossr docs</title>
+<meta name="description" content="velossr renders TSX to HTML on the server. There is no virtual DOM diffing and no client runtime: components run once per request and produce bytes, either all at once or streamed as async pieces resolve.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velossr">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>velossr renders TSX to HTML on the server. There is no virtual DOM diffing and no client runtime: components run once per request and produce bytes, either all at once or streamed as async pieces resolve.</p>
+<p>It is the server-side version of <a href="/docs/velotype/">Velotype</a>&#39;s TSX. Use it to send a page&#39;s HTML from the server, and use Velotype for the parts of the page that are interactive. Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed.</p>
+<h2 id="install">Install</h2>
+<p>velossr is a <a href="https://jsr.io/@velotype/velossr">JSR package</a> for Deno. Add it, and point the TSX compiler at it in <code>deno.json</code>:</p>
+<pre><code class="language-sh">deno add jsr:@velotype/velossr
+</code></pre>
+<pre><code class="language-json">{
+    &quot;compilerOptions&quot;: {
+        &quot;jsx&quot;: &quot;react-jsx&quot;,
+        &quot;jsxImportSource&quot;: &quot;@velotype/velossr&quot;
+    }
+}
+</code></pre>
+<p>A project that has both a server and a browser app needs two JSX settings, because the browser&#39;s TSX is Velotype&#39;s (<code>&quot;jsxImportSource&quot;: &quot;@velotype/velotype&quot;</code>). Keep them in separate directories with their own <code>deno.json</code>, or set it per file with a <code>/** @jsxImportSource @velotype/velossr */</code> comment.</p>
+<h2 id="a-page-and-a-server">A page and a server</h2>
+<p>velossr pairs naturally with <a href="/docs/veloserver/">veloserver</a>. A page is a component, <code>prepareHTMLVNodeForRendering()</code> prepares it once, and <code>renderServerVNode()</code> renders it for each request.</p>
+<pre><code class="language-tsx">import { type Context, Router, Server } from &quot;@velotype/veloserver&quot;
+import { type EmptyAttrs, prepareHTMLVNodeForRendering, renderServerVNode, type StaticServerComponent } from &quot;@velotype/velossr&quot;
+
+const Page: StaticServerComponent&lt;EmptyAttrs&gt; = function() {
+    return &lt;html&gt;&lt;body&gt;&lt;div&gt;Hello velossr!&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
+}
+const preparedPage = prepareHTMLVNodeForRendering(&lt;Page/&gt;)
+
+const router = new Router&lt;never&gt;({})
+router.get(&quot;/&quot;, function(request: Request, context: Context&lt;never&gt;) {
+    const response = new Response(renderServerVNode(preparedPage, request, context).toReadableStream())
+    response.headers.set(&quot;content-type&quot;, &quot;text/html; charset=utf-8&quot;)
+    return response
+})
+
+const server = new Server(router)
+server.serve(&quot;127.0.0.1&quot;, 3101)
+
+// Fetch the page once, then stop the server
+const response = await fetch(&quot;http://127.0.0.1:3101/&quot;)
+console.log(response.status, response.headers.get(&quot;content-type&quot;))
+console.log(await response.text())
+server.close()
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">200 text/html; charset=utf-8
+&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;div&gt;Hello velossr!&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<h2 id="writing-tsx-for-the-server">Writing TSX for the server</h2>
+<p>Each tag creates a server-side element. Nothing touches a DOM: the element is a description that velossr writes out as HTML.</p>
+<h3 id="attributes-are-html-attributes">Attributes are HTML attributes</h3>
+<p>velossr writes attributes as strings, so you write TSX the same as if you were writing HTML. Style objects resolve camelCase keys to kebab-case CSS. A <code>true</code> boolean attribute is written bare, and a <code>false</code> one is left out. Event listener attributes (<code>onClick</code>) cannot work on the server: they are left out and a warning is logged.</p>
+<h3 id="conditional-rendering">Conditional rendering</h3>
+<p><code>null</code> and <code>undefined</code> children render nothing, and so does a ternary that gives <code>null</code>. In velossr 0.0.9, a <code>false</code> child is written as the text <code>false</code>, so <code>{condition &amp;&amp; &lt;li/&gt;}</code> writes <code>false</code> when the condition is false. Use <code>{condition ? &lt;li/&gt; : null}</code> until the next release, which fixes this.</p>
+<h3 id="fragments">Fragments</h3>
+<p><code>&lt;&gt;...&lt;/&gt;</code> groups children without a wrapper element.</p>
+<pre><code class="language-tsx">import { renderServerVNode, prepareVNodeForRendering, type ServerVNode } from &quot;@velotype/velossr&quot;
+
+async function show(node: ServerVNode) {
+    const bytes = await renderServerVNode(prepareVNodeForRendering(node), new Request(&quot;http://localhost/&quot;), {}).toUint8Array()
+    console.log(new TextDecoder().decode(bytes))
+}
+
+// Attributes are written as HTML attributes
+await show(&lt;div class=&quot;exampleClass&quot; id=&quot;main&quot;&gt;this is a div&lt;/div&gt;)
+
+// Style objects resolve camelCase keys to kebab-case CSS
+await show(&lt;div style={{display: &quot;inline&quot;, marginTop: &quot;4px&quot;}}&gt;styled&lt;/div&gt;)
+
+// Boolean attributes are written when true, and left out when false
+await show(&lt;input type=&quot;checkbox&quot; checked={true} disabled={false}/&gt;)
+
+// Text, attribute values, and attribute names are escaped where they are written
+const untrusted = `&lt;script&gt;alert(&quot;hi&quot;)&lt;/script&gt; &amp; &quot;quotes&quot;`
+await show(&lt;p title={untrusted}&gt;{untrusted}&lt;/p&gt;)
+
+// Fragments group children without a wrapper element.
+// For a condition, use a ternary that gives null. A boolean child is written as text, so
+// {signedIn &amp;&amp; &lt;li/&gt;} would write &quot;false&quot; when signedIn is false.
+const signedIn = false
+await show(&lt;ul&gt;{signedIn ? &lt;li&gt;Account&lt;/li&gt; : null}&lt;&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/&gt;&lt;/ul&gt;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;div class=&quot;exampleClass&quot; id=&quot;main&quot;&gt;this is a div&lt;/div&gt;
+&lt;div style=&quot;display:inline;margin-top:4px&quot;&gt;styled&lt;/div&gt;
+&lt;input type=&quot;checkbox&quot; checked&gt;
+&lt;p title=&quot;&lt;script&gt;alert(&amp;quot;hi&amp;quot;)&lt;/script&gt; &amp;amp; &amp;quot;quotes&amp;quot;&quot;&gt;&amp;lt;script&gt;alert(&amp;quot;hi&amp;quot;)&amp;lt;/script&gt; &amp;amp; &amp;quot;quotes&amp;quot;&lt;/p&gt;
+&lt;ul&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/ul&gt;
+</code></pre>
+<h2 id="next-steps">Next steps</h2>
+<ul>
+<li><a href="/docs/velossr/components/">Components</a>: static and dynamic components</li>
+<li><a href="/docs/velossr/rendering/">Rendering</a>: preparing pages, and sending them whole or streamed</li>
+<li><a href="/docs/velossr/escaping-and-embedding/">Escaping and embedding</a>: what is escaped, and inline scripts, styles, and JSON</li>
+<li><a href="/docs/velossr/islands/">Islands</a>: interactive parts of a server-rendered page</li>
+</ul>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velossr","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velossr/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escaping and embedding - velossr docs</title>
+<meta name="description" content="velossr escapes what it writes, so data from a request cannot inject markup.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velossr">
+<div id="app"><article id="doc">
+<h1 id="escaping-and-embedding">Escaping and embedding</h1>
+<p>velossr escapes what it writes, so data from a request cannot inject markup.</p>
+<h2 id="what-is-escaped">What is escaped</h2>
+<p>Text, attribute values, and attribute names are escaped automatically, including the text that components return (as a string, an Array, or a fragment). Text is escaped once, where it is written.</p>
+<ul>
+<li>In HTML text, <code>&quot;</code>, <code>&amp;</code>, and <code>&lt;</code> are escaped</li>
+<li>In attribute values, quotes and <code>&amp;</code> are escaped, including in style object values</li>
+<li>Characters that are not valid in an attribute name are removed</li>
+</ul>
+<h2 id="inline-style-and-script">Inline style and script</h2>
+<p>Write CSS and JS as plain template strings. Browsers do not decode character references (such as <code>&amp;lt;</code>) inside <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code>, so their text is written as is, with <code>&lt;</code>, <code>&gt;</code>, and <code>&amp;</code> unchanged. Only the sequences that would end the element early are changed, in a way that reads the same in JavaScript and CSS strings:</p>
+<ul>
+<li>in a <code>&lt;script&gt;</code>, the <code>&lt;</code> of <code>&lt;/script</code> and <code>&lt;!--</code> is written as <code>&lt;</code></li>
+<li>in a <code>&lt;style&gt;</code>, <code>&lt;/style</code> is written as <code>&lt;\/style</code></li>
+</ul>
+<p>This also makes JSON safe to embed, whatever its strings contain: <code>&lt;script type=&quot;application/json&quot;&gt;{JSON.stringify(data)}&lt;/script&gt;</code>.</p>
+<p>A <code>DynamicServerComponent</code> inside a <code>&lt;script&gt;</code> or <code>&lt;style&gt;</code> has its text escaped the same way, so it can write per-request data. Elements, and the output of an <code>AsyncRenderObject</code> (which is escaped as HTML), cannot be placed inside a <code>&lt;script&gt;</code> or <code>&lt;style&gt;</code>: they are skipped, and an error is logged.</p>
+<h2 id="safetext">SafeText</h2>
+<p>For the rare case where you need to emit raw, already-safe content that should not be escaped at all, wrap it in <code>SafeText</code>. Use it only when the input text is known to be safe: HTML, CSS, SVG, and JavaScript escaping depends on where the text is written.</p>
+<pre><code class="language-tsx">import { prepareVNodeForRendering, renderServerVNode, SafeText } from &quot;@velotype/velossr&quot;
+
+const data = {note: &quot;&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;&quot;, amount: 5}
+
+const page = &lt;html&gt;
+    &lt;head&gt;
+        {/* CSS and JS are plain template strings. They are written as is, and only the
+            sequences that would end the element early are changed. */}
+        &lt;style&gt;{`
+div &gt; p { color: red; }
+/* &lt;/style&gt; in text is made safe */
+`}&lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;script&gt;{`
+function greet(name) {
+    if (name.length &gt; 0 &amp;&amp; name !== &quot;&lt;/script&gt;&quot;) {
+        console.log(&quot;Hello &quot; + name);
+    }
+}
+`}&lt;/script&gt;
+        {/* This makes JSON safe to embed, whatever its strings contain */}
+        &lt;script type=&quot;application/json&quot; id=&quot;page-data&quot;&gt;{JSON.stringify(data)}&lt;/script&gt;
+        {/* SafeText is not escaped at all: use it only for content that is known to be safe */}
+        &lt;div&gt;{new SafeText(&quot;&lt;b&gt;already safe&lt;/b&gt;&quot;)}&lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+
+const html = await renderServerVNode(prepareVNodeForRendering(page), new Request(&quot;http://localhost/&quot;), {}).toUint8Array()
+console.log(new TextDecoder().decode(html))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;html&gt;&lt;head&gt;&lt;style&gt;
+div &gt; p { color: red; }
+/* &lt;\/style&gt; in text is made safe */
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;script&gt;
+function greet(name) {
+    if (name.length &gt; 0 &amp;&amp; name !== &quot;\u003c/script&gt;&quot;) {
+        console.log(&quot;Hello &quot; + name);
+    }
+}
+&lt;/script&gt;&lt;script type=&quot;application/json&quot; id=&quot;page-data&quot;&gt;{&quot;note&quot;:&quot;\u003c/script&gt;&lt;script&gt;alert(1)\u003c/script&gt;&quot;,&quot;amount&quot;:5}&lt;/script&gt;&lt;div&gt;&lt;b&gt;already safe&lt;/b&gt;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velossr","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velossr/escaping-and-embedding/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

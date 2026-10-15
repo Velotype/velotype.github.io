@@ -1,0 +1,10 @@
+<html><head><style>
+div > p { color: red; }
+/* <\/style> in text is made safe */
+</style></head><body><script>
+function greet(name) {
+    if (name.length > 0 && name !== "\u003c/script>") {
+        console.log("Hello " + name);
+    }
+}
+</script><script type="application/json" id="page-data">{"note":"\u003c/script><script>alert(1)\u003c/script>","amount":5}</script><div><b>already safe</b></div></body></html>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Running the server - veloserver docs</title>
+<meta name="description" content="## Shutting down">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="veloserver">
+<div id="app"><article id="doc">
+<h1 id="running-the-server">Running the server</h1>
+<h2 id="shutting-down">Shutting down</h2>
+<p><code>serve()</code> registers listeners for <code>SIGINT</code>, <code>SIGTERM</code>, and <code>SIGUSR1</code>, and releases them once the server has finished shutting down. With nothing else pending, the process then ends on its own.</p>
+<p><code>server.close(reason?)</code> stops the server from code.</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>serve(hostname, port, options?)</code></td>
+<td>Starts the server. <code>options.exitProcessOnClose</code> calls <code>Deno.exit(0)</code> the moment the server has finished shutting down, even with other work pending (default: <code>false</code>)</td>
+</tr>
+<tr>
+<td><code>close(reason?)</code></td>
+<td>Stops the server. The reason is logged</td>
+</tr>
+<tr>
+<td><code>addServerListenCallback(callback)</code></td>
+<td>Runs <code>callback</code> just after the server starts listening</td>
+</tr>
+<tr>
+<td><code>addServerFinishedCallback(callback)</code></td>
+<td>Runs <code>callback</code> just after the server has finished</td>
+</tr>
+</tbody></table>
+<p>Leave <code>exitProcessOnClose</code> unset when the server is one part of a longer-lived process, such as a test suite or a build step, which should carry on after the server stops.</p>
+<pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
+
+const router = new Router&lt;never&gt;({})
+router.get(&quot;/&quot;, () =&gt; new Response(&quot;hello&quot;))
+
+const server = new Server(router)
+
+// Run code when the server starts listening, and when it has finished
+server.addServerListenCallback(() =&gt; console.log(&quot;callback: listening&quot;))
+server.addServerFinishedCallback(() =&gt; console.log(&quot;callback: finished&quot;))
+
+// serve() registers listeners for SIGINT, SIGTERM, and SIGUSR1, and releases them once the server
+// has finished shutting down. With nothing else pending, the process then ends on its own.
+// Pass exitProcessOnClose: true to end the process the moment the server stops, even with other
+// work still pending.
+server.serve(&quot;127.0.0.1&quot;, 3207, {exitProcessOnClose: false})
+
+await fetch(&quot;http://127.0.0.1:3207/&quot;).then(response =&gt; response.text())
+
+// close() stops the server from code. The reason is logged.
+server.close(&quot;done with the example&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">callback: listening
+callback: finished
+</code></pre>
+<h2 id="development-server">Development server</h2>
+<p><code>@velotype/veloserver/dev</code> exports <code>DevServer</code>, which serves a <a href="/docs/velotype/">Velotype</a> app during development and updates the page when its files change.</p>
+<pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
+import { DevServer } from &quot;@velotype/veloserver/dev&quot;
+
+// Serves a Velotype app during development, and updates the page when its files change.
+// Run it with --allow-net --allow-read --allow-write --allow-run --allow-env: builds run
+// `deno bundle` and write temporary files.
+const dev = new DevServer({
+    // module: serve each module unbundled, and re-run only the changed ones, keeping component state
+    // bundle: rebuild the bundle and re-run it, keeping component state
+    // reload: rebuild the bundle and reload the page
+    // off:    no development routes. The page loads the production scripts.
+    mode: &quot;module&quot;,
+    // The browser entry module, relative to root
+    entry: &quot;./browser/main.tsx&quot;,
+    // Optional: root (default: the current directory), config, watch, velotype, and production
+})
+
+const router = new Router&lt;never&gt;({})
+await dev.mount(router)
+
+// pageScripts() writes the scripts for the current mode, so switching modes needs no change to the page
+router.get(&quot;/&quot;, () =&gt; new Response(`&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;${dev.pageScripts()}&lt;/body&gt;&lt;/html&gt;`,
+    {headers: {&quot;content-type&quot;: &quot;text/html; charset=utf-8&quot;}}))
+
+const server = new Server(router)
+// Watching files keeps the process running, so stop it with the server
+server.addServerFinishedCallback(() =&gt; dev.close())
+server.serve(&quot;localhost&quot;, 3000)
+</code></pre>
+<h3 id="modes">Modes</h3>
+<p><code>mode</code> sets how the page is updated when a file changes:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Serves</th>
+<th>On a change</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>module</code></td>
+<td>each module unbundled, transpiled on request</td>
+<td>re-runs the changed modules, and the components on the page keep their state</td>
+</tr>
+<tr>
+<td><code>bundle</code></td>
+<td>the app bundle</td>
+<td>rebuilds and re-runs the bundle, and the components on the page keep their state</td>
+</tr>
+<tr>
+<td><code>reload</code></td>
+<td>the app bundle</td>
+<td>rebuilds the bundle and reloads the page</td>
+</tr>
+<tr>
+<td><code>off</code></td>
+<td>the <code>production</code> scripts</td>
+<td>nothing, and no development routes are added</td>
+</tr>
+</tbody></table>
+<p><code>pageScripts()</code> writes the scripts for the current mode, so switching modes needs no change to the page. In <code>off</code> mode it writes the <code>production</code> option&#39;s import map and scripts:</p>
+<pre><code class="language-tsx">import { Router } from &quot;@velotype/veloserver&quot;
+import { DevServer } from &quot;@velotype/veloserver/dev&quot;
+
+// In mode &quot;off&quot; there are no development routes, and pageScripts() writes the production option&#39;s
+// import map and scripts. The same page code serves development and production.
+const dev = new DevServer({
+    mode: &quot;off&quot;,
+    entry: &quot;./browser/main.tsx&quot;,
+    production: {
+        importMap: {&quot;@velotype/velotype&quot;: &quot;/build/velotype.js&quot;},
+        scripts: [&quot;/build/velotype.js&quot;, &quot;/build/main.js&quot;],
+    },
+})
+await dev.mount(new Router&lt;never&gt;({}))
+
+console.log(dev.mode)
+console.log(dev.pageScripts())
+dev.close()
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">off
+&lt;script type=&quot;importmap&quot;&gt;{&quot;imports&quot;:{&quot;@velotype/velotype&quot;:&quot;/build/velotype.js&quot;}}&lt;/script&gt;
+&lt;script type=&quot;module&quot; src=&quot;/build/velotype.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;module&quot; src=&quot;/build/main.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<h3 id="options">Options</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mode</code></td>
+<td>The <code>DevMode</code>. Required</td>
+</tr>
+<tr>
+<td><code>entry</code></td>
+<td>The browser entry module, relative to <code>root</code>. Required</td>
+</tr>
+<tr>
+<td><code>root</code></td>
+<td>The project directory, which contains <code>deno.json</code> (default: the current directory)</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>The project&#39;s config file, relative to <code>root</code> (default: <code>deno.json</code> or <code>deno.jsonc</code>)</td>
+</tr>
+<tr>
+<td><code>watch</code></td>
+<td>Directories to watch, relative to <code>root</code> (default: the entry module&#39;s directory)</td>
+</tr>
+<tr>
+<td><code>velotype</code></td>
+<td>The Velotype package specifier that the dev runtime is loaded from (default: <code>compilerOptions.jsxImportSource</code> from <code>deno.json</code>, or <code>@velotype/velotype</code>)</td>
+</tr>
+<tr>
+<td><code>production</code></td>
+<td><code>{importMap?, scripts}</code>: the page scripts for mode <code>off</code></td>
+</tr>
+</tbody></table>
+<h3 id="how-hot-updates-work">How hot updates work</h3>
+<p>Hot updates use the Velotype dev runtime (<code>@velotype/velotype/jsx-dev-runtime</code>), so builds use <code>&quot;jsx&quot;: &quot;react-jsxdev&quot;</code> whatever <code>deno.json</code> sets. The project&#39;s own setting can stay <code>react-jsx</code> for production builds. Every Velotype import loads one shared copy of the dev runtime, served at <code>/__velo/velotype.js</code>.</p>
+<p>In <code>module</code> mode a changed module is updated on its own when all of its exports are components, or when it calls <code>import.meta.hot.accept()</code>. Otherwise the modules that import it run again, and the page reloads when the change reaches the entry module. <code>import.meta.hot.dispose(callback)</code> runs <code>callback(import.meta.hot.data)</code> before a module runs again, to release what it set up.</p>
+<p>A build error is logged in the browser, and the page keeps running the last working code. When the server restarts, the page reloads.</p>
+<p>What Velotype does with a hot update is in <a href="/docs/velotype/development-tools/#hot-reloading">Development tools</a>. The <a href="https://github.com/Velotype/example-velotype-projects/tree/main/hot-reload-demo">hot-reload-demo</a> is an app that runs in each mode.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"veloserver","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/veloserver/running-the-server/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+48 bytes
+{"user":"ada","items":[{"id":1,"label":"one"},{"id":2,"label":"two"}]}
+same bytes as the server module: true
+{"user":"ada","items":[{"id":1,"label":"one"},{"id":2,"label":"two"}]}

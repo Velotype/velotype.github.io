@@ -1,0 +1,10 @@
+{
+    "minimumDependencyAge": {"age": "P1D", "exclude": ["jsr:@velotype/*"]},
+    "compilerOptions": {
+        "lib": ["dom", "deno.ns", "esnext"]
+    },
+    "imports": {
+        "@velotype/velojson": "jsr:@velotype/velojson@0.1.0",
+        "@velotype/velojson/browser": "jsr:@velotype/velojson@0.1.0/browser"
+    }
+}

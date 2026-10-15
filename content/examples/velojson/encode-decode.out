@@ -1,0 +1,13 @@
+VSON bytes: 34
+JSON bytes: 44
+{"name":"Some name","age":20,"address":null}
+null -> null
+true -> true
+42 -> 42
+3.14 -> 3.14
+"text" -> "text"
+[1,2,3] -> [1,2,3]
+{"nested":{"list":["a","b"]}} -> {"nested":{"list":["a","b"]}}
+{"a":1,"b":null}
+[1,null,null]
+0 undefined

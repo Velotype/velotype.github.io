@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Styling and raw HTML - Velotype docs</title>
+<meta name="description" content="## Stylesheets">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="styling-and-raw-html">Styling and raw HTML</h1>
+<h2 id="stylesheets">Stylesheets</h2>
+<p><code>setStylesheet(css, key, reset = false)</code> adds a stylesheet to the page, using <code>document.adoptedStyleSheets</code>, once per <code>key</code>. Call it from a Component&#39;s constructor or <code>render()</code> every time, and it adds no duplicates.</p>
+<p>By default a key that is already added is left alone. Pass <code>true</code> as the third argument to replace the stylesheet already added under <code>key</code>.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, type RenderableElements, setStylesheet } from &quot;@velotype/velotype&quot;
+
+class Card extends Component&lt;EmptyAttrs&gt; {
+    constructor(attrs: EmptyAttrs, children: RenderableElements[]) {
+        super(attrs, children)
+        // Adds the stylesheet to the page once per key, so calling this for every Card does not add duplicates
+        setStylesheet(`.card { padding: 8px; border-radius: 4px; }`, &quot;card&quot;)
+    }
+
+    override render() {
+        return &lt;div class=&quot;card&quot;&gt;{this.children}&lt;/div&gt;
+    }
+}
+
+// Pass true as the third argument to replace the stylesheet already added under the key
+setStylesheet(`.card { padding: 16px; border-radius: 8px; }`, &quot;card&quot;, true)
+void Card
+</code></pre>
+<p>In development, with the <code>jsx-dev-runtime</code>, <code>setStylesheet()</code> replaces a sheet whose text has changed, so styles update when their module runs again.</p>
+<h2 id="inline-styles">Inline styles</h2>
+<p>The <code>style</code> attribute takes an object. See <a href="/docs/velotype/#style-objects">style objects</a> for what is checked.</p>
+<h2 id="raw-html-svg-and-mathml">Raw HTML, SVG, and MathML</h2>
+<p>Velotype creates TSX tags as HTML elements, so SVG and MathML content is added with the <code>SVG</code> and <code>MATH</code> Components. They set a string of markup as the <code>innerHTML</code> of an <code>&lt;svg&gt;</code> or <code>&lt;math&gt;</code> element. <code>HTML</code> does the same on any HTML tag, which is a <code>&lt;div&gt;</code> unless you pass <code>tag</code>.</p>
+<p>The markup is not escaped, so only use content that is known to be safe.</p>
+<pre><code class="language-tsx">import { HTML, MATH, SVG } from &quot;@velotype/velotype&quot;
+
+// SVG and MathML content is added with the SVG and MATH Components, which set a string of markup
+// as the innerHTML of an &lt;svg&gt; or &lt;math&gt; element. HTML does the same on any HTML tag (a &lt;div&gt; by default).
+// The markup is not escaped, so only use content that is known to be safe.
+const icon = &lt;SVG innerHTML={`&lt;path d=&quot;M2 2 L10 10&quot;/&gt;`} elementAttrs={{viewBox: &quot;0 0 12 12&quot;, width: &quot;12&quot;, height: &quot;12&quot;}}/&gt;
+const formula = &lt;MATH innerHTML=&quot;&lt;mi&gt;x&lt;/mi&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mn&gt;2&lt;/mn&gt;&quot;/&gt;
+const snippet = &lt;HTML tag=&quot;p&quot; innerHTML=&quot;Some &lt;b&gt;bold&lt;/b&gt; text&quot;/&gt;
+
+document.body.append(icon, formula, snippet)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Attrs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HTML</code></td>
+<td><code>innerHTML</code>, <code>tag</code> (default <code>div</code>), and <code>elementAttrs</code> for the element&#39;s attributes</td>
+</tr>
+<tr>
+<td><code>SVG</code></td>
+<td><code>innerHTML</code>, and <code>elementAttrs</code> for the <code>&lt;svg&gt;</code> element&#39;s attributes</td>
+</tr>
+<tr>
+<td><code>MATH</code></td>
+<td><code>innerHTML</code>, and <code>elementAttrs</code> for the <code>&lt;math&gt;</code> element&#39;s attributes</td>
+</tr>
+</tbody></table>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/styling-and-raw-html/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theming - velodesign docs</title>
+<meta name="description" content="Components get their colors from CSS custom properties, set on &lt;html&gt; by Theme.injectStyles(). Change the palette by passing colors, and every component follows. The theme also switches between light and dark.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velodesign">
+<div id="app"><article id="doc">
+<h1 id="theming">Theming</h1>
+<p>Components get their colors from CSS custom properties, set on <code>&lt;html&gt;</code> by <code>Theme.injectStyles()</code>. Change the palette by passing colors, and every component follows. The theme also switches between light and dark.</p>
+<h2 id="colors">Colors</h2>
+<p><code>Theme.injectStyles(options?, includeCSSReset = true)</code> takes a <code>ThemeColorOptions</code>. Every field is optional, and each color has a light value and a dark value:</p>
+<table>
+<thead>
+<tr>
+<th>Color</th>
+<th>Light option</th>
+<th>Dark option</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>text</td>
+<td><code>textLightColor</code></td>
+<td><code>textDarkColor</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td>background</td>
+<td><code>backgroundLightColor</code>, <code>backgroundLightAltColor</code></td>
+<td><code>backgroundDarkColor</code>, <code>backgroundDarkAltColor</code></td>
+<td>The page, and the surfaces on it</td>
+</tr>
+<tr>
+<td>primary</td>
+<td><code>primaryLightColor</code></td>
+<td><code>primaryDarkColor</code></td>
+<td>The main action and the current item</td>
+</tr>
+<tr>
+<td>secondary</td>
+<td><code>secondaryLightColor</code></td>
+<td><code>secondaryDarkColor</code></td>
+<td>A second accent</td>
+</tr>
+<tr>
+<td>warning</td>
+<td><code>warningLightColor</code></td>
+<td><code>warningDarkColor</code></td>
+<td>Cautions</td>
+</tr>
+<tr>
+<td>accent</td>
+<td><code>accentLightColor</code></td>
+<td><code>accentDarkColor</code></td>
+<td>Danger and errors</td>
+</tr>
+</tbody></table>
+<p>The custom properties are:</p>
+<ul>
+<li><code>--text</code> is the text color, and <code>--text-alt</code> is the opposite one</li>
+<li><code>--background</code> is the page&#39;s color, <code>--background-1</code> to <code>--background-9</code> mix it toward <code>--background-alt</code> in steps, and <code>--background-alt</code> is the alternate. Components use the steps for borders, hovers, and the chrome around content</li>
+<li><code>--primary</code>, <code>--secondary</code>, <code>--warning</code>, and <code>--accent</code> are the colors you set. <code>--primary-1</code> to <code>--primary-9</code> mix each toward white and black in steps, with <code>--primary-5</code> equal to <code>--primary</code>. Components use them for fills, borders, and hovers</li>
+</ul>
+<p>You can use them in your own CSS, so your styles follow the theme too: <code>color: var(--primary-7)</code>.</p>
+<p><code>includeCSSReset</code> adds a small CSS reset. Pass <code>false</code> to leave your own in place.</p>
+<h2 id="light-and-dark">Light and dark</h2>
+<p>The theme is <code>light</code> or <code>dark</code>, set as <code>data-theme</code> on the <code>&lt;html&gt;</code> element. <code>ColorScheme</code> manages it:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>getColorScheme()</code></td>
+<td>The scheme in effect: <code>&quot;light&quot;</code> or <code>&quot;dark&quot;</code></td>
+</tr>
+<tr>
+<td><code>setColorScheme(scheme)</code></td>
+<td>Takes <code>&quot;light&quot;</code>, <code>&quot;dark&quot;</code>, or <code>&quot;default&quot;</code> to follow the browser&#39;s preference, and remembers it in <code>localStorage</code></td>
+</tr>
+<tr>
+<td><code>resetColorScheme()</code></td>
+<td>Applies the stored choice, or the browser&#39;s preference when there is none</td>
+</tr>
+</tbody></table>
+<p><code>Theme.injectStyles()</code> applies the stored choice, or the browser&#39;s preference, to start.</p>
+<h2 id="theming-part-of-a-page">Theming part of a page</h2>
+<p><code>setThemeOnSelector(selector, options?, resetSheet = false)</code> sets the same properties on any selector, not only <code>&lt;html&gt;</code>. The selected elements need <code>data-theme=&quot;light&quot;</code> or <code>data-theme=&quot;dark&quot;</code>.</p>
+<p>It adds its stylesheet once per selector. Calling it again for the same selector with different options does nothing, unless <code>resetSheet</code> is <code>true</code>, which replaces the stylesheet. A live theme editor does this to preview changes.</p>
+<pre><code class="language-tsx">import { ColorScheme, setThemeOnSelector, Theme } from &quot;@velotype/velodesign&quot;
+
+// Pass colors to change the palette. Every field is optional, and each has a light and a dark value.
+// Each of primary, secondary, warning, and accent becomes a ramp of CSS variables: --primary is the
+// color you gave, and --primary-1 to --primary-9 mix it toward white and black in steps, which
+// components use for fills, borders, and hovers.
+Theme.injectStyles({
+    primaryLightColor: &quot;#0b6bcb&quot;,
+    primaryDarkColor: &quot;#5aa9ff&quot;,
+    accentLightColor: &quot;#c4314b&quot;,
+    accentDarkColor: &quot;#ff6b81&quot;,
+})
+
+// The color scheme in effect is &quot;light&quot; or &quot;dark&quot;, written to data-theme on &lt;html&gt;
+console.log(ColorScheme.getColorScheme())
+
+// setColorScheme() takes &quot;light&quot;, &quot;dark&quot;, or &quot;default&quot; (follow the browser&#39;s preference), and
+// remembers the choice in localStorage
+ColorScheme.setColorScheme(&quot;dark&quot;)
+console.log(ColorScheme.getColorScheme())
+
+// Go back to the stored choice, or the browser&#39;s preference when there is none
+ColorScheme.resetColorScheme()
+
+// Theme any part of the page, not only &lt;html&gt;. The selected elements need data-theme=&quot;light&quot; or &quot;dark&quot;.
+const panel = document.createElement(&quot;section&quot;)
+panel.className = &quot;brand-panel&quot;
+panel.setAttribute(&quot;data-theme&quot;, &quot;dark&quot;)
+document.body.append(panel)
+setThemeOnSelector(&quot;.brand-panel&quot;, {backgroundDarkColor: &quot;#10202f&quot;})
+
+// Calling it again for the same selector does nothing unless resetSheet is true, which replaces the
+// stylesheet. A live theme editor does this to preview changes.
+setThemeOnSelector(&quot;.brand-panel&quot;, {backgroundDarkColor: &quot;#201030&quot;}, true)
+</code></pre>
+<h2 id="symbols">Symbols</h2>
+<p>A few small glyphs, such as a close control or a next arrow, are theme symbols. A symbol is a component with no attrs, so it can be an icon, an image, or text. The package&#39;s defaults are <code>✕</code> (close and cancel), <code>✓</code> (confirm), <code>∅</code> (empty), <code>…</code> (collapse), and <code>‹</code> and <code>›</code> (previous and next).</p>
+<p><code>CommonThemeOptions</code> holds the symbols that more than one component uses:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>closeSymbol</code></td>
+<td><code>Alert</code>, <code>Toast</code>, <code>Tag</code>, <code>Modal</code>, <code>Drawer</code></td>
+</tr>
+<tr>
+<td><code>cancelSymbol</code></td>
+<td><code>Modal</code>&#39;s footer, <code>Popconfirm</code>, an inline edit</td>
+</tr>
+<tr>
+<td><code>confirmSymbol</code></td>
+<td><code>Popconfirm</code>, an inline edit, a completed <code>Steps</code> step</td>
+</tr>
+<tr>
+<td><code>emptySymbol</code></td>
+<td><code>Empty</code>, the tables, every chart</td>
+</tr>
+<tr>
+<td><code>collapseSymbol</code></td>
+<td><code>Breadcrumbs</code>, <code>Pagination</code></td>
+</tr>
+<tr>
+<td><code>prevSymbol</code>, <code>nextSymbol</code></td>
+<td><code>Pagination</code>, the calendars, <code>Carousel</code>, <code>AsyncDataTable</code></td>
+</tr>
+</tbody></table>
+<p>Each component also has its own options object, such as <code>AlertThemeOptions</code> and <code>ModalThemeOptions</code>. A field on it falls back to the common one until you assign it, so the common one sets all of them, and a component&#39;s own one overrides it for that component alone.</p>
+<p>Assign symbols once at startup, before the first component that uses them is built. A symbol is a field on an object read when a component is built, not a CSS property, so changing one affects components built after it, and nothing re-renders. <code>resetThemeOptions(options, ...fields)</code> puts the package&#39;s defaults back, all of them or the named fields.</p>
+<pre><code class="language-tsx">import { Alert, AlertThemeOptions, CommonThemeOptions, Modal, ModalThemeOptions, resetThemeOptions } from &quot;@velotype/velodesign&quot;
+
+// A theme symbol is a component with no attrs that the library draws for a small glyph, such as a
+// close control. It is a field on an options object, not a CSS property, so assign it ONCE at
+// startup, before the first component that uses it is built. There is no re-render when it changes.
+CommonThemeOptions.closeSymbol = () =&gt; &lt;b&gt;x&lt;/b&gt;   // Alert, Toast, Tag, Modal, Drawer
+CommonThemeOptions.nextSymbol = () =&gt; &lt;span&gt;next&lt;/span&gt;
+CommonThemeOptions.prevSymbol = () =&gt; &lt;span&gt;back&lt;/span&gt;
+
+// A component&#39;s own options override the shared one for that component alone
+ModalThemeOptions.closeSymbol = () =&gt; &lt;b&gt;close&lt;/b&gt;
+console.log(typeof AlertThemeOptions.closeSymbol)
+
+// The package&#39;s defaults: ✕ ✓ ∅ … ‹ ›. resetThemeOptions() puts them back, all or by field.
+resetThemeOptions(ModalThemeOptions)
+resetThemeOptions(CommonThemeOptions, &quot;nextSymbol&quot;, &quot;prevSymbol&quot;)
+
+document.body.append(&lt;Alert type=&quot;info&quot; onDismiss={() =&gt; {}} dismissLabel=&quot;Dismiss&quot;&gt;An alert with a custom close&lt;/Alert&gt;)
+void Modal
+</code></pre>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velodesign","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velodesign/theming/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@velotype/velojson@0.1.0": "0.1.0"
+  },
+  "jsr": {
+    "@velotype/velojson@0.1.0": {
+      "integrity": "0abeea9745f684a6cb64d175abf3c946c10340d888a11cbb3a69f1e675131fc4"
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@velotype/velojson@0.1.0"
+    ]
+  }
+}

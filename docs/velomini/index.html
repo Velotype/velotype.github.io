@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - velomini docs</title>
+<meta name="description" content="velomini is a mostly minimal TSX framework, about 2.5kb, that adds class components to [velomicro](/docs/velomicro/): a Component base class with render(), mount(), unmount(), and refresh(). Its way to update what is on screen is to tear down a component's subtree and render a new one, with no diffing and no patching. The [Medium article](https://argoday.medium.com/a-2-5kb-tsx-framework-that-adds-classes-velomini-6f65cd979d40) walks through its source.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velomini">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>velomini is a mostly minimal TSX framework, about 2.5kb, that adds class components to <a href="/docs/velomicro/">velomicro</a>: a <code>Component</code> base class with <code>render()</code>, <code>mount()</code>, <code>unmount()</code>, and <code>refresh()</code>. Its way to update what is on screen is to tear down a component&#39;s subtree and render a new one, with no diffing and no patching. The <a href="https://argoday.medium.com/a-2-5kb-tsx-framework-that-adds-classes-velomini-6f65cd979d40">Medium article</a> walks through its source.</p>
+<p>It is a teaching tool. <a href="/docs/velotype/">Velotype</a> is the full framework: it keeps classes and the real-element model, and replaces <code>refresh()</code> with values that update in place.</p>
+<p>Every example in these docs is a file that is type-checked against the published package, and run in a browser.</p>
+<h2 id="install">Install</h2>
+<p>velomini is a <a href="https://jsr.io/@velotype/velomini">JSR package</a> for Deno:</p>
+<pre><code class="language-sh">deno add jsr:@velotype/velomini
+</code></pre>
+<pre><code class="language-json">{
+    &quot;compilerOptions&quot;: {
+        &quot;jsx&quot;: &quot;react-jsx&quot;,
+        &quot;jsxImportSource&quot;: &quot;@velotype/velomini&quot;
+    }
+}
+</code></pre>
+<h2 id="everything-from-velomicro">Everything from velomicro</h2>
+<p>velomini&#39;s TSX works as <a href="/docs/velomicro/">velomicro</a>&#39;s does: tags create real elements, attributes are HTML attributes, <code>style</code> takes an object, <code>on</code> attributes add listeners, and function components are functions of their attrs and children. As in velomicro, a boolean child is written as text, so use <code>{condition ? &lt;div/&gt; : null}</code> rather than <code>{condition &amp;&amp; &lt;div/&gt;}</code>.</p>
+<h2 id="class-components">Class components</h2>
+<p>A class component extends <code>Component&lt;AttrsType&gt;</code> and implements <code>render(attrs, children)</code>. It is created as a tag, and its attrs are the tag&#39;s attributes.</p>
+<p><code>getComponent&lt;T&gt;(element)</code> converts an element that was created for a class back to the instance, so you can call its methods. The element is still usable in TSX.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, getComponent, replaceElement } from &quot;@velotype/velomini/tsx-mini&quot;
+
+// Define a class. Its attrs are the type parameter, and render() returns what it shows.
+class ComplexComponent extends Component&lt;{foo: string}&gt; {
+    override render(attrs: Readonly&lt;{foo: string}&gt;) {
+        return &lt;div&gt;Hello {attrs.foo}&lt;/div&gt;
+    }
+}
+
+// Create it as a tag
+const page = &lt;div&gt;&lt;ComplexComponent foo=&quot;Component!&quot;&gt;&lt;/ComplexComponent&gt;&lt;/div&gt;
+
+// Class Components can have methods. getComponent() converts an element that was created for a
+// class back to the instance, to call them.
+class Advanced extends Component&lt;EmptyAttrs&gt; {
+    override render() {
+        return &lt;div&gt;This is an advanced Component&lt;/div&gt;
+    }
+    someMethod() {
+        console.log(&quot;Advanced someMethod() called&quot;)
+    }
+}
+const advanced: Advanced = getComponent&lt;Advanced&gt;(&lt;Advanced/&gt;)
+advanced.someMethod()
+
+// Mount the page by replacing a placeholder element
+const placeholder = document.createElement(&quot;div&quot;)
+document.body.append(placeholder)
+replaceElement(placeholder, &lt;div&gt;{page}{advanced}&lt;/div&gt;)
+</code></pre>
+<h2 id="mounting">Mounting</h2>
+<p><code>replaceElement(element, newElement)</code> replaces an element with a new one, and mounts what is inside the new one. Use it to put an app on the page: insert a placeholder element, then replace it. It returns the new element, and if the old element had focus the new one is focused.</p>
+<h2 id="the-lifecycle">The lifecycle</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Called</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>render(attrs, children)</code></td>
+<td>When the component needs to be turned into elements</td>
+</tr>
+<tr>
+<td><code>mount()</code></td>
+<td>Just after the component is attached to the DOM, children before parents</td>
+</tr>
+<tr>
+<td><code>unmount()</code></td>
+<td>Just before the component is removed from the DOM</td>
+</tr>
+<tr>
+<td><code>refresh()</code></td>
+<td>By you: unmounts and deletes the component&#39;s children, renders it again, and mounts the new children</td>
+</tr>
+</tbody></table>
+<p><code>replaceElement()</code> mounts the components inside the new element and unmounts the components inside the element it replaces. A component that is itself the new element is not mounted, so wrap it in an element, as <code>&lt;main&gt;</code> is wrapped here:</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, replaceElement } from &quot;@velotype/velomini/tsx-mini&quot;
+
+class Clock extends Component&lt;EmptyAttrs&gt; {
+    time = new Date().toLocaleTimeString()
+    timer?: number
+
+    // Called just after the Component is attached to the DOM
+    override mount() {
+        console.log(&quot;mounted&quot;)
+        this.timer = setInterval(() =&gt; {
+            this.time = new Date().toLocaleTimeString()
+            // Unmounts and deletes the Component&#39;s children, and renders it again from scratch
+            this.refresh()
+        }, 1000)
+    }
+
+    // Called just before the Component is removed from the DOM
+    override unmount() {
+        console.log(&quot;unmounted&quot;)
+        clearInterval(this.timer)
+    }
+
+    override render() {
+        return &lt;div&gt;The time is {this.time}&lt;/div&gt;
+    }
+}
+
+const placeholder = document.createElement(&quot;div&quot;)
+document.body.append(placeholder)
+// replaceElement() mounts the Components inside the new element, children before parents, and
+// unmounts the Components inside the element it replaces. A Component that is itself the new
+// element is not mounted, so wrap it in an element as &lt;main&gt; is wrapped here.
+const root = replaceElement(placeholder, &lt;main&gt;&lt;Clock/&gt;&lt;/main&gt;)
+replaceElement(root, &lt;main&gt;Removed&lt;/main&gt;)
+</code></pre>
+<p>Because <code>refresh()</code> rebuilds everything inside the component, anything those children held (text typed into an input, focus, a nested component&#39;s state) is lost. This is the cost that Velotype&#39;s <a href="/docs/velotype/render-objects/">RenderObjects</a> remove.</p>
+<h2 id="other-functions">Other functions</h2>
+<p><code>setAttrsOnElement(element, attrs)</code> sets attributes, a style object, event listeners, and boolean attributes on an existing element, the way TSX does.</p>
+<pre><code class="language-tsx">import { replaceElement, setAttrsOnElement } from &quot;@velotype/velomini/tsx-mini&quot;
+
+// setAttrsOnElement() sets attributes, a style object, event listeners, and boolean attributes on
+// an existing element, the way TSX does
+const input = document.createElement(&quot;input&quot;)
+setAttrsOnElement(input, {
+    type: &quot;text&quot;,
+    class: &quot;wide&quot;,
+    style: {width: &quot;100%&quot;},
+    onInput: () =&gt; console.log(&quot;typed&quot;),
+    required: true,
+})
+document.body.append(input)
+
+// replaceElement() replaces an element with a new one. If the old element had focus, the new one
+// is given it. It returns the new element.
+input.focus()
+const replacement = replaceElement(input, &lt;input type=&quot;text&quot; class=&quot;replacement&quot;/&gt;)
+console.log(document.activeElement == replacement)
+</code></pre>
+<h2 id="api">API</h2>
+<table>
+<thead>
+<tr>
+<th>Export</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Component&lt;AttrsType&gt;</code></td>
+<td>The abstract base class: <code>render()</code>, <code>mount()</code>, <code>unmount()</code>, <code>refresh()</code>, and <code>vtKey</code> and <code>element</code>, which the framework sets</td>
+</tr>
+<tr>
+<td><code>getComponent&lt;T&gt;(element)</code></td>
+<td>The class instance behind an element</td>
+</tr>
+<tr>
+<td><code>replaceElement(element, newElement)</code></td>
+<td>Replaces an element and mounts the new one&#39;s components</td>
+</tr>
+<tr>
+<td><code>setAttrsOnElement(element, attrs)</code></td>
+<td>Sets attributes on an existing element</td>
+</tr>
+<tr>
+<td><code>h</code>, <code>f</code>, <code>jsx</code>, <code>jsxs</code>, <code>Fragment</code></td>
+<td>The JSX runtimes</td>
+</tr>
+<tr>
+<td><code>FunctionComponent&lt;AttrsType&gt;</code></td>
+<td><code>(attrs, children) =&gt; RenderableElements</code></td>
+</tr>
+<tr>
+<td><code>RenderableElements</code>, <code>BasicTypes</code>, <code>EmptyAttrs</code>, <code>ChildrenAttr</code>, <code>IdAttr</code>, <code>StylePassthroughAttrs</code></td>
+<td>The types</td>
+</tr>
+<tr>
+<td><code>__vtAppMetadata</code></td>
+<td>Internal state for debugging. Do not use it</td>
+</tr>
+</tbody></table>
+<p>Imports: <code>@velotype/velomini</code> is the runtime, and <code>@velotype/velomini/tsx-mini</code> has the classes, functions, and types.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velomini","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velomini/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

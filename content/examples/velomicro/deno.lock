@@ -1,0 +1,16 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@velotype/velomicro@0.0.4": "0.0.4"
+  },
+  "jsr": {
+    "@velotype/velomicro@0.0.4": {
+      "integrity": "ca1d1ecd3e11ee57af498439eaab53d47510219c7a027d1a293fe01192174014"
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@velotype/velomicro@0.0.4"
+    ]
+  }
+}

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routes - veloserver docs</title>
+<meta name="description" content="get(), head(), and post() add a handler for a path, or for several paths when given an array. A handler receives the Request and its Context, and returns a Response or a Promise of one.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="veloserver">
+<div id="app"><article id="doc">
+<h1 id="routes">Routes</h1>
+<p><code>get()</code>, <code>head()</code>, and <code>post()</code> add a handler for a path, or for several paths when given an array. A handler receives the <code>Request</code> and its <code>Context</code>, and returns a <code>Response</code> or a Promise of one.</p>
+<h2 id="paths">Paths</h2>
+<ul>
+<li><code>:name</code> matches one path segment and stores it as a path variable, read with <code>context.pathVariables?.get(&quot;name&quot;)</code></li>
+<li><code>*</code> at the end of a path matches any remaining segments</li>
+<li>A static segment takes priority over a path variable or a wildcard at the same position</li>
+</ul>
+<pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
+
+const router = new Router&lt;never&gt;({})
+
+// A handler receives the request and its Context, and returns a Response or a Promise of one
+router.get(&quot;/&quot;, () =&gt; new Response(&quot;home&quot;))
+
+// :name matches one path segment and stores it as a path variable
+router.get(&quot;/users/:id&quot;, (request, context) =&gt; {
+    return router.json(request, context, {id: context.pathVariables?.get(&quot;id&quot;)})
+})
+
+// A static segment takes priority over a path variable at the same position
+router.get(&quot;/users/me&quot;, () =&gt; new Response(&quot;the current user&quot;))
+
+// * at the end of a path matches any remaining segments
+router.get(&quot;/files/*&quot;, (_request, context) =&gt; new Response(`file: ${context.getPathParts().slice(2).join(&quot;/&quot;)}`))
+
+// An array adds the same handler for several paths
+router.get([&quot;/docs/*&quot;, &quot;/guides/*&quot;], () =&gt; new Response(&quot;documentation&quot;))
+
+// Handlers can be async
+router.get(&quot;/slow&quot;, async () =&gt; {
+    await new Promise(resolve =&gt; setTimeout(resolve, 10))
+    return new Response(&quot;done waiting&quot;)
+})
+
+// head() and post() add handlers for HEAD and POST
+router.head(&quot;/&quot;, () =&gt; new Response(null, {headers: {&quot;x-head&quot;: &quot;yes&quot;}}))
+router.post(&quot;/echo&quot;, async (request) =&gt; new Response(await request.text()))
+
+const server = new Server(router)
+server.serve(&quot;127.0.0.1&quot;, 3202)
+
+const base = &quot;http://127.0.0.1:3202&quot;
+const show = async (label: string, request: Promise&lt;Response&gt;) =&gt; {
+    const response = await request
+    console.log(`${label}: ${response.status} ${await response.text()}`)
+}
+await show(&quot;GET /&quot;, fetch(`${base}/`))
+await show(&quot;GET /users/42&quot;, fetch(`${base}/users/42`))
+await show(&quot;GET /users/me&quot;, fetch(`${base}/users/me`))
+await show(&quot;GET /files/a/b.txt&quot;, fetch(`${base}/files/a/b.txt`))
+await show(&quot;GET /guides/intro&quot;, fetch(`${base}/guides/intro`))
+await show(&quot;GET /slow&quot;, fetch(`${base}/slow`))
+await show(&quot;POST /echo&quot;, fetch(`${base}/echo`, {method: &quot;POST&quot;, body: &quot;hello&quot;}))
+console.log(&quot;HEAD /:&quot;, (await fetch(`${base}/`, {method: &quot;HEAD&quot;})).headers.get(&quot;x-head&quot;))
+
+server.close()
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">GET /: 200 home
+GET /users/42: 200 {&quot;id&quot;:&quot;42&quot;}
+GET /users/me: 200 the current user
+GET /files/a/b.txt: 200 file: a/b.txt
+GET /guides/intro: 200 documentation
+GET /slow: 200 done waiting
+POST /echo: 200 hello
+HEAD /: yes
+</code></pre>
+<h2 id="responses">Responses</h2>
+<p><code>router.json(request, context, data)</code> returns a JSON response with status 200.</p>
+<h2 id="error-responses">Error responses</h2>
+<p>The Router options set the handlers for the cases a route cannot handle. Each has a default:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Used when</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>not_found_handler</code></td>
+<td>No route matches the path</td>
+</tr>
+<tr>
+<td><code>bad_request_error_handler</code></td>
+<td>A handler returns <code>router.badRequest()</code>. The router never calls it on its own</td>
+</tr>
+<tr>
+<td><code>server_error_handler</code></td>
+<td>A handler throws, or returns <code>router.serverError()</code></td>
+</tr>
+</tbody></table>
+<p><code>router.badRequest(request, context)</code> and <code>router.serverError(request, context)</code> return the router&#39;s own error responses, so a handler can send them. An error that a handler throws is logged.</p>
+<pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
+
+// The Router options set the handlers for unmatched paths, for badRequest(), and for errors thrown by handlers
+const router = new Router&lt;never&gt;({
+    not_found_handler: () =&gt; new Response(&quot;Nothing here&quot;, {status: 404}),
+    bad_request_error_handler: () =&gt; new Response(&quot;That request was malformed&quot;, {status: 400}),
+    server_error_handler: () =&gt; new Response(&quot;Something went wrong&quot;, {status: 500}),
+})
+
+router.get(&quot;/explode&quot;, () =&gt; {
+    throw new Error(&quot;a handler threw&quot;)
+})
+
+// badRequest() and serverError() return the router&#39;s own error responses
+router.get(&quot;/check&quot;, (request, context) =&gt; {
+    return new URL(request.url).searchParams.has(&quot;id&quot;) ? new Response(&quot;ok&quot;) : router.badRequest(request, context)
+})
+router.get(&quot;/fail&quot;, (request, context) =&gt; router.serverError(request, context))
+
+const server = new Server(router)
+server.serve(&quot;127.0.0.1&quot;, 3203)
+
+const base = &quot;http://127.0.0.1:3203&quot;
+for (const path of [&quot;/missing&quot;, &quot;/explode&quot;, &quot;/check&quot;, &quot;/check?id=1&quot;, &quot;/fail&quot;]) {
+    const response = await fetch(base + path)
+    console.log(`${path}: ${response.status} ${await response.text()}`)
+}
+
+server.close()
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">/missing: 404 Nothing here
+/explode: 500 Something went wrong
+/check: 400 That request was malformed
+/check?id=1: 200 ok
+/fail: 500 Something went wrong
+</code></pre>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"veloserver","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/veloserver/routes/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

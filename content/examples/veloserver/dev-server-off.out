@@ -1,0 +1,4 @@
+off
+<script type="importmap">{"imports":{"@velotype/velotype":"/build/velotype.js"}}</script>
+<script type="module" src="/build/velotype.js"></script>
+<script type="module" src="/build/main.js"></script>

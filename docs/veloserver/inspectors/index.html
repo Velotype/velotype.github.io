@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspectors - veloserver docs</title>
+<meta name="description" content="An Inspector runs before and after the handlers of a path. It is a pair of functions, and both are optional:">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="veloserver">
+<div id="app"><article id="doc">
+<h1 id="inspectors">Inspectors</h1>
+<p>An <code>Inspector</code> runs before and after the handlers of a path. It is a pair of functions, and both are optional:</p>
+<ul>
+<li>A <strong>request inspector</strong> runs before the handler. It returns a <code>RequestInspectorResponse</code>. An empty one continues to the handler. One with a <code>response</code> ends the request early, and that response starts the response chain</li>
+<li>A <strong>response inspector</strong> runs after the handler, and sees each response. It can read or change the response, and returns nothing</li>
+</ul>
+<p><code>new Inspector(requestInspector?, responseInspector?, observeChildPaths = true)</code></p>
+<p>By default an inspector also runs for the paths below its own. Pass <code>false</code> as the third argument to inspect only its own path.</p>
+<p>Use <code>addGetInspector()</code>, <code>addHeadInspector()</code>, or <code>addPostInspector()</code> to add an inspector for one HTTP method, and <code>addAllInspector()</code> for GET, HEAD, and POST. Each takes a path or an Array of paths. The path <code>&quot;&quot;</code> is the root, so an inspector there sees every request.</p>
+<pre><code class="language-tsx">import { Inspector, RequestInspectorResponse, Router, Server } from &quot;@velotype/veloserver&quot;
+
+type Metadata = {startTime?: number}
+const router = new Router&lt;Metadata&gt;({context_metadata_constructor: () =&gt; ({})})
+
+// An Inspector runs before and after the handlers of a path. Its request inspector can answer the
+// request itself, by returning a RequestInspectorResponse with a response, and its response
+// inspector sees each response. Both are optional.
+router.addAllInspector(&quot;&quot;, new Inspector&lt;Metadata&gt;(
+    (_request, context) =&gt; {
+        context.meta.startTime = performance.now()
+        return new RequestInspectorResponse()
+    },
+    (request, response, context) =&gt; {
+        const elapsed = performance.now() - context.meta.startTime!
+        console.log(`logged: ${response.status} ${request.method} ${new URL(request.url).pathname} (took ${elapsed &lt; 1000 ? &quot;under a second&quot; : &quot;too long&quot;})`)
+    },
+))
+
+// A request inspector that returns a response ends the request early. By default an inspector also
+// runs for the paths below its own (observeChildPaths), and the third argument turns that off.
+router.addGetInspector(&quot;/admin&quot;, new Inspector&lt;Metadata&gt;(
+    (request) =&gt; request.headers.get(&quot;authorization&quot;) == &quot;secret&quot;
+        ? new RequestInspectorResponse()
+        : new RequestInspectorResponse(new Response(&quot;Not allowed&quot;, {status: 401})),
+))
+
+router.get(&quot;/&quot;, () =&gt; new Response(&quot;public&quot;))
+router.get(&quot;/admin/dashboard&quot;, () =&gt; new Response(&quot;the dashboard&quot;))
+
+// addGetInspector(), addHeadInspector(), addPostInspector(), and addAllInspector() choose the methods
+router.addPostInspector(&quot;/&quot;, new Inspector&lt;Metadata&gt;(undefined, (_request, response) =&gt; {
+    response.headers.set(&quot;x-inspected&quot;, &quot;post&quot;)
+}))
+router.post(&quot;/&quot;, () =&gt; new Response(&quot;posted&quot;))
+
+const server = new Server(router)
+server.serve(&quot;127.0.0.1&quot;, 3205)
+
+const base = &quot;http://127.0.0.1:3205&quot;
+console.log((await fetch(`${base}/`).then(response =&gt; response.text())))
+console.log((await fetch(`${base}/admin/dashboard`).then(response =&gt; response.text())))
+console.log((await fetch(`${base}/admin/dashboard`, {headers: {authorization: &quot;secret&quot;}}).then(response =&gt; response.text())))
+const posted = await fetch(`${base}/`, {method: &quot;POST&quot;})
+console.log(await posted.text(), posted.headers.get(&quot;x-inspected&quot;))
+
+server.close()
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">logged: 200 GET / (took under a second)
+public
+logged: 401 GET /admin/dashboard (took under a second)
+Not allowed
+logged: 200 GET /admin/dashboard (took under a second)
+the dashboard
+logged: 200 POST / (took under a second)
+posted post
+</code></pre>
+<p>Common uses are logging and timing (a request inspector that records the start in the <a href="/docs/veloserver/request-metadata/">metadata</a>, and a response inspector that logs), authentication (a request inspector that returns a <code>401</code>), and setting headers on every response.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"veloserver","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/veloserver/inspectors/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

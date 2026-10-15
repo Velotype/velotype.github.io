@@ -1,0 +1,8 @@
+logged: 200 GET / (took under a second)
+public
+logged: 401 GET /admin/dashboard (took under a second)
+Not allowed
+logged: 200 GET /admin/dashboard (took under a second)
+the dashboard
+logged: 200 POST / (took under a second)
+posted post

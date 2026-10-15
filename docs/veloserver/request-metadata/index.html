@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request metadata - veloserver docs</title>
+<meta name="description" content="Context.meta holds typed metadata for each request. It is useful for data that a request needs from start to finish, such as a start time, an authenticated user, or a request id.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="veloserver">
+<div id="app"><article id="doc">
+<h1 id="request-metadata">Request metadata</h1>
+<p><code>Context.meta</code> holds typed metadata for each request. It is useful for data that a request needs from start to finish, such as a start time, an authenticated user, or a request id.</p>
+<p>The Router&#39;s type parameter is the metadata type, and the <code>context_metadata_constructor</code> option creates it from each request. The metadata is created before any inspector or handler runs.</p>
+<pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
+
+// Context.meta holds typed metadata for each request. The Router&#39;s type parameter is its type,
+// and context_metadata_constructor creates it from the request.
+type Metadata = {startTime: number, requestNumber: number}
+
+let requests = 0
+const router = new Router&lt;Metadata&gt;({
+    context_metadata_constructor: () =&gt; ({startTime: performance.now(), requestNumber: ++requests}),
+})
+
+router.get(&quot;/users/:id&quot;, (request, context) =&gt; {
+    return router.json(request, context, {
+        request: context.meta.requestNumber,
+        id: context.pathVariables?.get(&quot;id&quot;),
+        // The URL is parsed on first access, so a request that never reads it never pays for the parse
+        path: context.url.pathname,
+        parts: context.getPathParts(),
+    })
+})
+
+const server = new Server(router)
+server.serve(&quot;127.0.0.1&quot;, 3204)
+
+console.log(await (await fetch(&quot;http://127.0.0.1:3204/users/7&quot;)).text())
+console.log(await (await fetch(&quot;http://127.0.0.1:3204/users/8&quot;)).text())
+
+server.close()
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">{&quot;request&quot;:1,&quot;id&quot;:&quot;7&quot;,&quot;path&quot;:&quot;/users/7&quot;,&quot;parts&quot;:[&quot;&quot;,&quot;users&quot;,&quot;7&quot;]}
+{&quot;request&quot;:2,&quot;id&quot;:&quot;8&quot;,&quot;path&quot;:&quot;/users/8&quot;,&quot;parts&quot;:[&quot;&quot;,&quot;users&quot;,&quot;8&quot;]}
+</code></pre>
+<h2 id="context">Context</h2>
+<p>A <code>Context&lt;ContextMetadata&gt;</code> is created for each request and passed to every inspector and handler.</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>meta</code></td>
+<td>The metadata the router&#39;s <code>context_metadata_constructor</code> created</td>
+</tr>
+<tr>
+<td><code>pathVariables?: Map&lt;string, string&gt;</code></td>
+<td>The path variables the route captured, if any</td>
+</tr>
+<tr>
+<td><code>url: URL</code></td>
+<td>The request&#39;s URL, parsed on first access and then cached, so a request that never reads it never pays for the parse</td>
+</tr>
+<tr>
+<td><code>getPathParts(): string[]</code></td>
+<td><code>url.pathname.split(&quot;/&quot;)</code></td>
+</tr>
+<tr>
+<td><code>addPathVariable(name, value)</code></td>
+<td>Captures a path variable</td>
+</tr>
+</tbody></table>
+<p>Metadata is also how an inspector hands data to a handler: see <a href="/docs/veloserver/inspectors/">Inspectors</a>.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"veloserver","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/veloserver/request-metadata/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

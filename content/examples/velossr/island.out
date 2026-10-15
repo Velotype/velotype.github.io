@@ -1,0 +1,1 @@
+<!DOCTYPE html><html><body><div id="counter"><div class="counter"><span>Clicks &lt;/script> &amp; &lt;b>: 5</span><input name="note"><button type="button">+1</button></div></div><script type="application/json" id="counter-data">{"start":5,"label":"Clicks \u003c/script> & <b>"}</script><script type="module" src="/main.js"></script></body></html>

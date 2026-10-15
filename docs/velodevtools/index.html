@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - Velotype DevTools docs</title>
+<meta name="description" content="Velotype DevTools is a Chrome extension for debugging [Velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether Velotype is on the page.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velodevtools">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>Velotype DevTools is a Chrome extension for debugging <a href="/docs/velotype/">Velotype</a> apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether Velotype is on the page.</p>
+<table>
+<thead>
+<tr>
+<th>Panel</th>
+<th>Shows</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/docs/velodevtools/panels/#velotype">Velotype</a></td>
+<td>The page&#39;s live component tree, and the fields of each component</td>
+</tr>
+<tr>
+<td><a href="/docs/velodevtools/panels/#velotype-events">Velotype Events</a></td>
+<td>What is registered on the event bus</td>
+</tr>
+<tr>
+<td><a href="/docs/velodevtools/panels/#velojson">VeloJSON</a></td>
+<td>VSON and VBIN payloads, decoded</td>
+</tr>
+</tbody></table>
+<h2 id="install">Install</h2>
+<p>The extension is built from source, and loaded into Chrome as an unpacked extension. It needs <a href="https://deno.com">Deno</a>, and no npm or <code>node_modules</code>.</p>
+<pre><code class="language-sh">git clone https://github.com/Velotype/velodevtools
+cd velodevtools
+deno task build
+</code></pre>
+<p><code>deno task build</code> copies the static files (including the icons) and bundles the extension into <code>dist/</code>. Then, in Chrome:</p>
+<ol>
+<li>Open <code>chrome://extensions</code></li>
+<li>Turn on <strong>Developer mode</strong></li>
+<li>Choose <strong>Load unpacked</strong>, and select the <code>dist/</code> folder</li>
+</ol>
+<p>Open DevTools on a page that uses Velotype, and the panels are in the tabs.</p>
+<p>While developing the extension, <code>deno task watch</code> rebuilds on change. After it rebuilds, reload the extension from <code>chrome://extensions</code>, and refresh the inspected page, since content scripts are only injected on navigation. <code>deno task typecheck</code> checks the source.</p>
+<h2 id="it-needs-the-devtools-hook">It needs the devtools hook</h2>
+<p>Velotype keeps the map from DOM elements to its live Component and RenderObject instances to itself. The extension reads it through a hook, <code>window.__VELOTYPE_DEVTOOLS_HOOK__</code>, which every current Velotype entry point installs. If a site uses Velotype and the tree is empty, its Velotype bundle predates the hook: update Velotype.</p>
+<p>Several Velotype instances can be on one page (micro-frontends, or different versions in different bundles). Each registers separately with its own version, and their components do not collide.</p>
+<h2 id="an-app-to-try-it-on">An app to try it on</h2>
+<p>This is a small Velotype app with fields worth looking at: a Component with attrs, a <code>RenderBasic</code>, a <code>RenderObject</code> that holds an object, a <code>Map</code>, and an event bus listener.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, emitEvent, registerEventListener, RenderBasic, RenderObject, replaceElementWithRoot, VelotypeEvent } from &quot;@velotype/velotype&quot;
+
+type Settings = {theme: string, notifications: {email: boolean, sms: boolean}, tags: Set&lt;string&gt;}
+
+// A Component with fields to look at in the Velotype panel: attrs, a RenderBasic, a RenderObject
+// holding an object (which expands to its live values), and a Map
+class Profile extends Component&lt;{name: string}&gt; {
+    visits = new RenderBasic&lt;number&gt;(0)
+    settings = new RenderObject&lt;Settings&gt;(
+        {theme: &quot;dark&quot;, notifications: {email: true, sms: false}, tags: new Set([&quot;admin&quot;, &quot;beta&quot;])},
+        (settings: Settings) =&gt; &lt;div&gt;Theme: {settings.theme}&lt;/div&gt;,
+    )
+    history: Map&lt;string, number&gt; = new Map([[&quot;login&quot;, 1], [&quot;logout&quot;, 0]])
+
+    // A listener, which the Velotype Events panel lists under the key &quot;profile-updated&quot;
+    override mount() {
+        registerEventListener(this, &quot;profile-updated&quot;, () =&gt; { this.visits.value += 1 })
+    }
+
+    override render(attrs: Readonly&lt;{name: string}&gt;) {
+        return &lt;section&gt;
+            &lt;h2&gt;{attrs.name}&lt;/h2&gt;
+            &lt;p&gt;Visits: {this.visits}&lt;/p&gt;
+            {this.settings}
+            &lt;button type=&quot;button&quot; onClick={() =&gt; emitEvent(&quot;profile-updated&quot;, new VelotypeEvent(this, &quot;updated&quot;))}&gt;Update&lt;/button&gt;
+        &lt;/section&gt;
+    }
+}
+
+class App extends Component&lt;EmptyAttrs&gt; {
+    override render() {
+        return &lt;main&gt;
+            &lt;Profile name=&quot;Ada&quot;/&gt;
+            &lt;Profile name=&quot;Grace&quot;/&gt;
+        &lt;/main&gt;
+    }
+}
+
+replaceElementWithRoot(&lt;App/&gt;, document.getElementById(&quot;app&quot;))
+</code></pre>
+<p>Open it in a page, open DevTools, and look in the <strong>Velotype</strong> panel for <code>Profile</code>, and in <strong>Velotype Events</strong> for the <code>profile-updated</code> key.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velodevtools","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velodevtools/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

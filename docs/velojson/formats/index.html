@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formats - velojson (VSON) docs</title>
+<meta name="description" content="VSON has three encoding formats. Each one solves a cost of the one before it. A message's format is written in its first byte, so VSON.decode() reads Base and Key Table messages without being told which.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velojson">
+<div id="app"><article id="doc">
+<h1 id="formats">Formats</h1>
+<p>VSON has three encoding formats. Each one solves a cost of the one before it. A message&#39;s format is written in its first byte, so <code>VSON.decode()</code> reads Base and Key Table messages without being told which.</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th><code>EncodingFormat</code></th>
+<th>Keys are</th>
+<th>Needs agreement ahead of time</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Base</td>
+<td><code>EncodingFormat.Base</code></td>
+<td>written in full, each time</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Key Table</td>
+<td><code>EncodingFormat.KeyTable</code></td>
+<td>written once, in a table at the end</td>
+<td>no</td>
+</tr>
+<tr>
+<td>VBIN</td>
+<td><code>EncodingFormat.KeyID</code></td>
+<td>not written, only numbered</td>
+<td>yes: the KeyIDs</td>
+</tr>
+</tbody></table>
+<h2 id="base">Base</h2>
+<p>A direct structural translation of JSON. Because it mirrors JSON&#39;s structure, it works for streaming and partial decoding. It is typically 20-25% smaller than the JSON text, and consistently smaller in nearly all cases.</p>
+<h2 id="key-table">Key Table</h2>
+<p>All of an object&#39;s keys are collected into a table of strings appended to the root value, and each key in the data is a number that indexes the table. Every unique key is encoded once.</p>
+<p>Compared with JSON text, it ranges from about 20% smaller, for a single object or many objects with mostly unique keys (where the table has little to deduplicate), up to about 65% smaller, for many records that share the same wide set of keys.</p>
+<p>The root value must be an object or an Array. It is the default for those.</p>
+<h2 id="vbin">VBIN</h2>
+<p>The Key Id format. It is like Key Table, but the table is not in the message. The encoder and decoder must already have agreed on a number for each key. VBIN is typically about 25% to 70% smaller than JSON text, following the same shape-dependent pattern, and it also skips the table&#39;s own overhead.</p>
+<p>It is also much faster, because the key names are never encoded or decoded as UTF-8 strings or used as a string index on the constructed object. See <a href="/docs/velojson/vbin/">VBIN</a>.</p>
+<h2 id="comparing-sizes">Comparing sizes</h2>
+<pre><code class="language-tsx">import { EncodingFormat, VSON } from &quot;@velotype/velojson&quot;
+
+// Many records that share the same keys: where the Key Table format helps most
+const records = Array.from({length: 50}, (_, index) =&gt; ({
+    id: index,
+    firstName: &quot;Ada&quot;,
+    lastName: &quot;Lovelace&quot;,
+    emailAddress: `ada${index}@example.com`,
+    isActive: index % 2 == 0,
+}))
+const json = JSON.stringify(records).length
+
+// Base: a direct one-to-one translation of JSON. It can be streamed and partly decoded.
+const base = VSON.encode(records, EncodingFormat.Base)
+
+// KeyTable: every unique key is stored once, in a table at the end. It is the default for an
+// object or an Array.
+const keyTable = VSON.encode(records, EncodingFormat.KeyTable)
+const byDefault = VSON.encode(records)
+
+console.log(&quot;JSON text:&quot;, json, &quot;bytes&quot;)
+console.log(&quot;Base:     &quot;, base.length, &quot;bytes&quot;)
+console.log(&quot;KeyTable: &quot;, keyTable.length, &quot;bytes&quot;)
+console.log(&quot;The default is KeyTable:&quot;, byDefault.length == keyTable.length)
+
+// decode() reads the format from the data, so it takes no format argument
+console.log(JSON.stringify(VSON.decode(base)) == JSON.stringify(records))
+console.log(JSON.stringify(VSON.decode(keyTable)) == JSON.stringify(records))
+
+// KeyTable only supports an object or an Array at the root
+try {
+    VSON.encode(&quot;text&quot;, EncodingFormat.KeyTable)
+} catch (error) {
+    console.log((error as Error).message)
+}
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">JSON text: 5056 bytes
+Base:      3893 bytes
+KeyTable:  1988 bytes
+The default is KeyTable: true
+true
+true
+velojson: KeyTable encoding format only supported for root Object or Array types
+</code></pre>
+<h2 id="speed">Speed</h2>
+<p>The VSON formats (Base and Key Table) typically run slower than native <code>JSON.stringify()</code> and <code>JSON.parse()</code>, which are heavily optimized in the engine. For the rare case of many complex numbers VSON outperforms them. The VBIN format performs significantly faster than native JSON.</p>
+<p>Choose VSON for the smaller payload, and VBIN for speed and size.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velojson","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velojson/formats/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

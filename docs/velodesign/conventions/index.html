@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conventions - velodesign docs</title>
+<meta name="description" content="What every component has in common, and the functions and objects around the components.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velodesign">
+<div id="app"><article id="doc">
+<h1 id="conventions">Conventions</h1>
+<p>What every component has in common, and the functions and objects around the components.</p>
+<h2 id="attrs">Attrs</h2>
+<p>Every component&#39;s attrs type is named <code>&lt;Name&gt;AttrsType</code>, such as <code>ButtonAttrsType</code>, and exported. Each is built from shared pieces, which Velotype exports too:</p>
+<ul>
+<li><strong><code>id</code>, <code>class</code>, and <code>style</code></strong> are accepted by components, and set on the element the component renders. <code>class</code> is added to the element&#39;s own classes rather than replacing them</li>
+<li><strong><code>children</code></strong> are accepted by the components that take content, such as <code>Button</code>, <code>Card</code>, and <code>Alert</code></li>
+<li>A component&#39;s own attrs are the rest</li>
+</ul>
+<p>A component is a function component unless it needs state or a lifecycle, such as <code>Modal</code>, <code>Navbar</code>, and <code>TableOfContents</code>, which are classes. In TSX they are used the same way.</p>
+<h2 id="native-elements">Native elements</h2>
+<p>A component built on an element passes that element&#39;s attributes through, and uses the platform for the rest. A <code>Checkbox</code> is an <code>&lt;input type=&quot;checkbox&quot;&gt;</code> with a label, so it works with forms, keyboard, and autofill, and a <code>Modal</code> is a <code>&lt;dialog&gt;</code>.</p>
+<h2 id="no-language-is-assumed">No language is assumed</h2>
+<p>The library has no built-in text. ARIA labels and placeholders have no default, because a default would be one language. Set the labels yourself, such as <code>dismissLabel</code> on an <code>Alert</code>, or <code>menuLabel</code> on a <code>Navbar</code>.</p>
+<p><code>S</code> is a store of strings by key, and <code>T</code> renders one, with an optional plural:</p>
+<pre><code class="language-tsx">import { LocalizedString, S, T } from &quot;@velotype/velodesign&quot;
+
+// The library has no built-in text: it does not assume a language, so ARIA labels and
+// placeholders have no default. S is a store of strings by key, and T renders one.
+S.a(&quot;greeting&quot;, &quot;Hello&quot;)
+
+// A string with a plural form, chosen by a number
+S.aS(new LocalizedString(&quot;items&quot;, &quot;1 item&quot;, &quot;many items&quot;))
+
+console.log(S.g(&quot;greeting&quot;))     // Hello
+console.log(S.g(&quot;items&quot;, 1))     // 1 item
+console.log(S.g(&quot;items&quot;, 5))     // many items
+console.log(S.g(&quot;missing&quot;))      // -- missing --  (and an error is logged)
+
+// &lt;T k=&quot;...&quot;/&gt; renders a string in TSX, and n is the number for a plural
+const message = &lt;p&gt;&lt;T k=&quot;greeting&quot;/&gt;, you have &lt;T k=&quot;items&quot; n={3}/&gt;&lt;/p&gt;
+document.body.append(message)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>S.a(key, value)</code></td>
+<td>Adds a string</td>
+</tr>
+<tr>
+<td><code>S.aS(localizedString)</code></td>
+<td>Adds a <code>LocalizedString</code>, which can have a plural form</td>
+</tr>
+<tr>
+<td><code>S.g(key, n?)</code></td>
+<td>Gets a string. With <code>n</code>, it chooses the plural form unless <code>n</code> is <code>1</code>. A missing key logs an error and returns <code>-- key --</code></td>
+</tr>
+<tr>
+<td><code>&lt;T k=&quot;key&quot; n={n}/&gt;</code></td>
+<td>Renders a string in TSX</td>
+</tr>
+</tbody></table>
+<h2 id="toasts-and-icons">Toasts and icons</h2>
+<p><code>showToast(message, options?)</code> is a function, not a component, because a toast has no place in your tree. Call it from a handler. It keeps one container at the bottom right of the page. The options are <code>type</code>, <code>duration</code> (milliseconds before it is dismissed, default <code>4000</code>, and <code>0</code> keeps it), and <code>dismissLabel</code>.</p>
+<p>An <code>Icon</code> is a width, a height, and an SVG path. <code>registerIcon(key, icon)</code> registers it, and <code>&lt;I i={key}/&gt;</code> renders it as an inline SVG, <code>1em</code> tall, in the current text color.</p>
+<pre><code class="language-tsx">import { Button, I, Icon, registerIcon, showToast } from &quot;@velotype/velodesign&quot;
+
+// showToast() is a function, not a component: call it from a handler. It keeps one container at the
+// bottom right of the page, and removes each toast after its duration (4000ms by default, 0 keeps it).
+const toastButton = &lt;Button type=&quot;primary&quot; onClick={() =&gt; {
+    showToast(&quot;Saved your changes&quot;, {type: &quot;success&quot;})
+    showToast(&quot;Stays until dismissed&quot;, {type: &quot;warning&quot;, duration: 0, dismissLabel: &quot;Dismiss&quot;})
+}}&gt;Show toasts&lt;/Button&gt;
+
+// An Icon is a width, a height, and an SVG path. Register it under a key, and render it with &lt;I/&gt;.
+// It is drawn 1em tall in the current text color.
+registerIcon(&quot;check&quot;, new Icon(24, 24, &quot;M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z&quot;))
+
+document.body.append(toastButton, &lt;p&gt;Done &lt;I i=&quot;check&quot;/&gt;&lt;/p&gt;, &lt;I i=&quot;check&quot; style={{height: &quot;2em&quot;}}/&gt;)
+</code></pre>
+<h2 id="routing">Routing</h2>
+<p><code>Link</code> is a plain anchor, so open in a new tab, copy link address, and drag to a bookmark all work. Add <code>spa</code> and a click changes the location with <code>history.pushState()</code> instead of loading a page.</p>
+<p><code>NavLink</code> is a <code>Link</code> that knows whether it is the current page. It gets the class <code>vtd-nav-link-active</code>, or the <code>activeClass</code> you give it. <code>exact</code> is <code>true</code> by default, and matches the whole path. With <code>false</code> it matches any path that starts with <code>to</code>.</p>
+<p><code>History.changeLocation(path)</code> does a <code>pushState</code> and dispatches a <code>locationchange</code> event, which <code>NavLink</code> and <code>PageSelector</code> listen for. <code>History.loadNewPageLocation(path)</code> loads the page.</p>
+<pre><code class="language-tsx">import { History, Link, NavLink, Navbar } from &quot;@velotype/velodesign&quot;
+
+// A Link is a plain anchor, so open-in-new-tab, copy-link, and drag-to-bookmark all work.
+// spa makes a click change the location with history.pushState() instead of loading a page.
+const links = &lt;nav&gt;
+    &lt;Link to=&quot;/docs/&quot;&gt;A normal link&lt;/Link&gt;
+    &lt;Link to=&quot;/docs/&quot; spa&gt;A client-side link&lt;/Link&gt;
+&lt;/nav&gt;
+
+// A NavLink is a Link that knows whether it is the current page: it gets the class
+// &quot;vtd-nav-link-active&quot;, or the one you give as activeClass. exact (default true) matches the whole
+// path, and false matches any path that starts with it.
+const nav = &lt;Navbar brand={&lt;NavLink to=&quot;/&quot; spa&gt;Home&lt;/NavLink&gt;}&gt;
+    &lt;NavLink to=&quot;/docs/&quot; spa exact={false} activeClass=&quot;current&quot;&gt;Docs&lt;/NavLink&gt;
+    &lt;NavLink to=&quot;/about/&quot; spa&gt;About&lt;/NavLink&gt;
+&lt;/Navbar&gt;
+
+// Change the location from code. changeLocation() does a pushState and dispatches a &quot;locationchange&quot;
+// event, which NavLink listens for. loadNewPageLocation() loads the page for real.
+const button = &lt;button type=&quot;button&quot; onClick={() =&gt; History.changeLocation(&quot;/docs/&quot;)}&gt;Go to docs&lt;/button&gt;
+
+document.body.append(nav, links, button)
+</code></pre>
+<h2 id="updating-only-what-changed">Updating only what changed</h2>
+<p>Components do the smallest DOM update that expresses a change, and none when nothing changed, so focus, caret position, text selection, scroll position, and running transitions survive. When you build on them, do the same: use <a href="/docs/velotype/render-objects/">RenderObjects</a> rather than <code>refresh()</code> for state that changes.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velodesign","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velodesign/conventions/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components - Velotype docs</title>
+<meta name="description" content="Components are the objects that you create as tags in TSX. Velotype has two kinds: function components for simple, stateless markup, and class components for anything with state, a lifecycle, or methods.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="components">Components</h1>
+<p>Components are the objects that you create as tags in TSX. Velotype has two kinds: function components for simple, stateless markup, and class components for anything with state, a lifecycle, or methods.</p>
+<h2 id="function-components">Function components</h2>
+<p>A <code>FunctionComponent&lt;AttrsType&gt;</code> is a function from its attrs to what it renders. It receives its children as a second argument.</p>
+<p>Function components must be idempotent with no side effects, and they do not support <code>mount()</code> and <code>unmount()</code>. Use a class component when you need either.</p>
+<p>To accept children, add <code>ChildrenAttr</code> to the attrs type.</p>
+<pre><code class="language-tsx">import { type ChildrenAttr, type FunctionComponent, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+type UserProfile = {
+    name: string
+    email?: string
+    address?: string
+}
+type UserProfileAttrsType = {
+    user: UserProfile
+}
+
+// A FunctionComponent takes attrs, and children as a second argument.
+// It must be idempotent with no side effects, and it has no mount or unmount.
+export const UserProfile: FunctionComponent&lt;UserProfileAttrsType&gt; = function(attrs: UserProfileAttrsType) {
+    return &lt;div&gt;
+        &lt;div&gt;Name: {attrs.user.name}&lt;/div&gt;
+        {attrs.user.email &amp;&amp; &lt;div&gt;Email: {attrs.user.email}&lt;/div&gt;}
+        {attrs.user.address &amp;&amp; &lt;div&gt;Address: {attrs.user.address}&lt;/div&gt;}
+    &lt;/div&gt;
+}
+
+type PanelAttrsType = {title: string} &amp; ChildrenAttr
+
+export const Panel: FunctionComponent&lt;PanelAttrsType&gt; = function(attrs: PanelAttrsType, children) {
+    return &lt;section&gt;
+        &lt;h2&gt;{attrs.title}&lt;/h2&gt;
+        {children}
+    &lt;/section&gt;
+}
+
+replaceElementWithRoot(
+    &lt;Panel title=&quot;Profile&quot;&gt;
+        &lt;UserProfile user={{name: &quot;Ada&quot;, email: &quot;ada@example.com&quot;}}/&gt;
+    &lt;/Panel&gt;,
+    document.getElementById(&quot;app&quot;),
+)
+</code></pre>
+<h2 id="class-components">Class components</h2>
+<p>A class component extends <code>Component&lt;AttrsType&gt;</code> and implements <code>render()</code>. Velotype calls its lifecycle methods for you.</p>
+<p>The attrs a Component is created with are <code>this.attrs</code>, and its children are <code>this.children</code>. They are also passed to <code>render()</code>.</p>
+<p>A Component that accepts children adds <code>ChildrenAttr</code> to its attrs type.</p>
+<pre><code class="language-tsx">import { type ChildrenAttr, Component, type RenderableElements, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+type GreetingAttrsType = {
+    name: string
+    punctuation?: string
+}
+
+// A Component is a class. Its attrs are the type parameter, and render() returns what it shows.
+class Greeting extends Component&lt;GreetingAttrsType&gt; {
+    override render(attrs: Readonly&lt;GreetingAttrsType&gt;) {
+        return &lt;div&gt;Hello {attrs.name}{attrs.punctuation ?? &quot;!&quot;}&lt;/div&gt;
+    }
+}
+
+// A Component that accepts children adds ChildrenAttr to its attrs. The children it is created
+// with are passed to render(), and are also this.children.
+class Card extends Component&lt;ChildrenAttr&gt; {
+    override render(_attrs: Readonly&lt;ChildrenAttr&gt;, children: RenderableElements[]) {
+        return &lt;div class=&quot;card&quot;&gt;{children}&lt;/div&gt;
+    }
+}
+
+replaceElementWithRoot(
+    &lt;Card&gt;
+        &lt;Greeting name=&quot;Ada&quot;/&gt;
+        &lt;Greeting name=&quot;Grace&quot; punctuation=&quot;?&quot;/&gt;
+    &lt;/Card&gt;,
+    document.getElementById(&quot;app&quot;),
+)
+</code></pre>
+<h2 id="the-lifecycle">The lifecycle</h2>
+<p>A Component goes through <code>mount()</code>, <code>render()</code>, and <code>unmount()</code>. A Component can also call <code>this.refresh()</code> to render again.</p>
+<pre><code class="language-tsx">import { type ChildrenAttr, Component, RenderBasic, type RenderableElements, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+type MoreComplexAttrsType = {
+    requiredAttr: string
+    optionalAttr?: string
+} &amp; ChildrenAttr
+
+class MoreComplexComponent extends Component&lt;MoreComplexAttrsType&gt; {
+    renderCallCount: number = 0
+    someMethodCallCount: number = 0
+    otherMethodCallCount = new RenderBasic&lt;number&gt;(0)
+
+    // Called once, just after the Component is inserted into the page, before the browser paints.
+    // Child Components mount before their parent.
+    override mount() {
+        console.log(&quot;This component was just added to the DOM&quot;)
+    }
+
+    // Called once, just before the Component is removed, while it is still in the page
+    override unmount() {
+        console.log(&quot;This component is about to be removed from the DOM&quot;)
+    }
+
+    override render(attrs: Readonly&lt;MoreComplexAttrsType&gt;, children: RenderableElements[]) {
+        this.renderCallCount++
+        return &lt;div&gt;
+            This is a more complex Component for {attrs.requiredAttr}
+            &lt;div&gt;render() has been called: {this.renderCallCount} times&lt;/div&gt;
+            &lt;button type=&quot;button&quot; onClick={this.otherMethod}&gt;click me (RenderBasic) {this.otherMethodCallCount}&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={this.someMethod}&gt;click me (refresh) {this.someMethodCallCount}&lt;/button&gt;
+            &lt;div&gt;
+                Children here:
+                &lt;div&gt;{children}&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    }
+
+    otherMethod = () =&gt; {
+        // Updating the RenderBasic renders only the one {this.otherMethodCallCount} element above
+        this.otherMethodCallCount.value += 1
+    }
+
+    someMethod = () =&gt; {
+        this.someMethodCallCount += 1
+        // A full render of this Component: its children are unmounted and deleted, then render()
+        // runs again and creates and mounts a fresh set. This Component stays mounted.
+        this.refresh()
+    }
+}
+
+replaceElementWithRoot(
+    &lt;MoreComplexComponent requiredAttr=&quot;the docs&quot;&gt;&lt;span&gt;a child&lt;/span&gt;&lt;/MoreComplexComponent&gt;,
+    document.getElementById(&quot;app&quot;),
+)
+</code></pre>
+<ul>
+<li><code>render()</code> creates the Component&#39;s elements. It can run again when the Component calls <code>refresh()</code></li>
+<li><code>mount()</code> runs just after the Component is inserted into the page, before the browser paints, so it can read layout (such as <code>getBoundingClientRect()</code>). Child Components mount before their parent. For work that should wait until after the first paint, start it from <code>mount()</code> with <code>requestAnimationFrame()</code> or <code>setTimeout()</code></li>
+<li><code>unmount()</code> runs just before the Component is removed, while it is still in the page</li>
+<li><code>refresh()</code> unmounts and mounts the Component&#39;s children, and the Component itself stays mounted. If <code>render()</code> throws, the current render is kept and the error is thrown to the caller of <code>refresh()</code></li>
+<li>Moving an element (such as <code>swap()</code>, or moving it with DOM methods) does not unmount or mount it</li>
+<li>A Component mounts and unmounts once. Once Velotype removes it, it is released, and inserting its element again does not mount it (Velotype warns in the console). Create a new Component instead</li>
+<li>Velotype mounts Components that are inserted through Velotype: <code>replaceElementWithRoot()</code>, a Component&#39;s child methods, and RenderObjects. An element inserted with DOM methods such as <code>appendChild()</code> is not mounted</li>
+<li>Likewise Velotype unmounts Components that are removed through Velotype: <code>removeElementRoot()</code>, a Component&#39;s child methods, <code>refresh()</code>, and RenderObjects. An element removed with DOM methods is not unmounted</li>
+<li>The RenderObjects in a Component&#39;s fields mount and unmount with it (calling their <code>registerOnMount()</code> callbacks), and the ones in public fields are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a <code>#private</code> field</li>
+<li>Errors thrown by <code>mount()</code> and <code>unmount()</code> are reported with <code>reportError()</code>, and the other Components still run. See <a href="/docs/velotype/events-and-errors/#when-code-throws">Errors</a></li>
+</ul>
+<h3 id="prefer-renderobjects-to-refresh">Prefer RenderObjects to refresh()</h3>
+<p><code>refresh()</code> is the largest possible update: it throws away the Component&#39;s children and creates them again, which loses their state. To change part of a Component, use a <a href="/docs/velotype/render-objects/">RenderObject</a> for a value, or a <a href="#changing-part-of-what-a-component-rendered">child method</a> for an element.</p>
+<h2 id="cleaning-up-with-unmountsignal">Cleaning up with unmountSignal</h2>
+<p><code>this.unmountSignal</code> is an <code>AbortSignal</code> that is aborted just after <code>unmount()</code> returns. Pass it to what <code>mount()</code> starts, and it is cleaned up without an <code>unmount()</code>. It works with <code>addEventListener()</code> and with <code>fetch()</code>, so a response that arrives after the Component unmounts is not used.</p>
+<p>The signal is created on first use. It is also aborted when a Component is released without being mounted, such as when its <code>render()</code> throws.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderBasic } from &quot;@velotype/velotype&quot;
+
+// this.unmountSignal is aborted just after unmount() returns. Pass it to what mount() starts,
+// and it is cleaned up without an unmount().
+export class WindowWidth extends Component&lt;EmptyAttrs&gt; {
+    width = new RenderBasic&lt;number&gt;(globalThis.innerWidth)
+
+    override mount() {
+        globalThis.addEventListener(&quot;resize&quot;, () =&gt; {
+            this.width.value = globalThis.innerWidth
+        }, {signal: this.unmountSignal})
+    }
+
+    override render() {
+        return &lt;div&gt;Window width: {this.width}&lt;/div&gt;
+    }
+}
+
+// It works with fetch() too, so a response that arrives after the Component unmounts is not used
+export class Greeting extends Component&lt;EmptyAttrs&gt; {
+    message = new RenderBasic&lt;string&gt;(&quot;Loading&quot;)
+
+    override mount() {
+        fetch(&quot;/greeting&quot;, {signal: this.unmountSignal})
+            .then(response =&gt; response.text())
+            .then(text =&gt; { this.message.value = text })
+            .catch(() =&gt; { /* aborted, or failed */ })
+    }
+
+    override render() {
+        return &lt;div&gt;{this.message}&lt;/div&gt;
+    }
+}
+</code></pre>
+<h2 id="changing-part-of-what-a-component-rendered">Changing part of what a Component rendered</h2>
+<p>A Component&#39;s child methods change one element inside what it rendered, without a <code>refresh()</code>. Each takes an element from this Component&#39;s render, mounts what it inserts, and unmounts what it removes.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>replaceChild(child, newChild)</code></td>
+<td>Replaces <code>child</code>, and returns the new element</td>
+</tr>
+<tr>
+<td><code>appendToChild(child, newChild)</code></td>
+<td>Adds <code>newChild</code> to the end of <code>child</code></td>
+</tr>
+<tr>
+<td><code>prependToChild(child, newChild)</code></td>
+<td>Adds <code>newChild</code> to the start of <code>child</code></td>
+</tr>
+<tr>
+<td><code>replaceChildrenOfChild(child, newChildren)</code></td>
+<td>Replaces all of <code>child</code>&#39;s children</td>
+</tr>
+<tr>
+<td><code>removeChild(child)</code></td>
+<td>Removes <code>child</code></td>
+</tr>
+</tbody></table>
+<p>The methods return <code>false</code> (or <code>child</code>, for <code>replaceChild()</code>) and change nothing when <code>child</code> is not part of this Component&#39;s render.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs } from &quot;@velotype/velotype&quot;
+
+// A Component&#39;s child methods change one element inside what it rendered, without a refresh().
+// Each takes an element from this Component&#39;s render, mounts what it inserts, and unmounts what
+// it removes.
+export class Panel extends Component&lt;EmptyAttrs&gt; {
+    body: HTMLElement = &lt;div&gt;Loading...&lt;/div&gt;
+    list: HTMLUListElement = &lt;ul&gt;&lt;li&gt;second&lt;/li&gt;&lt;/ul&gt;
+    note: HTMLElement = &lt;p&gt;A note that is removed later&lt;/p&gt;
+
+    override mount() {
+        fetch(&quot;/panel&quot;, {signal: this.unmountSignal}).then(response =&gt; response.text()).then(text =&gt; {
+            // replaceChild() returns the new element
+            this.body = this.replaceChild(this.body, &lt;div&gt;{text}&lt;/div&gt;) as HTMLElement
+
+            // add to the end or start of an element
+            this.appendToChild(this.list, &lt;li&gt;third&lt;/li&gt;)
+            this.prependToChild(this.list, &lt;li&gt;first&lt;/li&gt;)
+
+            // replace all of an element&#39;s children
+            this.replaceChildrenOfChild(this.list, [&lt;li&gt;one&lt;/li&gt;, &lt;li&gt;two&lt;/li&gt;])
+
+            // remove an element. These return false (replaceChild() returns the child) and change
+            // nothing when the element is not part of this Component&#39;s render.
+            const removed: boolean = this.removeChild(this.note)
+            console.log(&quot;removed&quot;, removed)
+        })
+    }
+
+    override render() {
+        return &lt;section&gt;
+            {this.body}
+            {this.list}
+            {this.note}
+        &lt;/section&gt;
+    }
+}
+</code></pre>
+<h2 id="getting-the-component-from-its-element">Getting the Component from its element</h2>
+<p>TSX evaluates to the element, but the TypeScript type of a tag for a class is the class. <code>getComponent&lt;T&gt;(element)</code> converts an element that was created for a class Component back to the instance, so you can call its methods.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, getComponent } from &quot;@velotype/velotype&quot;
+
+class AdvancedComponent extends Component&lt;EmptyAttrs&gt; {
+    override render() {
+        return &lt;div&gt;This is an advanced Component&lt;/div&gt;
+    }
+    someMethod() {
+        console.log(&quot;AdvancedComponent someMethod() called&quot;)
+    }
+}
+
+// JSX evaluates to the element, and getComponent() converts it back to the instance that made it
+const instance: AdvancedComponent = getComponent&lt;AdvancedComponent&gt;(&lt;AdvancedComponent/&gt;)
+instance.someMethod()
+
+// The element is still usable in TSX
+const page = &lt;div&gt;{instance}&lt;/div&gt;
+document.body.append(page)
+</code></pre>
+<h2 id="accepting-id-class-and-style">Accepting id, class, and style</h2>
+<p><code>passthroughAttrsToElement(element, attrs)</code> sets the <code>id</code>, <code>class</code>, and <code>style</code> attrs that a caller passed on the element a Component renders. <code>class</code> is added to the element&#39;s own classes rather than replacing them. Add <code>IdAttr</code> and <code>StylePassthroughAttrs</code> to the Component&#39;s attrs type to accept them.</p>
+<p><code>setAttrsOnElement(element, attrs)</code> sets attributes, style objects, and event listeners on an existing element the same way TSX does.</p>
+<pre><code class="language-tsx">import { Component, type IdAttr, passthroughAttrsToElement, setAttrsOnElement, type StylePassthroughAttrs } from &quot;@velotype/velotype&quot;
+
+// IdAttr and StylePassthroughAttrs add id, class, and style to a Component&#39;s attrs
+type ButtonAttrs = IdAttr &amp; StylePassthroughAttrs &amp; {label: string}
+
+class FancyButton extends Component&lt;ButtonAttrs&gt; {
+    override render(attrs: Readonly&lt;ButtonAttrs&gt;) {
+        // Sets the id, class, and style the caller passed. class is added to the element&#39;s own
+        // classes rather than replacing them.
+        return passthroughAttrsToElement(&lt;button type=&quot;button&quot; class=&quot;fancy&quot;&gt;{attrs.label}&lt;/button&gt;, attrs)
+    }
+}
+
+const button = &lt;FancyButton label=&quot;Save&quot; id=&quot;save&quot; class=&quot;primary&quot; style={{marginTop: &quot;4px&quot;}}/&gt;
+
+// setAttrsOnElement() sets attributes, style objects, and event listeners on an existing element
+// the same way TSX does
+const input = document.createElement(&quot;input&quot;)
+setAttrsOnElement(input, {
+    type: &quot;text&quot;,
+    class: &quot;wide&quot;,
+    style: {width: &quot;100%&quot;},
+    onInput: () =&gt; console.log(&quot;typed&quot;),
+})
+
+document.body.append(button, input)
+</code></pre>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/components/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

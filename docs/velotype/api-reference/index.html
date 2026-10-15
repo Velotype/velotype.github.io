@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API reference - Velotype docs</title>
+<meta name="description" content="Everything @velotype/velotype exports, by area. Types are shown as they appear in the package. Each name links to the guide that covers it with an example.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="api-reference">API reference</h1>
+<p>Everything <code>@velotype/velotype</code> exports, by area. Types are shown as they appear in the package. Each name links to the guide that covers it with an example.</p>
+<h2 id="mounting">Mounting</h2>
+<table>
+<thead>
+<tr>
+<th>Export</th>
+<th>Signature</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/docs/velotype/#mounting-an-app"><code>replaceElementWithRoot</code></a></td>
+<td><code>(rootComponent: AnchorElement, element: HTMLElement | null) =&gt; AnchorElement | null</code></td>
+</tr>
+<tr>
+<td><a href="/docs/velotype/#mounting-an-app"><code>removeElementRoot</code></a></td>
+<td><code>(element: AnchorElement | null) =&gt; void</code></td>
+</tr>
+</tbody></table>
+<h2 id="components">Components</h2>
+<h3 id="component">Component</h3>
+<p><code>abstract class Component&lt;AttrsType&gt; implements HasVtKey</code></p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>constructor(attrs: Readonly&lt;AttrsType&gt;, children: RenderableElements[])</code></td>
+<td>Receives the attrs and children. Rarely overridden</td>
+</tr>
+<tr>
+<td><code>readonly attrs: AttrsType</code></td>
+<td>The attrs the Component was created with</td>
+</tr>
+<tr>
+<td><code>readonly children: RenderableElements[]</code></td>
+<td>The children the Component was created with</td>
+</tr>
+<tr>
+<td><code>readonly vtKey: number</code></td>
+<td>A unique key per instance. Set after the constructor returns, so it is undefined in the constructor and in field initializers</td>
+</tr>
+<tr>
+<td><code>protected render(attrs, children): RenderableElements</code></td>
+<td>Abstract. Renders the Component</td>
+</tr>
+<tr>
+<td><code>protected mount(): void</code></td>
+<td>Called once, just after the Component is inserted, before the browser paints</td>
+</tr>
+<tr>
+<td><code>protected unmount(): void</code></td>
+<td>Called once, just before the Component is removed</td>
+</tr>
+<tr>
+<td><code>get refresh(): () =&gt; void</code></td>
+<td>Renders the Component&#39;s children again</td>
+</tr>
+<tr>
+<td><code>get unmountSignal(): AbortSignal</code></td>
+<td>Aborted just after <code>unmount()</code> returns</td>
+</tr>
+<tr>
+<td><code>get replaceChild(): (child, newChild) =&gt; AnchorElement</code></td>
+<td>Replaces one element of this Component&#39;s render</td>
+</tr>
+<tr>
+<td><code>get appendToChild(): (child, newChild) =&gt; boolean</code></td>
+<td>Adds to the end of an element</td>
+</tr>
+<tr>
+<td><code>get prependToChild(): (child, newChild) =&gt; boolean</code></td>
+<td>Adds to the start of an element</td>
+</tr>
+<tr>
+<td><code>get replaceChildrenOfChild(): (child, newChildren) =&gt; boolean</code></td>
+<td>Replaces all of an element&#39;s children</td>
+</tr>
+<tr>
+<td><code>get removeChild(): (child) =&gt; boolean</code></td>
+<td>Removes an element</td>
+</tr>
+</tbody></table>
+<p>See <a href="/docs/velotype/components/">Components</a>.</p>
+<h3 id="errorboundary">ErrorBoundary</h3>
+<p><code>abstract class ErrorBoundary&lt;AttrsType&gt; extends Component&lt;AttrsType&gt;</code></p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>protected renderContent(attrs, children): RenderableElements</code></td>
+<td>Abstract. Renders the content</td>
+</tr>
+<tr>
+<td><code>protected renderError(error: unknown, attrs, children): RenderableElements</code></td>
+<td>Abstract. Renders the fallback when <code>renderContent()</code> throws</td>
+</tr>
+</tbody></table>
+<p>See <a href="/docs/velotype/events-and-errors/#errorboundary">Events and errors</a>.</p>
+<h3 id="other">Other</h3>
+<table>
+<thead>
+<tr>
+<th>Export</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>getComponent&lt;T&gt;(element)</code></td>
+<td>Converts an element created for a class Component back to the instance</td>
+</tr>
+<tr>
+<td><code>passthroughAttrsToElement(element, attrs)</code></td>
+<td>Sets the <code>id</code>, <code>class</code>, and <code>style</code> attrs on the element a Component renders</td>
+</tr>
+<tr>
+<td><code>setAttrsOnElement(element, attrs?)</code></td>
+<td>Sets attributes, style objects, and event listeners on an existing element</td>
+</tr>
+<tr>
+<td><code>createElement(tag, attrs, ...children)</code></td>
+<td>What TSX compiles tags to in the classic runtime</td>
+</tr>
+<tr>
+<td><code>createFragment(attrs, ...children)</code></td>
+<td>What <code>&lt;&gt;...&lt;/&gt;</code> compiles to</td>
+</tr>
+<tr>
+<td><code>jsx</code>, <code>jsxs</code>, <code>Fragment</code></td>
+<td>The automatic JSX runtime</td>
+</tr>
+</tbody></table>
+<h2 id="renderobjects">RenderObjects</h2>
+<h3 id="renderobject">RenderObject</h3>
+<p><code>class RenderObject&lt;DataType, UpdateRefsType = any&gt; implements HasVtKey</code></p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>constructor(initialData, defaultRenderFunction?, defaultHandleUpdate?)</code></td>
+<td>Creates a RenderObject</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>Reads or sets the value</td>
+</tr>
+<tr>
+<td><code>get(): DataType</code></td>
+<td>Reads the value</td>
+</tr>
+<tr>
+<td><code>set(newData: DataType): void</code></td>
+<td>Sets the value, and renders it if it is a different value</td>
+</tr>
+<tr>
+<td><code>rerenderElements(newData: DataType): void</code></td>
+<td>Sets the value and renders it again, even if it is the same object</td>
+</tr>
+<tr>
+<td><code>registerOnChangeListener(listener, options?): this</code></td>
+<td>Runs <code>listener</code> after each change. Options: <code>hasVtKey</code>, <code>triggerOnRegistration</code>, <code>eventDispatchDelay</code></td>
+</tr>
+<tr>
+<td><code>registerOnMount(onMount?, onUnmount?): this</code></td>
+<td>Runs callbacks when the owning Component mounts and unmounts</td>
+</tr>
+<tr>
+<td><code>render(renderFunction, handleUpdate?): AnchorElement</code></td>
+<td>Renders one more element with another render function</td>
+</tr>
+<tr>
+<td><code>getElements(): AnchorElement[]</code></td>
+<td>The rendered elements. Advanced</td>
+</tr>
+<tr>
+<td><code>removeAll(): void</code></td>
+<td>Removes every rendered element</td>
+</tr>
+<tr>
+<td><code>readonly vtKey: number</code></td>
+<td>This RenderObject&#39;s key</td>
+</tr>
+</tbody></table>
+<p>See <a href="/docs/velotype/render-objects/">RenderObjects</a>.</p>
+<h3 id="renderbasic">RenderBasic</h3>
+<p><code>class RenderBasic&lt;DataType extends BasicTypes&gt; extends RenderObject&lt;DataType, Text&gt;</code></p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>constructor(initialData: DataType)</code></td>
+<td>Creates a RenderBasic</td>
+</tr>
+<tr>
+<td><code>getString(): string</code></td>
+<td>The value as a string</td>
+</tr>
+<tr>
+<td><code>setString(newDataString: string): void</code></td>
+<td>Sets the value from a string</td>
+</tr>
+</tbody></table>
+<h3 id="updatehandlerlink">UpdateHandlerLink</h3>
+<p><code>class UpdateHandlerLink&lt;UpdateRefsType = any&gt;</code></p>
+<p><code>constructor(result: RenderableElements, updateRefs: UpdateRefsType)</code>, with <code>readonly result</code> and <code>readonly updateRefs</code>. Returned from a render function to give <code>handleUpdate</code> its references.</p>
+<h3 id="asyncrenderobject">AsyncRenderObject</h3>
+<p><code>class AsyncRenderObject&lt;DataType&gt; extends RenderObject&lt;AsyncState&lt;DataType&gt;&gt;</code></p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>constructor(source: AsyncSource&lt;DataType&gt;, options: AsyncRenderObjectOptions&lt;DataType&gt;)</code></td>
+<td>Starts loading <code>source</code></td>
+</tr>
+<tr>
+<td><code>load(source: AsyncSource&lt;DataType&gt;): void</code></td>
+<td>Replaces the load in progress</td>
+</tr>
+<tr>
+<td><code>get loading(): boolean</code></td>
+<td><code>true</code> while a load is in progress</td>
+</tr>
+</tbody></table>
+<pre><code class="language-ts">type AsyncSource&lt;DataType&gt; = Promise&lt;DataType&gt; | ((signal: AbortSignal) =&gt; Promise&lt;DataType&gt;)
+type AsyncState&lt;DataType&gt; =
+    | {readonly status: &quot;pending&quot;}
+    | {readonly status: &quot;resolved&quot;, readonly value: DataType}
+    | {readonly status: &quot;rejected&quot;, readonly reason: unknown}
+</code></pre>
+<p><code>AsyncRenderObjectOptions&lt;DataType&gt;</code> has <code>render</code>, <code>pending?</code>, <code>onFail?</code>, and <code>keepPrevious?</code>. See <a href="/docs/velotype/async-data/">Async data</a>.</p>
+<h2 id="lists">Lists</h2>
+<p><code>class RenderObjectArray&lt;DataType, UpdateRefsType = any&gt;</code> and <code>class RenderTemplateArray&lt;DataType, UpdateRefsType = any, RowElementType extends Element = HTMLElement&gt;</code> have the same methods.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>push(data)</code> / <code>pushAll(data[])</code></td>
+<td>Add to the end</td>
+</tr>
+<tr>
+<td><code>insertAt(index, data)</code> / <code>insertAllAt(index, data[])</code></td>
+<td>Insert before <code>index</code></td>
+</tr>
+<tr>
+<td><code>deleteAt(startIndex, deleteCount?)</code> / <code>delete(data)</code></td>
+<td>Remove</td>
+</tr>
+<tr>
+<td><code>getAt(index)</code> / <code>setAt(index, data)</code></td>
+<td>Read and replace</td>
+</tr>
+<tr>
+<td><code>swap(indexA, indexB)</code> / <code>move(from, to)</code></td>
+<td>Reposition</td>
+</tr>
+<tr>
+<td><code>sort(compareFn)</code> / <code>reorder(indexes)</code></td>
+<td>Reorder</td>
+</tr>
+<tr>
+<td><code>filter(predicate?)</code></td>
+<td>Show only matching data points</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Remove everything</td>
+</tr>
+<tr>
+<td><code>get length(): number</code></td>
+<td>The number of data points</td>
+</tr>
+</tbody></table>
+<pre><code class="language-ts">type RenderObjectArrayOptions&lt;DataType, UpdateRefsType = any&gt; = {
+    wrapperElementTag?: string
+    wrapperAttrs?: any
+    renderFunction: RenderObjectRenderFunctionType&lt;DataType, UpdateRefsType&gt;
+    handleUpdate?: RenderObjectHandleUpdateType&lt;DataType, UpdateRefsType&gt;
+}
+
+type RenderTemplateArrayOptions&lt;DataType, UpdateRefsType = any, RowElementType extends Element = HTMLElement&gt; = {
+    wrapperElementTag?: string
+    wrapperAttrs?: any
+    template: RowElementType
+    renderFunction: (row: RowElementType, data: DataType) =&gt; UpdateRefsType
+    handleUpdate?: (row: RowElementType, updateRefs: UpdateRefsType, oldData: DataType, newData: DataType) =&gt; void
+    on?: {[EventName in BubblingEventName]?: (event: HTMLElementEventMap[EventName], row: RowElementType, data: DataType, index: number) =&gt; void}
+}
+</code></pre>
+<p>See <a href="/docs/velotype/lists/">Lists</a>.</p>
+<h2 id="events">Events</h2>
+<table>
+<thead>
+<tr>
+<th>Export</th>
+<th>Signature</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>registerEventListener</code></td>
+<td><code>(hasVtKey: HasVtKey, listeningKey: string, listener: VelotypeEventListener) =&gt; void</code></td>
+</tr>
+<tr>
+<td><code>emitEvent</code></td>
+<td><code>(listeningKey: string, event: VelotypeEvent, hasVtKey?: HasVtKey) =&gt; void</code></td>
+</tr>
+<tr>
+<td><code>removeEventListeners</code></td>
+<td><code>(hasVtKey: HasVtKey, listeningKey: string, listener?: VelotypeEventListener) =&gt; void</code></td>
+</tr>
+<tr>
+<td><code>VelotypeEvent</code></td>
+<td><code>class</code> with <code>constructor(emittingObject, event: string, data?: any)</code>, <code>emittingObject</code>, <code>event</code>, and <code>data</code></td>
+</tr>
+</tbody></table>
+<p>See <a href="/docs/velotype/events-and-errors/">Events and errors</a>.</p>
+<h2 id="styles-and-raw-markup">Styles and raw markup</h2>
+<table>
+<thead>
+<tr>
+<th>Export</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>setStylesheet(sheetText, sheetKey, resetSheet = false)</code></td>
+<td>Adds a stylesheet once per key</td>
+</tr>
+<tr>
+<td><code>HTML</code></td>
+<td>A Component that sets <code>innerHTML</code> on an HTML element. Attrs: <code>innerHTML</code>, <code>tag?</code>, <code>elementAttrs?</code></td>
+</tr>
+<tr>
+<td><code>SVG</code></td>
+<td>A Component that sets <code>innerHTML</code> on an <code>&lt;svg&gt;</code> element. Attrs: <code>innerHTML</code>, <code>elementAttrs?</code></td>
+</tr>
+<tr>
+<td><code>MATH</code></td>
+<td>A Component that sets <code>innerHTML</code> on a <code>&lt;math&gt;</code> element. Attrs: <code>innerHTML</code>, <code>elementAttrs?</code></td>
+</tr>
+</tbody></table>
+<p>See <a href="/docs/velotype/styling-and-raw-html/">Styling and raw HTML</a>.</p>
+<h2 id="types">Types</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FunctionComponent&lt;AttrsType&gt;</code></td>
+<td><code>(attrs, children) =&gt; RenderableElements</code></td>
+</tr>
+<tr>
+<td><code>EmptyAttrs</code></td>
+<td>The attrs type of a Component with no attrs</td>
+</tr>
+<tr>
+<td><code>IdAttr</code>, <code>StylePassthroughAttrs</code>, <code>ChildrenAttr</code></td>
+<td>Attrs mixins for <code>id</code>, <code>class</code> and <code>style</code>, and <code>children</code></td>
+</tr>
+<tr>
+<td><code>RenderableElements</code></td>
+<td>Anything that can be a child: an element, text, a number, an Array of them, <code>null</code>, <code>undefined</code>, or a RenderObject</td>
+</tr>
+<tr>
+<td><code>AnchorElement</code></td>
+<td><code>HTMLElement | SVGSVGElement | MathMLElement</code></td>
+</tr>
+<tr>
+<td><code>BasicTypes</code></td>
+<td><code>string | bigint | number | boolean</code></td>
+</tr>
+<tr>
+<td><code>RenderObjectRenderFunctionType</code>, <code>RenderObjectHandleUpdateType</code></td>
+<td>The function types of a RenderObject&#39;s render function and <code>handleUpdate</code></td>
+</tr>
+<tr>
+<td><code>HasVtKey</code></td>
+<td>Something with a <code>vtKey</code>: a Component or RenderObject</td>
+</tr>
+<tr>
+<td><code>VelotypeEventListener</code></td>
+<td><code>(event: VelotypeEvent) =&gt; void</code></td>
+</tr>
+<tr>
+<td><code>StyleSection</code></td>
+<td>A stylesheet that <code>setStylesheet()</code> added</td>
+</tr>
+<tr>
+<td><code>HTMLAttrsType</code>, <code>SVGAttrsType</code>, <code>MATHAttrsType</code></td>
+<td>The attrs of <code>HTML</code>, <code>SVG</code>, and <code>MATH</code></td>
+</tr>
+</tbody></table>
+<p>The package also exports the DOM and JSX types (<code>HTMLAttributes</code>, event handler types, ARIA types, and CSS value types) that type-check TSX.</p>
+<h2 id="entry-points">Entry points</h2>
+<table>
+<thead>
+<tr>
+<th>Import</th>
+<th>For</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>@velotype/velotype</code></td>
+<td>The runtime, and the <code>jsx-runtime</code></td>
+</tr>
+<tr>
+<td><code>@velotype/velotype/jsx-runtime</code></td>
+<td>The production JSX runtime</td>
+</tr>
+<tr>
+<td><code>@velotype/velotype/jsx-dev-runtime</code></td>
+<td>The development JSX runtime, with <a href="/docs/velotype/development-tools/#hot-reloading">hot reloading</a></td>
+</tr>
+<tr>
+<td><code>@velotype/velotype/devtools</code></td>
+<td><code>__vtAppMetadata</code> and <code>getDevtoolsHook()</code></td>
+</tr>
+</tbody></table>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/api-reference/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

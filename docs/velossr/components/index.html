@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components - velossr docs</title>
+<meta name="description" content="velossr has two kinds of components. A static component renders the same way every time, and a dynamic component can see the request and wait for data.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velossr">
+<div id="app"><article id="doc">
+<h1 id="components">Components</h1>
+<p>velossr has two kinds of components. A static component renders the same way every time, and a dynamic component can see the request and wait for data.</p>
+<h2 id="static-components">Static components</h2>
+<p>A <code>StaticServerComponent&lt;AttrsType&gt;</code> is a plain function that renders synchronously, with no access to the request. Use it for markup that never depends on the request. It receives its attrs, and its children as a second argument. To accept children, add <code>ChildrenAttr</code> to the attrs type.</p>
+<pre><code class="language-tsx">import { type ChildrenAttr, prepareVNodeForRendering, renderServerVNode, type StaticServerComponent } from &quot;@velotype/velossr&quot;
+
+// A StaticServerComponent is a plain function that renders synchronously, with no access to the
+// request. Use it for markup that never depends on the request.
+const Greeting: StaticServerComponent&lt;{name: string}&gt; = function(attrs) {
+    return &lt;div&gt;Hello {attrs.name}!&lt;/div&gt;
+}
+
+// A Component that accepts children adds ChildrenAttr to its attrs, and takes them as a second argument
+const Card: StaticServerComponent&lt;{title: string} &amp; ChildrenAttr&gt; = function(attrs, children) {
+    return &lt;section&gt;
+        &lt;h2&gt;{attrs.title}&lt;/h2&gt;
+        {children}
+    &lt;/section&gt;
+}
+
+const page = &lt;Card title=&quot;Greetings&quot;&gt;
+    &lt;Greeting name=&quot;Ada&quot;/&gt;
+    &lt;Greeting name=&quot;Grace&quot;/&gt;
+&lt;/Card&gt;
+
+const html = await renderServerVNode(prepareVNodeForRendering(page), new Request(&quot;http://localhost/&quot;), {}).toUint8Array()
+console.log(new TextDecoder().decode(html))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;section&gt;&lt;h2&gt;Greetings&lt;/h2&gt;&lt;div&gt;Hello Ada!&lt;/div&gt;&lt;div&gt;Hello Grace!&lt;/div&gt;&lt;/section&gt;
+</code></pre>
+<p>Static parts of a page are prepared once, when you call <a href="/docs/velossr/rendering/"><code>prepareVNodeForRendering()</code></a>, and then rendered from bytes on every request.</p>
+<h2 id="dynamic-components">Dynamic components</h2>
+<p>A <code>DynamicServerComponent&lt;AttrsType&gt;</code> is a class with access to the <code>Request</code> and the <code>context</code>. Its <code>render(attrs, children, request, context)</code> can return a node, or a Promise of one.</p>
+<p>If <code>render()</code> fails, <code>onFail(reason, attrs, children, request, context)</code> renders instead, so one failing component does not take down the rest of the page. By default a failed component renders nothing. Override <code>onFail()</code> to show a message.</p>
+<pre><code class="language-tsx">import { DynamicServerComponent, type EmptyAttrs, prepareVNodeForRendering, renderServerVNode, type ServerVNode } from &quot;@velotype/velossr&quot;
+
+type Context = {users: Record&lt;string, string&gt;}
+
+// A DynamicServerComponent is a class with access to the Request and the context. It can render
+// synchronously or return a Promise.
+class UserGreeting extends DynamicServerComponent&lt;EmptyAttrs&gt; {
+    override async render(_attrs: Readonly&lt;EmptyAttrs&gt;, _children: Readonly&lt;ServerVNode[]&gt;, request: Request, context: Context) {
+        const id = new URL(request.url).searchParams.get(&quot;user&quot;) ?? &quot;&quot;
+        const name = await Promise.resolve(context.users[id])
+        if (!name) {
+            throw new Error(`No user ${id}`)
+        }
+        return &lt;div&gt;Hello {name}!&lt;/div&gt;
+    }
+
+    // If render() fails, onFail() renders instead, so one failing component does not take down the
+    // rest of the page. By default a failed component renders nothing.
+    override onFail(reason: Readonly&lt;unknown&gt;) {
+        return &lt;div&gt;Hello! ({String(reason)})&lt;/div&gt;
+    }
+}
+
+async function render(url: string) {
+    const page = &lt;main&gt;&lt;UserGreeting/&gt;&lt;/main&gt;
+    const output = renderServerVNode(prepareVNodeForRendering(page), new Request(url), {users: {1: &quot;Ada&quot;}})
+    console.log(new TextDecoder().decode(await output.toUint8Array()))
+}
+
+await render(&quot;http://localhost/?user=1&quot;)
+await render(&quot;http://localhost/?user=2&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;main&gt;&lt;div&gt;Hello Ada!&lt;/div&gt;&lt;/main&gt;
+&lt;main&gt;&lt;div&gt;Hello! (Error: No user 2)&lt;/div&gt;&lt;/main&gt;
+</code></pre>
+<p>The <code>context</code> is whatever you pass to <code>renderServerVNode()</code>. With veloserver it is the request&#39;s <code>Context</code>.</p>
+<h2 id="asyncrenderobject">AsyncRenderObject</h2>
+<p>An <code>AsyncRenderObject&lt;DataType&gt;</code> waits on one Promise and can be rendered into several places. It is created with the Promise, the request, and the context: <code>new AsyncRenderObject(promise, request, context, defaultOnFail?)</code>.</p>
+<p><code>render(renderFunction, onFail?)</code> places it in the page. <code>renderFunction</code> receives the resolved value and returns a node, or a Promise of one. <code>onFail</code> renders when the Promise rejects or the render function throws. When a place passes no <code>onFail</code>, <code>defaultOnFail</code> is used, and without either the place renders nothing.</p>
+<pre><code class="language-tsx">import { AsyncRenderObject, DynamicServerComponent, prepareVNodeForRendering, renderServerVNode, type ServerVNode } from &quot;@velotype/velossr&quot;
+
+type User = {name: string, team: string}
+
+class Profile extends DynamicServerComponent&lt;{user: AsyncRenderObject&lt;User&gt;}&gt; {
+    override render(attrs: Readonly&lt;{user: AsyncRenderObject&lt;User&gt;}&gt;) {
+        // One AsyncRenderObject can be rendered in several places. It waits on one Promise.
+        return &lt;div&gt;
+            {attrs.user.render(async user =&gt; &lt;h1&gt;{user.name}&lt;/h1&gt;)}
+            {attrs.user.render(async user =&gt; &lt;p&gt;Team: {user.team}&lt;/p&gt;)}
+            {attrs.user.render(
+                async () =&gt; { throw new Error(&quot;not reached&quot;) },
+                // onFail() renders when the Promise rejects or the render function throws
+                (reason: Readonly&lt;unknown&gt;): ServerVNode =&gt; &lt;p&gt;Failed: {String(reason)}&lt;/p&gt;,
+            )}
+        &lt;/div&gt;
+    }
+}
+
+const request = new Request(&quot;http://localhost/&quot;)
+const context = {}
+const user = new AsyncRenderObject&lt;User&gt;(Promise.resolve({name: &quot;Ada&quot;, team: &quot;Analytical&quot;}), request, context)
+
+const page = &lt;Profile user={user}/&gt;
+const output = renderServerVNode(prepareVNodeForRendering(page), request, context)
+console.log(new TextDecoder().decode(await output.toUint8Array()))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;div&gt;&lt;h1&gt;Ada&lt;/h1&gt;&lt;p&gt;Team: Analytical&lt;/p&gt;&lt;p&gt;Failed: Error: not reached&lt;/p&gt;&lt;/div&gt;
+</code></pre>
+<p>The output of an AsyncRenderObject is escaped as HTML, so it cannot be placed inside a <code>&lt;script&gt;</code> or <code>&lt;style&gt;</code>. See <a href="/docs/velossr/escaping-and-embedding/">Escaping and embedding</a>.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velossr","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velossr/components/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

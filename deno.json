@@ -1,6 +1,9 @@
 {
     "tasks": {
-        "build": "deno bundle ./src/main.tsx --output ./build/main.js --minify --platform browser && deno run --allow-read --allow-write ./scripts/build-pages.ts",
+        "check": "deno run -A ./scripts/check-examples.ts",
+        "run-examples": "deno run -A ./scripts/run-examples.ts",
+        "smoke": "deno run -A ./scripts/smoke-examples.ts",
+        "build": "deno run --allow-read --allow-write ./scripts/build-docs.ts && deno bundle ./src/main.tsx --output ./build/main.js --minify --platform browser && deno run --allow-read --allow-write ./scripts/build-pages.ts",
         "serve": "deno run --allow-read --allow-net jsr:@std/http@^1.0.20/file-server . --port 8000"
     },
     "compilerOptions": {
