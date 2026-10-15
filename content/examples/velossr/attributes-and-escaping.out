@@ -1,0 +1,5 @@
+<div class="exampleClass" id="main">this is a div</div>
+<div style="display:inline;margin-top:4px">styled</div>
+<input type="checkbox" checked>
+<p title="<script>alert(&quot;hi&quot;)</script> &amp; &quot;quotes&quot;">&lt;script>alert(&quot;hi&quot;)&lt;/script> &amp; &quot;quotes&quot;</p>
+<ul><li>one</li><li>two</li></ul>

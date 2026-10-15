@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - velojson (VSON) docs</title>
+<meta name="description" content="velojson, or VSON (Velocity JSON), is a compact binary wire format for JavaScript JSON data. Any data representable with JSON in JavaScript is representable with VSON, and the other way around. No types or capabilities are added: it is a one-to-one mapping, so it can replace JSON between two programs without changing what they send.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velojson">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>velojson, or VSON (Velocity JSON), is a compact binary wire format for JavaScript JSON data. Any data representable with JSON in JavaScript is representable with VSON, and the other way around. No types or capabilities are added: it is a one-to-one mapping, so it can replace JSON between two programs without changing what they send.</p>
+<p>Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed.</p>
+<h2 id="install">Install</h2>
+<p>velojson is a <a href="https://jsr.io/@velotype/velojson">JSR package</a>:</p>
+<pre><code class="language-sh">deno add jsr:@velotype/velojson
+</code></pre>
+<p>It has two modules:</p>
+<table>
+<thead>
+<tr>
+<th>Import</th>
+<th>For</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>@velotype/velojson</code></td>
+<td>Servers. Optimized for speed, and supports every format: Base, Key Table, and VBIN</td>
+</tr>
+<tr>
+<td><code>@velotype/velojson/browser</code></td>
+<td>Browsers. Optimized for size (about 4.3kb minified), and supports the Key Table format only</td>
+</tr>
+</tbody></table>
+<h2 id="encode-and-decode">Encode and decode</h2>
+<p><code>VSON.encode(value)</code> returns a <code>Uint8Array</code>, and <code>VSON.decode(bytes)</code> returns the value. <code>decode()</code> reads the format from the data, so it takes no format argument.</p>
+<pre><code class="language-tsx">import { VSON } from &quot;@velotype/velojson&quot;
+
+const startObj = { name: &quot;Some name&quot;, age: 20, address: null }
+
+// encode() returns a Uint8Array. Any JSON value can be encoded, and nothing else is added.
+const objBinary: Uint8Array = VSON.encode(startObj)
+console.log(&quot;VSON bytes:&quot;, objBinary.length)
+console.log(&quot;JSON bytes:&quot;, JSON.stringify(startObj).length)
+
+// decode() reads any VSON format, and returns the value
+const endObj = VSON.decode(objBinary)
+console.log(JSON.stringify(endObj))
+
+// Every JSON value works, not only objects
+for (const value of [null, true, 42, 3.14, &quot;text&quot;, [1, 2, 3], {nested: {list: [&quot;a&quot;, &quot;b&quot;]}}]) {
+    const roundTripped = VSON.decode(VSON.encode(value))
+    console.log(JSON.stringify(value), &quot;-&gt;&quot;, JSON.stringify(roundTripped))
+}
+
+// undefined is handled as JSON.parse(JSON.stringify(value)) handles it:
+// an object key with the value undefined is left out, and undefined in an Array becomes null
+console.log(JSON.stringify(VSON.decode(VSON.encode({ a: 1, b: null, c: undefined }))))
+console.log(JSON.stringify(VSON.decode(VSON.encode([1, null, undefined]))))
+
+// undefined itself encodes to zero bytes, and zero bytes decode to undefined
+console.log(VSON.encode(undefined).length, VSON.decode(new Uint8Array()))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">VSON bytes: 34
+JSON bytes: 44
+{&quot;name&quot;:&quot;Some name&quot;,&quot;age&quot;:20,&quot;address&quot;:null}
+null -&gt; null
+true -&gt; true
+42 -&gt; 42
+3.14 -&gt; 3.14
+&quot;text&quot; -&gt; &quot;text&quot;
+[1,2,3] -&gt; [1,2,3]
+{&quot;nested&quot;:{&quot;list&quot;:[&quot;a&quot;,&quot;b&quot;]}} -&gt; {&quot;nested&quot;:{&quot;list&quot;:[&quot;a&quot;,&quot;b&quot;]}}
+{&quot;a&quot;:1,&quot;b&quot;:null}
+[1,null,null]
+0 undefined
+</code></pre>
+<h3 id="undefined">undefined</h3>
+<p><code>undefined</code> is handled as <code>JSON.parse(JSON.stringify(value))</code> handles it:</p>
+<ul>
+<li>An object key with the value <code>undefined</code> is left out</li>
+<li><code>undefined</code> in an Array becomes <code>null</code></li>
+<li><code>undefined</code> passed directly to <code>encode()</code> is encoded in zero bytes, and zero bytes decode to <code>undefined</code></li>
+</ul>
+<h2 id="which-format">Which format?</h2>
+<p><code>encode()</code> uses the Key Table format for an object or an Array, which is typically smaller than JSON. Choose another with the second argument. <a href="/docs/velojson/formats/">Formats</a> compares them, and <a href="/docs/velojson/vbin/">VBIN</a> covers the fast one.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velojson","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velojson/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

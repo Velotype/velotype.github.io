@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rendering - velossr docs</title>
+<meta name="description" content="Rendering a page has two steps: prepare it, which can happen once, and render it for each request.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velossr">
+<div id="app"><article id="doc">
+<h1 id="rendering">Rendering</h1>
+<p>Rendering a page has two steps: prepare it, which can happen once, and render it for each request.</p>
+<h2 id="preparing-a-page">Preparing a page</h2>
+<p><code>prepareVNodeForRendering(node)</code> compacts a node into a flat array of bytes and the parts that need a request. <code>prepareHTMLVNodeForRendering(node)</code> does the same with <code>&lt;!DOCTYPE html&gt;</code> added at the start, to make a valid HTML document.</p>
+<p>Prepare at module load, outside the request handler, so the static parts are not rebuilt for every request.</p>
+<h2 id="rendering-for-a-request">Rendering for a request</h2>
+<p><code>renderServerVNode(node, request, context)</code> takes a prepared page, or a raw node, and returns a <code>RenderedVDOM</code>. Convert that into the form you need:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Returns</th>
+<th>For</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>toArrayBuffer()</code></td>
+<td><code>Promise&lt;ArrayBuffer&gt;</code></td>
+<td>A <code>Response</code> that is sent all at once</td>
+</tr>
+<tr>
+<td><code>toUint8Array()</code></td>
+<td><code>Promise&lt;Uint8Array&gt;</code></td>
+<td>The bytes, for tests or further processing</td>
+</tr>
+<tr>
+<td><code>toReadableStream()</code></td>
+<td><code>ReadableStream</code></td>
+<td>A <code>Response</code> that streams</td>
+</tr>
+</tbody></table>
+<pre><code class="language-tsx">import { type EmptyAttrs, prepareHTMLVNodeForRendering, renderServerVNode, type StaticServerComponent } from &quot;@velotype/velossr&quot;
+
+const Page: StaticServerComponent&lt;EmptyAttrs&gt; = function() {
+    return &lt;html&gt;&lt;body&gt;&lt;div&gt;Hello velossr!&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
+}
+
+// Prepare a page once, which can happen at module load outside the request handler. The static
+// parts are compacted into bytes. prepareHTMLVNodeForRendering() adds &lt;!DOCTYPE html&gt;, and
+// prepareVNodeForRendering() renders a fragment as it is.
+const preparedPage = prepareHTMLVNodeForRendering(&lt;Page/&gt;)
+
+const request = new Request(&quot;http://localhost/&quot;)
+const context = {}
+
+// All at once
+const all = await renderServerVNode(preparedPage, request, context).toArrayBuffer()
+console.log(new TextDecoder().decode(all))
+
+// As a single Uint8Array
+const bytes = await renderServerVNode(preparedPage, request, context).toUint8Array()
+console.log(bytes.length, &quot;bytes&quot;)
+
+// Streamed, where async components flush in place as they resolve
+const stream = renderServerVNode(preparedPage, request, context).toReadableStream()
+const response = new Response(stream, {headers: {&quot;content-type&quot;: &quot;text/html; charset=utf-8&quot;}})
+console.log(await response.text())
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;div&gt;Hello velossr!&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
+66 bytes
+&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;div&gt;Hello velossr!&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<h2 id="streaming">Streaming</h2>
+<p>With <code>toReadableStream()</code>, the page is written as it is ready. Static parts go out at once, and an async <code>DynamicServerComponent</code> flushes in place when it resolves, so the visitor sees the top of the page before the slow part is done.</p>
+<pre><code class="language-tsx">import { DynamicServerComponent, type EmptyAttrs, prepareHTMLVNodeForRendering, renderServerVNode } from &quot;@velotype/velossr&quot;
+
+// An async component that takes a while
+class SlowPart extends DynamicServerComponent&lt;EmptyAttrs&gt; {
+    override async render() {
+        await new Promise(resolve =&gt; setTimeout(resolve, 50))
+        return &lt;p&gt;The slow part&lt;/p&gt;
+    }
+}
+
+const page = &lt;html&gt;&lt;body&gt;
+    &lt;h1&gt;Shown first&lt;/h1&gt;
+    &lt;SlowPart/&gt;
+    &lt;footer&gt;Shown last&lt;/footer&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+const request = new Request(&quot;http://localhost/&quot;)
+const stream = renderServerVNode(prepareHTMLVNodeForRendering(page), request, {}).toReadableStream()
+
+// Each chunk is written as soon as it is ready, so the page starts arriving before the slow part resolves
+const decoder = new TextDecoder()
+const start = performance.now()
+let html = &quot;&quot;
+let firstPartAt = 0
+let slowPartAt = 0
+for await (const chunk of stream) {
+    const text = decoder.decode(chunk)
+    html += text
+    if (text == &quot;Shown first&quot;) {
+        firstPartAt = performance.now() - start
+    }
+    if (text == &quot;The slow part&quot;) {
+        slowPartAt = performance.now() - start
+    }
+}
+
+console.log(html)
+console.log(&quot;The first part arrived before the slow part resolved:&quot;, firstPartAt &lt; 40)
+console.log(&quot;The slow part arrived after it resolved:&quot;, slowPartAt &gt;= 40)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;h1&gt;Shown first&lt;/h1&gt;&lt;p&gt;The slow part&lt;/p&gt;&lt;footer&gt;Shown last&lt;/footer&gt;&lt;/body&gt;&lt;/html&gt;
+The first part arrived before the slow part resolved: true
+The slow part arrived after it resolved: true
+</code></pre>
+<p>Because the response is already streaming when an async component fails, there is no way to change the status code afterwards. Handle failures with <code>onFail()</code>.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velossr","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velossr/rendering/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

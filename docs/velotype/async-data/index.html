@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Async data - Velotype docs</title>
+<meta name="description" content="AsyncRenderObject is a RenderObject for data that arrives later. It shows pending() while a Promise is loading, then render() with its result, or onFail() when the Promise rejects.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="async-data">Async data</h1>
+<p><code>AsyncRenderObject</code> is a RenderObject for data that arrives later. It shows <code>pending()</code> while a Promise is loading, then <code>render()</code> with its result, or <code>onFail()</code> when the Promise rejects.</p>
+<p>It is in its own module, so bundles that do not use it do not include it.</p>
+<h2 id="loading-a-value">Loading a value</h2>
+<p>Pass a Promise, or a function that gets an <code>AbortSignal</code> and returns one. Pass the function form when the load can be cancelled, as <code>fetch()</code> can.</p>
+<pre><code class="language-tsx">import { AsyncRenderObject, Component } from &quot;@velotype/velotype&quot;
+
+type User = {name: string}
+
+class UserCard extends Component&lt;{id: string}&gt; {
+    // The first argument is a Promise, or a function that gets an AbortSignal and returns one
+    user = new AsyncRenderObject&lt;User&gt;((signal) =&gt; fetch(`/users/${this.attrs.id}`, {signal}).then(response =&gt; response.json()), {
+        pending: () =&gt; &lt;p&gt;Loading&lt;/p&gt;,
+        render: (user: User) =&gt; &lt;p&gt;{user.name}&lt;/p&gt;,
+        onFail: () =&gt; &lt;p&gt;Could not load the user&lt;/p&gt;,
+        // Keep showing the resolved value while load() fetches a new one
+        keepPrevious: true,
+    })
+
+    override render() {
+        return &lt;div&gt;
+            {this.user}
+            &lt;button type=&quot;button&quot; onClick={() =&gt; {
+                // Replaces the load in progress, so only the latest load is shown
+                this.user.load((signal) =&gt; fetch(`/users/${this.attrs.id}`, {signal}).then(response =&gt; response.json()))
+            }}&gt;Reload&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; {
+                // Show a state directly, such as a value that is already known. This cancels the load in progress.
+                this.user.set({status: &quot;resolved&quot;, value: {name: &quot;Ada&quot;}})
+            }}&gt;Use a known user&lt;/button&gt;
+            &lt;div&gt;{this.user.loading ? &quot;Loading...&quot; : &quot;Idle&quot;}&lt;/div&gt;
+        &lt;/div&gt;
+    }
+}
+void UserCard
+</code></pre>
+<p>The options are:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>render(value)</code></td>
+<td>Renders the resolved value. Required</td>
+</tr>
+<tr>
+<td><code>pending()</code></td>
+<td>Renders what is shown while loading. The default is a hidden element</td>
+</tr>
+<tr>
+<td><code>onFail(reason)</code></td>
+<td>Renders what is shown when loading rejects, or when <code>render()</code> throws</td>
+</tr>
+<tr>
+<td><code>keepPrevious</code></td>
+<td>Keeps showing the resolved value while <code>load()</code> fetches a new one, instead of showing <code>pending()</code> again</td>
+</tr>
+</tbody></table>
+<h2 id="how-it-behaves">How it behaves</h2>
+<ul>
+<li><strong>Only the latest load is shown.</strong> <code>load()</code> replaces the load in progress, so a slower, earlier request that finishes last does not overwrite a newer one</li>
+<li><strong>Loads are cancelled</strong> when a newer <code>load()</code> or <code>set()</code> replaces them, and when the AsyncRenderObject unmounts (as a field of a Component, when that Component unmounts). The function&#39;s <code>AbortSignal</code> is aborted and the result is ignored</li>
+<li><strong><code>keepPrevious: true</code></strong> keeps showing the resolved value while <code>load()</code> fetches a new one. <code>loading</code> is <code>true</code> while a load is in progress</li>
+<li><strong>Errors:</strong> a rejection, or a <code>render()</code> that throws, shows <code>onFail(reason)</code>. Without <code>onFail</code>, the error is reported with <code>reportError()</code> and a hidden element is shown</li>
+<li><code>value</code> is the current state: <code>{status: &quot;pending&quot;}</code>, <code>{status: &quot;resolved&quot;, value}</code>, or <code>{status: &quot;rejected&quot;, reason}</code></li>
+<li><code>set(state)</code> shows a state directly, such as a value that is already known, and cancels the load in progress</li>
+<li><code>pending()</code> is shown first even when the Promise has already resolved, since a Promise&#39;s result is only available asynchronously</li>
+</ul>
+<h2 id="loading-code-on-demand">Loading code on demand</h2>
+<p>The same pattern loads code when it is needed, such as a Component that is only used after a click. To show several loads at once, load <code>Promise.all()</code> of them into one AsyncRenderObject.</p>
+<pre><code class="language-tsx">import { AsyncRenderObject, Component, type EmptyAttrs } from &quot;@velotype/velotype&quot;
+
+// Loading code on demand: a Component that is only needed after a click
+class LazyChart extends Component&lt;EmptyAttrs&gt; {
+    chart = new AsyncRenderObject(import(&quot;./chart-module.tsx&quot;), {
+        pending: () =&gt; &lt;p&gt;Loading chart&lt;/p&gt;,
+        render: (module) =&gt; &lt;module.Chart/&gt;,
+    })
+
+    override render() {
+        return &lt;div&gt;{this.chart}&lt;/div&gt;
+    }
+}
+
+// To show several loads at once, load Promise.all() of them into one AsyncRenderObject
+class Dashboard extends Component&lt;EmptyAttrs&gt; {
+    data = new AsyncRenderObject(Promise.all([
+        fetch(&quot;/users&quot;).then(response =&gt; response.json() as Promise&lt;string[]&gt;),
+        fetch(&quot;/teams&quot;).then(response =&gt; response.json() as Promise&lt;string[]&gt;),
+    ]), {
+        render: ([users, teams]) =&gt; &lt;p&gt;{users.length} users on {teams.length} teams&lt;/p&gt;,
+    })
+
+    override render() {
+        return &lt;div&gt;{this.data}&lt;/div&gt;
+    }
+}
+void LazyChart
+void Dashboard
+</code></pre>
+<h2 id="keeping-the-page-responsive">Keeping the page responsive</h2>
+<p>An update renders only the RenderObject or rows whose value changed, so most updates are small and finish within a frame. Velotype has no scheduler to make them interruptible, so updates are slow in two cases: when frequent input, such as typing, starts expensive work each time, and when one update renders thousands of elements.</p>
+<p>For frequent input, run the expensive work from a listener with <code>eventDispatchDelay</code>, so it runs at most once in that time instead of once per change. The listener runs after the delay, so it reads the latest <code>value</code>. Here a search runs at most every 250ms while typing, and the AsyncRenderObject shows only the latest search&#39;s results and aborts the earlier requests:</p>
+<pre><code class="language-tsx">import { AsyncRenderObject, Component, type EmptyAttrs, RenderBasic } from &quot;@velotype/velotype&quot;
+
+type Result = {title: string}
+
+class Search extends Component&lt;EmptyAttrs&gt; {
+    // Shows only the latest search&#39;s results, and aborts the earlier requests
+    results = new AsyncRenderObject&lt;Result[]&gt;(Promise.resolve([]), {
+        render: (results) =&gt; &lt;ul&gt;{results.map((result) =&gt; &lt;li&gt;{result.title}&lt;/li&gt;)}&lt;/ul&gt;,
+        keepPrevious: true,
+    })
+
+    // The listener runs at most once every 250ms while typing, and reads the latest value
+    query = new RenderBasic&lt;string&gt;(&quot;&quot;).registerOnChangeListener(() =&gt; {
+        const query = this.query.value
+        this.results.load((signal) =&gt; fetch(`/search?q=${encodeURIComponent(query)}`, {signal}).then(response =&gt; response.json()))
+    }, {eventDispatchDelay: 250})
+
+    override render() {
+        return &lt;div&gt;
+            &lt;input type=&quot;search&quot; onInput={(event: Event) =&gt; this.query.value = (event.target as HTMLInputElement).value}/&gt;
+            {this.results}
+        &lt;/div&gt;
+    }
+}
+void Search
+</code></pre>
+<p>For thousands of rows, see <a href="/docs/velotype/lists/#very-long-lists">very long lists</a>.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/async-data/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

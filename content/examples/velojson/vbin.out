@@ -1,0 +1,6 @@
+VBIN bytes: 28
+VSON bytes: 51
+JSON bytes: 64
+{"id":7,"name":"Widget","inStock":true,"tags":["tools","metal"]}
+{"1":7,"2":"Widget","3":true,"4":["tools","metal"]}
+rejected: velojson: missing required field

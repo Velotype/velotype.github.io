@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wire format - velojson (VSON) docs</title>
+<meta name="description" content="The format of each message, for implementing VSON in another language or reading bytes by hand.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velojson">
+<div id="app"><article id="doc">
+<h1 id="wire-format">Wire format</h1>
+<p>The format of each message, for implementing VSON in another language or reading bytes by hand.</p>
+<h2 id="values">Values</h2>
+<p>Every value is a <code>VStruct</code> that starts with one varint, <code>A</code>, built from a key (or key length) and a 3 bit wire type:</p>
+<table>
+<thead>
+<tr>
+<th>Wire type</th>
+<th>Value</th>
+<th>Encoded value that follows</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td><code>null</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>false</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>true</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>3</td>
+<td>positive integer</td>
+<td>a positive varint (1 to 7 bytes), for zero and up to <code>Number.isSafeInteger()</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>double</td>
+<td>8 bytes, little endian, for any other number</td>
+</tr>
+<tr>
+<td>5</td>
+<td>string</td>
+<td>a length varint, then UTF-8 bytes</td>
+</tr>
+<tr>
+<td>6</td>
+<td>object</td>
+<td>a length varint, then a series of <code>VStruct</code>s, each with a key</td>
+</tr>
+<tr>
+<td>7</td>
+<td>array</td>
+<td>a length varint with a homogenous bit, then <code>VStruct</code>s with no key</td>
+</tr>
+</tbody></table>
+<p>The bytes of a few values, in the Base format:</p>
+<pre><code class="language-tsx">import { EncodingFormat, VSON } from &quot;@velotype/velojson&quot;
+
+// The bytes of a few values in the Base format, to read alongside the format specification.
+// Each value starts with a varint: the encoding format (0 for Base) shifted past 3 bits of wire type.
+const show = (label: string, value: unknown) =&gt; {
+    const bytes = VSON.encode(value, EncodingFormat.Base)
+    console.log(label.padEnd(12), [...bytes].map(byte =&gt; byte.toString(16).padStart(2, &quot;0&quot;)).join(&quot; &quot;))
+}
+
+show(&quot;null&quot;, null)           // wire type 0
+show(&quot;false&quot;, false)         // wire type 1
+show(&quot;true&quot;, true)           // wire type 2
+show(&quot;42&quot;, 42)               // wire type 3: a positive integer, as a varint
+show(&quot;1.5&quot;, 1.5)             // wire type 4: a double, 8 bytes little endian
+show(&#39;&quot;hi&quot;&#39;, &quot;hi&quot;)           // wire type 5: a length, then UTF-8
+show(&quot;[]&quot;, [])               // wire type 7
+show(&quot;{}&quot;, {})               // wire type 6
+show(&#39;{&quot;a&quot;:1}&#39;, {a: 1})      // a key length and wire type, the key, then the value
+</code></pre>
+<pre><code class="language-text">null         00
+false        01
+true         02
+42           03 2a
+1.5          04 00 00 00 00 00 00 f8 3f
+&quot;hi&quot;         05 02 68 69
+[]           07 00
+{}           06 00
+{&quot;a&quot;:1}      06 03 0b 61 01
+</code></pre>
+<p>Reading them: the root of <code>{&quot;a&quot;:1}</code> is <code>06</code> (format 0, wire type 6: an object), <code>03</code> (the body is 3 bytes), <code>0b</code> (key length 1, wire type 3: a positive integer), <code>61</code> (the key <code>a</code>), and <code>01</code> (the value).</p>
+<h2 id="base">Base</h2>
+<p><code>VRoot</code> is <code>{A: encoding format (0) ++ wire type}{C?: encoded value}</code>.</p>
+<p><code>VStruct</code> is <code>{A: key length ++ wire type}{B?: key}{C?: encoded value}</code>, where <code>A</code> is a positive varint of the key&#39;s length in bytes followed by 3 bits for the wire type, <code>B</code> is the UTF-8 key (absent for the root and for array items), and <code>C</code> is the encoded value. In the Base format a key length of zero encodes the empty-string key <code>&quot;&quot;</code>.</p>
+<h3 id="arrays">Arrays</h3>
+<p>An array is <code>{A}{B?}{C}</code> with <code>C</code> as <code>{LENGTH ++ 0}{VALUE?}</code> for a heterogenous array, or <code>{LENGTH ++ 1}{WIRETYPE}{VALUE}</code> for a homogenous one. <code>LENGTH</code> is a positive varint. A homogenous array&#39;s values all have one wire type, which is written once, and skip their own wire type byte. The encoder may choose either encoding for a homogenous array.</p>
+<h2 id="key-table">Key Table</h2>
+<p><code>VRoot</code> is <code>{A: encoding format (1) ++ wire type}{C: encoded value}{D: encoded key table}</code>, and the root must be an object or an Array.</p>
+<p>Keys are replaced by a 1-indexed key index into the table: <code>VStruct</code> is <code>{A: key index ++ wire type}{C?: encoded value}</code>, where an index of zero means no key. <code>D</code> is a homogenous string array of all the keys.</p>
+<h2 id="vbin">VBIN</h2>
+<p><code>VRoot</code> is <code>{A: encoding format (2) ++ wire type}{C: encoded value}</code>, and the root must be an object.</p>
+<p><code>VStruct</code> is <code>{A: key index ++ wire type}{C?: encoded value}</code>, where the key index is the KeyID, which the encoder and decoder agreed on ahead of time. There is no key table.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velojson","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velojson/wire-format/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

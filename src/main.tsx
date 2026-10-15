@@ -1,15 +1,20 @@
 import { Breadcrumbs, Button, Card, CodeBlock, Grid, Heading, Link, Navbar, Paragraph, Statistic, Stack, Tag, Text, Theme } from "@velotype/velodesign"
 import { replaceElementWithRoot } from "@velotype/velotype"
+import { DocsPage } from "./docs.tsx"
+import docsIndex from "./docs-index.json" with { type: "json" }
 import { groups, projectById, projects } from "./projects.ts"
 import type { Project, Resource, Sample } from "./projects.ts"
 
 const projectUrl = (project: Project) => `/projects/${project.id}/`
+
+const docsUrl = (project: Project): string | undefined => (docsIndex as Record<string, string>)[project.id]
 
 const goTo = (to: string) => () => { location.assign(to) }
 
 const Header = () => <Navbar
     style={{borderBottom: "1px solid var(--background-4)"}}
     brand={<Link to="/" style={{fontWeight: "bold", color: "inherit", textDecoration: "none"}}>The Velocity Project</Link>}>
+    <Link to={docsIndex.velotype}>Docs</Link>
     <Link to="https://github.com/Velotype">GitHub</Link>
     <Link to="https://jsr.io/@velotype">JSR</Link>
     <Link to="https://argoday.medium.com/">Articles</Link>
@@ -35,6 +40,7 @@ const ProjectCard = (project: Project) => <Card id={project.id} header={
         <Paragraph>{project.tagline}</Paragraph>
         <Stack>
             <Link to={projectUrl(project)}>Learn more</Link>
+            {docsUrl(project) && <Link to={docsUrl(project)!}>Docs</Link>}
             <Link to={project.links[0].to}>GitHub</Link>
         </Stack>
     </Stack>
@@ -75,7 +81,8 @@ const ProjectPage = (project: Project) => <Stack direction="column" gap="lg">
         </Stack>
         <Paragraph style={{fontSize: "1.2em"}}>{project.tagline}</Paragraph>
         <Stack>
-            <Button type="primary" onClick={goTo(project.links[0].to)}>{project.links[0].label}</Button>
+            {docsUrl(project) && <Button type="primary" onClick={goTo(docsUrl(project)!)}>Documentation</Button>}
+            <Button type={docsUrl(project) ? "secondary" : "primary"} onClick={goTo(project.links[0].to)}>{project.links[0].label}</Button>
             {project.links.slice(1).map(link =>
                 <Button type="secondary" onClick={goTo(link.to)}>{link.label}</Button>)}
         </Stack>
@@ -130,9 +137,9 @@ const project = page ? projectById.get(page) : undefined
 
 replaceElementWithRoot(<div style={{fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif"}}>
     {Header()}
-    <main style={{maxWidth: "60rem", margin: "0 auto", padding: "2rem 1rem 4rem"}}>
+    <main style={{maxWidth: document.body.dataset.doc ? "84rem" : "60rem", margin: "0 auto", padding: "2rem 1rem 4rem"}}>
         <Stack direction="column" gap="lg">
-            {project ? ProjectPage(project) : HomePage()}
+            {document.body.dataset.doc ? DocsPage() : project ? ProjectPage(project) : HomePage()}
             {Footer()}
         </Stack>
     </main>

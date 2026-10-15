@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panels - Velotype DevTools docs</title>
+<meta name="description" content="## Velotype">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velodevtools">
+<div id="app"><article id="doc">
+<h1 id="panels">Panels</h1>
+<h2 id="velotype">Velotype</h2>
+<p>The live component tree for the page, like React DevTools. Each node shows its class name and its DOM anchor, the element it is attached to. For a class Component it also shows its <code>attrs</code> and its own instance fields, including the live values of <code>RenderObject</code> and <code>RenderBasic</code> fields.</p>
+<ul>
+<li>Click a node to inspect it, and the element is highlighted on the page</li>
+<li>Fields are a real expand and collapse tree. An object, Array, Map, or Set field expands to its actual live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded. A field is never a dead end that just says &quot;Object&quot;</li>
+</ul>
+<p>Try it on the <a href="/docs/velodevtools/#an-app-to-try-it-on">demo app</a>: <code>Profile</code> has a <code>settings</code> RenderObject whose value is an object holding a nested object and a <code>Set</code>, and a <code>history</code> <code>Map</code>.</p>
+<h2 id="velotype-events">Velotype Events</h2>
+<p>A snapshot of the event bus&#39;s current registrations: every listening key, how many listeners are on it, and, resolved against Velotype&#39;s registry, which live Components and RenderObjects they belong to.</p>
+<p>It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, <code>profile-updated</code> has one listener for each <code>Profile</code>.</p>
+<p>It shows what is registered, not what has fired. It is not a trace of events as they happen.</p>
+<h2 id="velojson">VeloJSON</h2>
+<p>Decodes <a href="/docs/velojson/">velojson</a> payloads.</p>
+<p><strong>Network.</strong> While the panel is open it inspects the bodies of network requests and responses, and lists those that are VSON or VBIN, decoded as JSON. A body is decoded when its <code>Content-Type</code> is <code>application/vson</code> or <code>application/vbin</code>. A <code>; charset=utf-8</code> suffix does not matter. A body with another content type is never attempted, and a body with one of these content types is always decoded, so a failure shows the real error.</p>
+<p>The velojson docs&#39; <a href="/docs/velojson/browser/">browser</a> and the veloserver example below produce such responses:</p>
+<pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
+import { VSON } from &quot;@velotype/velojson&quot;
+
+// A server for trying the VeloJSON panel. The panel decodes a request or response body only when its
+// Content-Type is application/vson or application/vbin (a &quot;; charset=utf-8&quot; suffix is fine).
+const router = new Router&lt;never&gt;({})
+
+router.get(&quot;/api/orders&quot;, () =&gt; {
+    const orders = Array.from({length: 5}, (_, index) =&gt; ({id: index + 1, customer: &quot;Ada&quot;, total: 9.99 * (index + 1)}))
+    return new Response(VSON.encode(orders), {headers: {&quot;content-type&quot;: &quot;application/vson&quot;}})
+})
+
+router.post(&quot;/api/orders&quot;, async (request) =&gt; {
+    const order = VSON.decode(new Uint8Array(await request.arrayBuffer()))
+    return new Response(VSON.encode({received: order}), {headers: {&quot;content-type&quot;: &quot;application/vson; charset=utf-8&quot;}})
+})
+
+new Server(router).serve(&quot;127.0.0.1&quot;, 3000)
+</code></pre>
+<p><strong>Manual.</strong> A decode tool turns bytes into JSON, and an encode tool turns JSON into bytes. Use it for a payload that has no content type, since it has no HTTP request to read one from.</p>
+<p><strong>VBIN.</strong> A VBIN payload can only be decoded in the debug format, where an object&#39;s keys are its numeric KeyIDs, such as <code>{&quot;1&quot;: &quot;hello&quot;}</code>. The real field names come from a schema&#39;s <code>VBINObjectMapper</code>, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such.</p>
+<h2 id="the-popup">The popup</h2>
+<p>The toolbar popup shows whether Velotype is present on the current page, without opening DevTools.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velodevtools","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velodevtools/panels/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

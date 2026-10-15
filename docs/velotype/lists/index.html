@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lists - Velotype docs</title>
+<meta name="description" content="Velotype has two list types. Both hold an Array of data points, and both render, move, and remove only the rows that changed. They have the same methods.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="lists">Lists</h1>
+<p>Velotype has two list types. Both hold an Array of data points, and both render, move, and remove only the rows that changed. They have the same methods.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>RenderObjectArray</th>
+<th>RenderTemplateArray</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A row is</td>
+<td>rendered by TSX, by its own RenderObject</td>
+<td>a clone of a template element, filled in with DOM APIs</td>
+</tr>
+<tr>
+<td>Rows can hold</td>
+<td>Components, RenderObjects, RenderBasics, and TSX event handlers</td>
+<td>plain markup only</td>
+</tr>
+<tr>
+<td>Row events</td>
+<td>TSX handlers on elements in the row</td>
+<td><code>on</code>, one listener per event on the wrapper element</td>
+</tr>
+<tr>
+<td>Fastest for</td>
+<td>lists of rich rows</td>
+<td>long or frequently rebuilt lists of plain rows</td>
+</tr>
+</tbody></table>
+<p>Use RenderObjectArray when rows need Components, RenderObjects, or RenderBasics inside them, their own <code>mount()</code> and <code>unmount()</code>, or TSX event handlers. Use RenderTemplateArray for long or frequently rebuilt lists of plain markup, such as tables, logs, and search results, where each row is the same structure with a few changing values. In js-framework-benchmark it creates and replaces rows with about a quarter of the script time of RenderObjectArray, and clears rows in about half the time.</p>
+<h2 id="renderobjectarray">RenderObjectArray</h2>
+<p><code>new RenderObjectArray&lt;DataType&gt;({renderFunction})</code> renders each data point with its own RenderObject. The rows go into a wrapper element, which is a <code>&lt;div style=&quot;display:contents;&quot;&gt;</code> unless you pass <code>wrapperElementTag</code>. A named tag is created unstyled, and <code>wrapperAttrs</code> sets attributes on it.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderBasic, RenderObjectArray } from &quot;@velotype/velotype&quot;
+
+type Todo = {
+    text: string
+}
+
+class TodoList extends Component&lt;EmptyAttrs&gt; {
+    // Each row is rendered by its own RenderObject, so a row can hold Components and RenderObjects,
+    // and use TSX event handlers
+    todos: RenderObjectArray&lt;Todo&gt; = new RenderObjectArray&lt;Todo&gt;({
+        wrapperElementTag: &quot;ul&quot;,
+        renderFunction: (todo: Todo) =&gt; {
+            const done = new RenderBasic&lt;string&gt;(&quot;&quot;)
+            return &lt;li&gt;
+                {todo.text}{done}
+                &lt;button type=&quot;button&quot; onClick={() =&gt; done.value = &quot; (done)&quot;}&gt;Done&lt;/button&gt;
+                &lt;button type=&quot;button&quot; onClick={() =&gt; this.todos.delete(todo)}&gt;Remove&lt;/button&gt;
+            &lt;/li&gt;
+        },
+    })
+    textInput: HTMLInputElement = &lt;input/&gt;
+
+    addTodo = () =&gt; {
+        this.todos.push({text: this.textInput.value})
+        this.textInput.value = &quot;&quot;
+    }
+
+    override render() {
+        return &lt;form onSubmit={this.addTodo} action=&quot;javascript:&quot;&gt;
+            &lt;label&gt;
+                &lt;span&gt;Add Todo&lt;/span&gt;
+                {this.textInput}
+            &lt;/label&gt;
+            &lt;button type=&quot;submit&quot;&gt;Add&lt;/button&gt;
+            {this.todos}
+        &lt;/form&gt;
+    }
+}
+void TodoList
+</code></pre>
+<p>The options are <code>wrapperElementTag</code>, <code>wrapperAttrs</code>, <code>renderFunction</code>, and <code>handleUpdate</code> (the same advanced update function as <a href="/docs/velotype/render-objects/#updating-in-place-with-handleupdate">RenderObject</a>).</p>
+<h2 id="rendertemplatearray">RenderTemplateArray</h2>
+<p><code>new RenderTemplateArray&lt;DataType, UpdateRefsType&gt;({template, renderFunction})</code> builds a template element once, and every row is a <code>cloneNode()</code> of it that <code>renderFunction</code> fills in. It has no per-row bookkeeping to do when rows are created, updated, or removed, which is why it is fast.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderTemplateArray } from &quot;@velotype/velotype&quot;
+
+type Server = {
+    name: string
+    cpu: number
+}
+
+class ServerList extends Component&lt;EmptyAttrs&gt; {
+    // Rows are clones of the template. renderFunction fills in each new clone with DOM APIs.
+    servers = new RenderTemplateArray&lt;Server, null&gt;({
+        wrapperElementTag: &quot;ul&quot;,
+        template: &lt;li&gt;&lt;/li&gt;,
+        renderFunction: (row: HTMLElement, server: Server) =&gt; {
+            row.textContent = `${server.name} ${server.cpu}%`
+            return null
+        },
+    })
+
+    override mount() {
+        this.servers.pushAll([
+            {name: &quot;eu-west-1&quot;, cpu: 40},
+            {name: &quot;us-east-1&quot;, cpu: 75},
+            {name: &quot;ap-south-1&quot;, cpu: 12},
+        ])
+    }
+
+    override render() {
+        return &lt;div&gt;
+            &lt;input type=&quot;search&quot; placeholder=&quot;Filter&quot; onInput={(event) =&gt; {
+                const text = (event.target as HTMLInputElement).value
+                // Rows that do not match are taken out of the page. filter(undefined) shows them all again.
+                this.servers.filter(text === &quot;&quot; ? undefined : server =&gt; server.name.includes(text))
+            }}/&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.servers.sort((a, b) =&gt; b.cpu - a.cpu)}&gt;Busiest first&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.servers.move(this.servers.length - 1, 0)}&gt;Last to top&lt;/button&gt;
+            {this.servers}
+        &lt;/div&gt;
+    }
+}
+void ServerList
+</code></pre>
+<h3 id="rules-for-templates">Rules for templates</h3>
+<ul>
+<li>The template must not contain Components, RenderObjects, or event listeners. <code>cloneNode()</code> does not copy event listeners</li>
+<li>Listen for row events with <code>on</code>, which adds one listener per event to the wrapper element and calls it with the event, the row element, its data, and its index. Only events that bubble can be listened for (use <code>focusin</code> and <code>focusout</code> instead of <code>focus</code> and <code>blur</code>)</li>
+<li><code>renderFunction</code> fills in a new clone with DOM APIs and returns the references that <code>handleUpdate</code> needs</li>
+<li><code>setAt()</code> calls <code>handleUpdate</code> to update a row in place. Without <code>handleUpdate</code>, the row is replaced with a new clone</li>
+</ul>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderTemplateArray } from &quot;@velotype/velotype&quot;
+
+type Row = {
+    id: number
+    label: string
+}
+// What renderFunction returns, and handleUpdate receives: the parts that change
+type RowRefs = {
+    label: Text
+}
+
+class RowTable extends Component&lt;EmptyAttrs&gt; {
+    #nextId = 1
+
+    rows: RenderTemplateArray&lt;Row, RowRefs&gt; = new RenderTemplateArray&lt;Row, RowRefs&gt;({
+        wrapperElementTag: &quot;tbody&quot;,
+        // Built once, then cloned for every row. It must not hold Components, RenderObjects, or event listeners.
+        template: &lt;tr&gt;&lt;td class=&quot;id&quot;&gt;&lt;/td&gt;&lt;td class=&quot;label&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;button type=&quot;button&quot; class=&quot;remove&quot;&gt;Remove&lt;/button&gt;&lt;/td&gt;&lt;/tr&gt;,
+        // Fill in a new clone, and return the references that handleUpdate needs
+        renderFunction: (row: HTMLElement, data: Row) =&gt; {
+            row.children[0].textContent = String(data.id)
+            const label = document.createTextNode(data.label)
+            row.children[1].appendChild(label)
+            return {label}
+        },
+        // Update a row in place when setAt() changes its data. Without it, setAt() replaces the row with a new clone.
+        handleUpdate: (_row, refs, _oldData, newData) =&gt; {
+            refs.label.data = newData.label
+        },
+        // One listener per event, on the wrapper element, called with the row, its data, and its index.
+        // Only events that bubble can be listened for.
+        on: {
+            click: (event, _row, _data, index) =&gt; {
+                if ((event.target as HTMLElement).closest(&quot;.remove&quot;)) {
+                    this.rows.deleteAt(index)
+                }
+            },
+        },
+    })
+
+    override render() {
+        return &lt;div&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.rows.push({id: this.#nextId++, label: &quot;New row&quot;})}&gt;Add row&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; {
+                if (this.rows.length &gt; 0) {
+                    this.rows.setAt(0, {id: this.rows.getAt(0).id, label: &quot;Renamed row&quot;})
+                }
+            }}&gt;Rename first row&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.rows.swap(0, 1)}&gt;Swap first two rows&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.rows.clear()}&gt;Clear&lt;/button&gt;
+            &lt;table&gt;{this.rows}&lt;/table&gt;
+        &lt;/div&gt;
+    }
+}
+void RowTable
+</code></pre>
+<p>The options are <code>wrapperElementTag</code>, <code>wrapperAttrs</code>, <code>template</code>, <code>renderFunction</code>, <code>handleUpdate</code>, and <code>on</code>.</p>
+<h2 id="changing-the-array">Changing the Array</h2>
+<p>Every method changes the data and the page together.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>push(data)</code></td>
+<td>Adds one data point to the end</td>
+</tr>
+<tr>
+<td><code>pushAll(data[])</code></td>
+<td>Adds several data points to the end</td>
+</tr>
+<tr>
+<td><code>insertAt(index, data)</code></td>
+<td>Inserts one data point before the data point at <code>index</code></td>
+</tr>
+<tr>
+<td><code>insertAllAt(index, data[])</code></td>
+<td>Inserts several data points, in order, before the data point at <code>index</code></td>
+</tr>
+<tr>
+<td><code>deleteAt(startIndex, deleteCount?)</code></td>
+<td>Removes the data point at <code>startIndex</code>, or <code>deleteCount</code> of them</td>
+</tr>
+<tr>
+<td><code>delete(data)</code></td>
+<td>Removes the first data point that is <code>data</code>, in linear time</td>
+</tr>
+<tr>
+<td><code>getAt(index)</code></td>
+<td>Reads the data point at <code>index</code></td>
+</tr>
+<tr>
+<td><code>setAt(index, data)</code></td>
+<td>Replaces the data point at <code>index</code></td>
+</tr>
+<tr>
+<td><code>swap(indexA, indexB)</code></td>
+<td>Swaps two data points and their rows</td>
+</tr>
+<tr>
+<td><code>move(from, to)</code></td>
+<td>Moves a data point so that it ends up at index <code>to</code></td>
+</tr>
+<tr>
+<td><code>sort(compareFn)</code></td>
+<td>Sorts the data points, stably</td>
+</tr>
+<tr>
+<td><code>reorder(indexes)</code></td>
+<td>Puts the data points in any new order</td>
+</tr>
+<tr>
+<td><code>filter(predicate?)</code></td>
+<td>Shows only the data points that match</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Removes every data point</td>
+</tr>
+<tr>
+<td><code>length</code></td>
+<td>The number of data points</td>
+</tr>
+</tbody></table>
+<p><code>insertAt()</code> and <code>insertAllAt()</code> are separate methods so that a data point can itself be an Array. Their <code>index</code> runs from <code>0</code> to <code>length</code>, or counts from the end when negative, as <code>Array.splice()</code> does.</p>
+<pre><code class="language-tsx">import { RenderObjectArray, RenderTemplateArray } from &quot;@velotype/velotype&quot;
+
+// RenderObjectArray and RenderTemplateArray have the same methods.
+// Only the rows that are affected are rendered, moved, or removed.
+const letters = new RenderObjectArray&lt;string&gt;({
+    wrapperElementTag: &quot;ul&quot;,
+    renderFunction: (letter: string) =&gt; &lt;li&gt;{letter}&lt;/li&gt;,
+})
+const wrapper = &lt;div&gt;{letters}&lt;/div&gt;
+document.body.append(wrapper)
+
+letters.push(&quot;b&quot;)                     // b
+letters.pushAll([&quot;c&quot;, &quot;d&quot;])           // b c d
+letters.insertAt(0, &quot;a&quot;)              // a b c d
+letters.insertAllAt(4, [&quot;e&quot;, &quot;f&quot;])    // a b c d e f
+letters.insertAt(-1, &quot;x&quot;)             // a b c d e x f   (negative counts from the end, as Array.splice() does)
+
+console.log(letters.length)           // 7
+console.log(letters.getAt(2))         // &quot;c&quot;
+
+letters.setAt(5, &quot;e2&quot;)                // a b c d e e2 f   (replaces the data point at an index)
+letters.delete(&quot;e2&quot;)                  // a b c d e f      (removes the first data point that is this value)
+letters.deleteAt(5)                   // a b c d e        (removes the data point at an index)
+letters.deleteAt(0, 2)                // c d e            (removes 2 data points from index 0)
+
+letters.swap(0, 1)                    // d c e
+letters.move(0, 2)                    // c e d            (the moved data point ends up at index 2)
+
+// sort() is stable, and moves only the rows that change places
+letters.sort((a, b) =&gt; a.localeCompare(b))
+
+// reorder() puts the data points in any order: afterwards the data point at index k is the one
+// that was at indexes[k]. It throws a RangeError unless indexes holds each index once.
+const count = letters.length
+letters.reorder(Array.from({length: count}, (_, index) =&gt; count - 1 - index))
+
+// filter() takes the rows that do not match out of the page, and filter(undefined) shows them all
+// again. Indexes and length still count every data point.
+letters.filter(letter =&gt; letter !== &quot;d&quot;)
+letters.filter(undefined)
+
+letters.clear()
+
+// A RenderTemplateArray is used the same way
+const numbers = new RenderTemplateArray&lt;number, null&gt;({
+    wrapperElementTag: &quot;ol&quot;,
+    template: &lt;li&gt;&lt;/li&gt;,
+    renderFunction: (row: HTMLElement, value: number) =&gt; {
+        row.textContent = String(value)
+        return null
+    },
+})
+numbers.pushAll([3, 1, 2])
+numbers.sort((a, b) =&gt; a - b)
+document.body.append(&lt;div&gt;{numbers}&lt;/div&gt;)
+</code></pre>
+<h3 id="sorting-moving-and-filtering">Sorting, moving, and filtering</h3>
+<p>These change the order of the rows, or which rows are shown, by moving the rows that are already rendered. They never render them again.</p>
+<ul>
+<li><code>sort(compareFn)</code> sorts the data points as <code>Array.sort()</code> does, and it is stable. Only the rows that change places are moved, so re-sorting a list that is nearly in order, such as a table sorted by a column that a few <code>setAt()</code> calls changed, moves only those rows</li>
+<li><code>reorder(indexes)</code> puts the data points in any new order: afterwards the data point at index <code>k</code> is the one that was at <code>indexes[k]</code>. It throws a <code>RangeError</code> unless <code>indexes</code> holds each index from <code>0</code> to <code>length - 1</code> once. Like <code>sort()</code>, it moves only the rows that change places</li>
+<li><code>move(from, to)</code> moves one data point and its rows, so that it ends up at index <code>to</code>, as removing it with <code>splice(from, 1)</code> and inserting it with <code>splice(to, 0, data)</code> would</li>
+<li><code>filter(predicate)</code> shows only the data points that <code>predicate</code> returns true for, and <code>filter(undefined)</code> shows them all again</li>
+</ul>
+<p>When a filter is set, the other data points stay in the Array with their rows kept out of the page, so showing them again moves those rows back. Indexes, in <code>getAt()</code>, <code>setAt()</code>, <code>swap()</code>, the <code>on</code> listeners of a RenderTemplateArray, and the rest, still count every data point, and <code>length</code> is the length of the whole Array.</p>
+<p>The predicate is applied to data points added later, and to one changed with <code>setAt()</code>. Call <code>filter()</code> again when what it tests for has changed, such as the text in a search box.</p>
+<p>In a RenderObjectArray, the Components in a row that is filtered out stay mounted while it is out of the page, and a row added while filtered out mounts when it is first shown.</p>
+<p>Taking rows out of the page is faster than hiding them with <code>hidden</code> or <code>display: none</code>: the browser does less work for each change when a list has fewer rows, and showing them again is faster than rendering them again.</p>
+<h2 id="very-long-lists">Very long lists</h2>
+<p>An update renders only the rows that changed, but one update that renders thousands of rows is still slow. Use RenderTemplateArray for the rows, and add them in batches, giving the browser a chance to paint and handle input between batches. <code>insertAllAt()</code> does the same at a position other than the end.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderTemplateArray } from &quot;@velotype/velotype&quot;
+
+// Add thousands of rows in batches, giving the browser a chance to paint and handle input between batches
+export async function pushInBatches&lt;DataType&gt;(array: {pushAll(data: DataType[]): void}, data: DataType[], batchSize = 1000) {
+    for (let index = 0; index &lt; data.length; index += batchSize) {
+        array.pushAll(data.slice(index, index + batchSize))
+        // Let the browser paint and handle input before the next batch
+        await new Promise((resolve) =&gt; setTimeout(resolve, 0))
+    }
+}
+
+class BigList extends Component&lt;EmptyAttrs&gt; {
+    rows = new RenderTemplateArray&lt;number, null&gt;({
+        wrapperElementTag: &quot;ul&quot;,
+        template: &lt;li&gt;&lt;/li&gt;,
+        renderFunction: (row: HTMLElement, value: number) =&gt; {
+            row.textContent = `Row ${value}`
+            return null
+        },
+    })
+
+    override mount() {
+        pushInBatches(this.rows, Array.from({length: 10000}, (_, index) =&gt; index))
+    }
+
+    override render() {
+        return &lt;div&gt;{this.rows}&lt;/div&gt;
+    }
+}
+void BigList
+</code></pre>
+<p>Where it is supported, <code>await scheduler.yield()</code> instead of <code>setTimeout()</code> resumes sooner after the browser has handled input. Work that is slow without rendering anything, such as parsing or sorting a large data set, belongs in a Web Worker.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/lists/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

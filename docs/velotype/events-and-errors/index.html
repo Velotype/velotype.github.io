@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events and errors - Velotype docs</title>
+<meta name="description" content="## The event bus">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="events-and-errors">Events and errors</h1>
+<h2 id="the-event-bus">The event bus</h2>
+<p>The event bus sends an event to every listener registered for a key, without the sender and receiver knowing about each other.</p>
+<ul>
+<li><code>registerEventListener(component, key, listener)</code> registers <code>listener</code> for the events sent under <code>key</code></li>
+<li><code>emitEvent(key, event, emitter?)</code> sends a <code>VelotypeEvent</code> to the listeners of <code>key</code>. Passing the emitting Component as the third argument skips that Component&#39;s own listeners</li>
+<li><code>removeEventListeners(component, key, listener?)</code> removes one listener, or every listener of <code>key</code> for that Component when no listener is passed</li>
+</ul>
+<p>Listeners are removed automatically when the Component they were registered for unmounts.</p>
+<p>A <code>VelotypeEvent</code> has <code>emittingObject</code>, <code>event</code> (a name), and <code>data</code>.</p>
+<p>Register a Component&#39;s listeners in <code>mount()</code>. A Component gets its <code>vtKey</code>, which the listener is registered under, after its constructor returns, so <code>registerEventListener()</code> throws a <code>TypeError</code> when called from a constructor or a field initializer.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, emitEvent, RenderBasic, registerEventListener, removeEventListeners, VelotypeEvent } from &quot;@velotype/velotype&quot;
+
+class Status extends Component&lt;EmptyAttrs&gt; {
+    message = new RenderBasic&lt;string&gt;(&quot;&quot;)
+
+    private onStatus = (event: VelotypeEvent) =&gt; {
+        this.message.value = String(event.data)
+    }
+
+    // Register a Component&#39;s listeners in mount(). A Component gets its vtKey after its constructor
+    // returns, so registerEventListener() throws a TypeError when called from a constructor or a
+    // field initializer. Listeners are removed when the Component unmounts.
+    override mount() {
+        registerEventListener(this, &quot;status&quot;, this.onStatus)
+    }
+
+    stopListening() {
+        // Remove one listener, or every listener for the key when no listener is passed
+        removeEventListeners(this, &quot;status&quot;, this.onStatus)
+    }
+
+    override render() {
+        return &lt;div&gt;{this.message}&lt;/div&gt;
+    }
+}
+
+class Saver extends Component&lt;EmptyAttrs&gt; {
+    override render() {
+        return &lt;button type=&quot;button&quot; onClick={() =&gt; {
+            // Sends the event to every listener of &quot;status&quot;. Passing the emitting Component as the
+            // third argument skips that Component&#39;s own listeners.
+            emitEvent(&quot;status&quot;, new VelotypeEvent(this, &quot;saved&quot;, &quot;Saved&quot;), this)
+        }}&gt;Save&lt;/button&gt;
+    }
+}
+void Status
+void Saver
+</code></pre>
+<h2 id="when-code-throws">When code throws</h2>
+<p>Velotype keeps its own state consistent whatever an app&#39;s code throws.</p>
+<ul>
+<li><strong>Errors in rendering are thrown to the caller:</strong> a Component&#39;s constructor or <code>render()</code>, a function component, and a RenderObject&#39;s render function or <code>handleUpdate</code>. What the failed render created is released. <code>refresh()</code> keeps the current render, a RenderObject keeps its current value, and RenderObjectArray and RenderTemplateArray keep their data and rows matching</li>
+<li><strong>Errors in <code>mount()</code>, <code>unmount()</code>, <code>registerOnMount()</code> callbacks, and event bus listeners are reported</strong> with <code>reportError()</code>, which logs them and dispatches an <code>error</code> event on the window. The other Components and listeners still run</li>
+<li><strong>An <a href="/docs/velotype/async-data/">AsyncRenderObject</a> shows <code>onFail()</code></strong> when its Promise rejects or its <code>render()</code> throws, and reports the error with <code>reportError()</code> when it has no <code>onFail()</code></li>
+</ul>
+<p>A <code>handleUpdate</code> changes elements in place, so one that throws partway leaves its own elements partly updated.</p>
+<h2 id="errorboundary">ErrorBoundary</h2>
+<p>To show a fallback instead of throwing, extend <code>ErrorBoundary</code> and implement <code>renderContent()</code> and <code>renderError()</code>. When <code>renderContent()</code> throws, on first render or on <code>refresh()</code>, what it created is released and <code>renderError()</code> is rendered instead.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, ErrorBoundary } from &quot;@velotype/velotype&quot;
+
+class Chart extends Component&lt;EmptyAttrs&gt; {
+    override render(): HTMLElement {
+        throw new Error(&quot;The chart data is missing&quot;)
+    }
+}
+
+// When renderContent() throws, on first render or on refresh(), what it created is released and
+// renderError() is rendered instead
+class SafeChart extends ErrorBoundary&lt;EmptyAttrs&gt; {
+    override renderContent() {
+        // Create the Components to protect here. A Component passed in as a child is created by the
+        // parent before the ErrorBoundary, so its errors are not caught.
+        return &lt;div&gt;&lt;Chart/&gt;&lt;/div&gt;
+    }
+
+    override renderError(error: unknown) {
+        return &lt;div&gt;The chart could not be shown: {String(error)}&lt;/div&gt;
+    }
+}
+
+document.body.append(&lt;SafeChart/&gt;)
+</code></pre>
+<p>An ErrorBoundary catches errors from the Components that <code>renderContent()</code> creates, but not from its children: in <code>&lt;SafeChart&gt;&lt;Chart/&gt;&lt;/SafeChart&gt;</code> the <code>Chart</code> is created by the parent before <code>SafeChart</code>, so create the Components to protect inside <code>renderContent()</code>. It also does not catch errors from event handlers or later RenderObject updates. An error thrown by <code>renderError()</code> is thrown to the code that created or refreshed the ErrorBoundary.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/events-and-errors/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

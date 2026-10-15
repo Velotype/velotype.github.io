@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components - velodesign docs</title>
+<meta name="description" content="Every velodesign component, by category. Each links to its page in the [showcase](https://velotype.github.io/velodesign/), which has a live preview, the props table, and the types it uses.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velodesign">
+<div id="app"><article id="doc">
+<h1 id="components">Components</h1>
+<p>Every velodesign component, by category. Each links to its page in the <a href="https://velotype.github.io/velodesign/">showcase</a>, which has a live preview, the props table, and the types it uses.</p>
+<p>The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.1.0. What the components have in common is covered in <a href="/docs/velodesign/theming/">theming</a>, <a href="/docs/velodesign/layout-and-typography/">layout and typography</a>, and <a href="/docs/velodesign/conventions/">conventions</a>.</p>
+<h2 id="typography">Typography</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/typography">Typography on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/heading"><code>Heading</code></a></td>
+<td>A heading, h1 through h6. Size comes from level, so the visual hierarchy and the document outline cannot disagree.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/text"><code>Text</code></a></td>
+<td>Inline text with a semantic colour and the usual modifiers. type=&quot;muted&quot; is the one to reach for most.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/paragraph"><code>Paragraph</code></a></td>
+<td>A block of prose with the package&#39;s line height and spacing. The last paragraph in a container drops its bottom margin.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/icon"><code>Icon</code></a></td>
+<td>Renders a registered vector icon as an inline SVG.</td>
+</tr>
+</tbody></table>
+<h2 id="layout">Layout</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/layout">Layout on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/stack"><code>Stack</code></a></td>
+<td>One-dimensional layout: a row or column of children with a consistent gap. The component that replaces style={{display:&#39;flex&#39;, gap:&#39;0.5rem&#39;}}.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/grid"><code>Grid</code></a></td>
+<td>Two-dimensional layout: cells that reflow to fill the width they are given, without a media query.</td>
+</tr>
+</tbody></table>
+<h2 id="form">Form</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/form">Form on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/button"><code>Button</code></a></td>
+<td>A clickable action trigger with themed color variants and an optional loading state.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/button-group"><code>ButtonGroup</code></a></td>
+<td>Visually joins a row (or column) of Buttons into a single connected control, sharing borders instead of each having its own.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/radio-button"><code>RadioButton</code></a></td>
+<td>A single option in a mutually-exclusive group, wrapping a native radio input.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/checkbox"><code>Checkbox</code></a></td>
+<td>A tri-state (checked/unchecked/indeterminate) toggle, wrapping a native checkbox input.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/toggle"><code>Toggle</code></a></td>
+<td>A switch-style boolean control, wrapping a native checkbox input styled as a track and thumb.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/text-box"><code>TextBox</code></a></td>
+<td>A single-line text input supporting text, email, phone, and password variants.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/textarea"><code>Textarea</code></a></td>
+<td>A multi-line text input with a configurable row count and resize behavior.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/select"><code>Select</code></a></td>
+<td>A themed dropdown for choosing one of a fixed set of options, wrapping a native select.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/select-menu"><code>SelectMenu</code></a></td>
+<td>A Select-alike with fully custom rendering of each option (and of the trigger&#39;s current value), for options that need icons, avatars, or other rich content a native select can&#39;t display.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/text-non-editable-field"><code>TextNonEditableField</code></a></td>
+<td>A read-only label/value pair, styled consistently with the other form-field components.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/text-form-field"><code>TextFormField</code></a></td>
+<td>A label paired with a TextBox, bound to a RenderBasic field value.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/text-editable-field"><code>TextEditableField</code></a></td>
+<td>A label/value pair that swaps between a read view and an inline-editable TextBox with confirm/cancel.</td>
+</tr>
+</tbody></table>
+<h2 id="navigation">Navigation</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/navigation">Navigation on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/nav-link"><code>NavLink</code></a></td>
+<td>A Link that also knows whether it matches the current location, for highlighting active navigation items.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/link"><code>Link</code></a></td>
+<td>An anchor that navigates within the app via History.changeLocation instead of a full page reload.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/breadcrumbs"><code>Breadcrumbs</code></a></td>
+<td>A navigational trail showing where the current page sits in the site hierarchy. Crumbs can carry an avatar or icon, and a long trail collapses its middle behind an expander.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/pagination"><code>Pagination</code></a></td>
+<td>A control for navigating between pages of results, with a windowed page-number list.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/navbar"><code>Navbar</code></a></td>
+<td>A themed top navigation bar with a brand slot and a row of children (typically NavLinks).</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/sidebar"><code>Sidebar</code></a></td>
+<td>A themed vertical navigation list, with the current page highlighted automatically.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/table-of-contents"><code>TableOfContents</code></a></td>
+<td>A list of a page&#39;s sections, indented by level, with the one currently in view highlighted. Each entry is an in-page anchor.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/menu"><code>Menu</code></a></td>
+<td>A dropdown menu of navigational links or actions, built on native details/summary.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/steps"><code>Steps</code></a></td>
+<td>A horizontal sequence of numbered steps for wizards and checkout flows.</td>
+</tr>
+</tbody></table>
+<h2 id="feedback">Feedback</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/feedback">Feedback on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/alert"><code>Alert</code></a></td>
+<td>An inline message box that draws attention to important information, with an optional dismiss button.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/toast"><code>Toast</code></a></td>
+<td>A transient, auto-dismissing notification message, shown via the imperative showToast() function rather than placed in your JSX tree.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/tooltip"><code>Tooltip</code></a></td>
+<td>A CSS-only hover/focus bubble that shows a short hint next to its trigger content.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/spinner"><code>Spinner</code></a></td>
+<td>A standalone animated loading indicator.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/progress"><code>Progress</code></a></td>
+<td>A determinate progress bar, wrapping a native progress element.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/skeleton"><code>Skeleton</code></a></td>
+<td>An animated placeholder shown in place of content that hasn&#39;t loaded yet.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/empty"><code>Empty</code></a></td>
+<td>A placeholder shown in place of a list/table/section that has no data.</td>
+</tr>
+</tbody></table>
+<h2 id="overlays">Overlays</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/overlays">Overlays on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/modal"><code>Modal</code></a></td>
+<td>A centered dialog over the page, wrapping a native <dialog>, with confirm/cancel actions built in.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/drawer"><code>Drawer</code></a></td>
+<td>A panel that slides in from a viewport edge over the page, for side/top/bottom-anchored content.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/popover"><code>Popover</code></a></td>
+<td>A click-triggered bubble of rich content anchored to its trigger - can wrap a real Button, unlike Menu.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/popconfirm"><code>Popconfirm</code></a></td>
+<td>An inline &quot;are you sure?&quot; bubble for confirming a destructive action without the weight of a full Modal.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/context-menu"><code>ContextMenu</code></a></td>
+<td>Opens a themed menu at the cursor position on right-click, in place of the browser&#39;s native context menu.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/command"><code>Command</code></a></td>
+<td>A searchable command-palette overlay with keyboard navigation, built on a native <dialog>.</td>
+</tr>
+</tbody></table>
+<h2 id="data-display">Data Display</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/data-display">Data Display on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/badge"><code>Badge</code></a></td>
+<td>A small inline label, typically used to show a status or count.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/card"><code>Card</code></a></td>
+<td>A themed container with optional header/footer slots, for grouping related content.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/code-block"><code>CodeBlock</code></a></td>
+<td>A block of source code, highlighted and scrollable. The grammar is a small scanner in the package itself, so it adds no runtime dependency.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/avatar"><code>Avatar</code></a></td>
+<td>A small circular image (or initials fallback) representing a person or entity.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/time-ago"><code>TimeAgo</code></a></td>
+<td>Formats a timestamp as a localized relative time string, e.g. &quot;5 minutes ago&quot;.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/divider"><code>Divider</code></a></td>
+<td>A thin themed line used to visually separate content, horizontal or vertical.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/tabs"><code>Tabs</code></a></td>
+<td>A set of labeled panels where only one panel is shown at a time.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/accordion"><code>Accordion</code></a></td>
+<td>A list of collapsible sections built on native details/summary. Set exclusive and opening one closes the rest - that grouping belongs to the list, which is why a row of Collapses cannot express it.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/tag"><code>Tag</code></a></td>
+<td>A small inline label like Badge, but optionally removable - for filter chips and multi-select values.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/collapse"><code>Collapse</code></a></td>
+<td>A single collapsible section you place yourself and fill with children. Same widget Accordion renders - same border, chevron and animated open - but one section rather than a list.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/statistic"><code>Statistic</code></a></td>
+<td>A labeled numeric stat tile, for dashboards and KPI summaries.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/list"><code>List</code></a></td>
+<td>A styled list of items, each with optional leading/trailing slots.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/timeline"><code>Timeline</code></a></td>
+<td>A vertical list of dated/ordered events, each with a dot marker on a connecting line.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/aspect-ratio"><code>AspectRatio</code></a></td>
+<td>Constrains its children to a fixed width:height ratio, via pure CSS.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/scroll-area"><code>ScrollArea</code></a></td>
+<td>A scrollable container with a themed thin scrollbar.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/table"><code>Table</code></a></td>
+<td>A themed data table wrapping a native <table>, generic over the row type.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/data-table"><code>DataTable</code></a></td>
+<td>A batteries-included data table: sortable and resizable columns, user-toggleable column visibility, an optional search box, and built-in pagination via Pagination.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/async-data-table"><code>AsyncDataTable</code></a></td>
+<td>The same table, for data a server filters, sorts and pages. Give it a load() and it handles debouncing, out-of-order responses, loading and error states, and pagination.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/carousel"><code>Carousel</code></a></td>
+<td>A single-slide-at-a-time carousel with prev/next arrows and optional dot indicators.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/calendar"><code>Calendar</code></a></td>
+<td>A month-grid date picker with prev/next month navigation and a selectable day.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/calendar-range"><code>CalendarRange</code></a></td>
+<td>A month-grid date-<em>range</em> picker: click a start day, then an end day, and the span between them highlights.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/tree"><code>Tree</code></a></td>
+<td>A hierarchical, expandable/collapsible list built on nested native details/summary pairs. Nodes open and close with the same animation as Collapse and Accordion.</td>
+</tr>
+</tbody></table>
+<h2 id="data-entry">Data Entry</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/data-entry">Data Entry on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/date-picker"><code>DatePicker</code></a></td>
+<td>A themed date input, wrapping a native <input type="date">.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/date-time-picker"><code>DateTimePicker</code></a></td>
+<td>A themed date-and-time input, wrapping a native <input type="datetime-local">.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/date-time-range-picker"><code>DateTimeRangePicker</code></a></td>
+<td>A pair of linked date-and-time inputs for picking a span rather than a single moment.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/slider"><code>Slider</code></a></td>
+<td>A themed range input, wrapping a native <input type="range">.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/input-number"><code>InputNumber</code></a></td>
+<td>A themed numeric input, wrapping a native <input type="number">.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/color-picker"><code>ColorPicker</code></a></td>
+<td>A themed color swatch input, wrapping a native <input type="color">.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/combobox"><code>Combobox</code></a></td>
+<td>A free-text input with a searchable dropdown of suggestions, wrapping a native input paired with a datalist.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/upload"><code>Upload</code></a></td>
+<td>A themed drop-zone wrapping a visually-hidden native file input.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/rate"><code>Rate</code></a></td>
+<td>An interactive star rating, built on a group of visually-hidden native radio inputs.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/form"><code>Form</code></a></td>
+<td>A themed <form> layout wrapper, paired with FormField for a label/control/error stack around each input.</td>
+</tr>
+</tbody></table>
+<h2 id="charts">Charts</h2>
+<p>The whole category: <a href="https://velotype.github.io/velodesign/category/charts">Charts on the showcase</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velodesign/components/line-chart"><code>LineChart</code></a></td>
+<td>A line chart for trends over time, optionally filled and optionally stacked. Hovering anywhere over the plot reads out every series at the nearest category.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/area-chart"><code>AreaChart</code></a></td>
+<td>A filled line chart - LineChart with area set. Stack it to show how parts add up to a total.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/bar-chart"><code>BarChart</code></a></td>
+<td>A bar chart for comparing categories: vertical or horizontal, with series side by side or stacked.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/pie-chart"><code>PieChart</code></a></td>
+<td>A pie or donut chart for part-to-whole. Slices are drawn in the order given, never re-sorted, so they stay aligned with a legend or table beside them.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/gauge"><code>Gauge</code></a></td>
+<td>A radial gauge for one value against a range, with optional coloured bands for good/warning/critical zones.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velodesign/components/sparkline"><code>Sparkline</code></a></td>
+<td>A tiny axis-less trend, sized to sit inside a table cell or beside a Statistic. Line, area or bar.</td>
+</tr>
+</tbody></table>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velodesign","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velodesign/components/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

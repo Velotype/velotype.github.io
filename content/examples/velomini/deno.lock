@@ -1,0 +1,16 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@velotype/velomini@0.0.3": "0.0.3"
+  },
+  "jsr": {
+    "@velotype/velomini@0.0.3": {
+      "integrity": "98f0f373f6b801cc0e0c9a75e1dad95894eb6002aa6ebe362c4f4564629f2f78"
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@velotype/velomini@0.0.3"
+    ]
+  }
+}

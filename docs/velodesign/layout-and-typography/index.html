@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout and typography - velodesign docs</title>
+<meta name="description" content="Stack and Grid, and Heading, Text, and Paragraph, are the primitives that everything else is composed from.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velodesign">
+<div id="app"><article id="doc">
+<h1 id="layout-and-typography">Layout and typography</h1>
+<p><code>Stack</code> and <code>Grid</code>, and <code>Heading</code>, <code>Text</code>, and <code>Paragraph</code>, are the primitives that everything else is composed from.</p>
+<h2 id="typography">Typography</h2>
+<ul>
+<li><strong><code>Heading</code></strong> renders <code>&lt;h1&gt;</code> to <code>&lt;h6&gt;</code>. <code>level</code> is required, because a default would quietly produce a second <code>&lt;h1&gt;</code> on a page that already has one. Size comes from the level, so the visual hierarchy and the document outline cannot disagree</li>
+<li><strong><code>Text</code></strong> is inline text with modifiers: <code>strong</code>, <code>italic</code>, <code>underline</code>, <code>strike</code>, <code>numeric</code> (tabular figures, so digits line up and a changing value does not shift its neighbours), and <code>code</code> (a real <code>&lt;code&gt;</code> element)</li>
+<li><strong><code>Paragraph</code></strong> is a block of prose with the package&#39;s line height and spacing</li>
+<li><strong><code>type</code></strong> is a semantic color: <code>&quot;muted&quot;</code>, <code>&quot;primary&quot;</code>, <code>&quot;secondary&quot;</code>, <code>&quot;warning&quot;</code>, or <code>&quot;danger&quot;</code>. Leave it unset for the page&#39;s own text color. Use <code>type=&quot;muted&quot;</code> for muted text: it is the right color in both themes</li>
+</ul>
+<h2 id="stack">Stack</h2>
+<p><code>Stack</code> lays children out in a row or a column with a gap from one scale. It replaces <code>style={{display: &quot;flex&quot;, gap: &quot;0.5rem&quot;}}</code>: every consumer spells it the same way, so two rows that look the same are the same.</p>
+<table>
+<thead>
+<tr>
+<th>Attr</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>direction</code></td>
+<td><code>&quot;row&quot;</code> (default) or <code>&quot;column&quot;</code></td>
+</tr>
+<tr>
+<td><code>gap</code></td>
+<td><code>&quot;none&quot;</code>, <code>&quot;xs&quot;</code> (0.25em), <code>&quot;sm&quot;</code> (0.5em), <code>&quot;md&quot;</code> (0.75em, default), <code>&quot;lg&quot;</code> (1.25em), <code>&quot;xl&quot;</code> (2em), or any CSS length</td>
+</tr>
+<tr>
+<td><code>align</code></td>
+<td><code>&quot;start&quot;</code>, <code>&quot;center&quot;</code>, <code>&quot;end&quot;</code>, <code>&quot;stretch&quot;</code>, or <code>&quot;baseline&quot;</code>: how children line up across the stack</td>
+</tr>
+<tr>
+<td><code>justify</code></td>
+<td><code>&quot;start&quot;</code>, <code>&quot;center&quot;</code>, <code>&quot;end&quot;</code>, <code>&quot;between&quot;</code>, or <code>&quot;around&quot;</code>: how children are spread along the stack</td>
+</tr>
+<tr>
+<td><code>wrap</code></td>
+<td>Let children wrap onto further lines (default: true for a row)</td>
+</tr>
+<tr>
+<td><code>inline</code></td>
+<td>Flow inline with surrounding text instead of taking a line of its own</td>
+</tr>
+</tbody></table>
+<p>The gap scale is in <code>em</code>, not <code>px</code>, so spacing follows the type size.</p>
+<p>A column <code>Stack</code> stretches its children, which is flexbox&#39;s own default. It is right for stacking cards or form fields, and surprising for badges. Use <code>align=&quot;start&quot;</code> for those.</p>
+<h2 id="grid">Grid</h2>
+<p><code>Grid</code> lays children out in columns.</p>
+<table>
+<thead>
+<tr>
+<th>Attr</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>minColumnWidth</code></td>
+<td>Fit as many columns as will hold this width, then share the remainder (default: <code>&quot;16em&quot;</code>). It is <code>repeat(auto-fill, minmax(width, 1fr))</code>, so the grid reflows on its own, with no media query</td>
+</tr>
+<tr>
+<td><code>columns</code></td>
+<td>A fixed number of equal columns. Prefer <code>minColumnWidth</code> unless the count itself is meaningful, because a fixed count has to be chosen again at every breakpoint</td>
+</tr>
+<tr>
+<td><code>gap</code></td>
+<td>The same scale as <code>Stack</code></td>
+</tr>
+<tr>
+<td><code>align</code></td>
+<td>How children line up within their cell</td>
+</tr>
+</tbody></table>
+<pre><code class="language-tsx">import { Grid, Heading, Paragraph, Stack, Text } from &quot;@velotype/velodesign&quot;
+import { replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+replaceElementWithRoot(
+    &lt;Stack direction=&quot;column&quot; gap=&quot;lg&quot;&gt;
+        {/* Typography. Heading requires a level, because a default would quietly produce a second &lt;h1&gt;. */}
+        &lt;Heading level={1}&gt;A page&lt;/Heading&gt;
+        &lt;Heading level={2} type=&quot;muted&quot;&gt;A muted subheading&lt;/Heading&gt;
+        &lt;Paragraph&gt;Body text, with &lt;Text strong&gt;strong&lt;/Text&gt;, &lt;Text italic&gt;italic&lt;/Text&gt;, &lt;Text underline&gt;underline&lt;/Text&gt;, &lt;Text strike&gt;strike&lt;/Text&gt;, and &lt;Text code&gt;code&lt;/Text&gt;.&lt;/Paragraph&gt;
+        &lt;Paragraph&gt;
+            &lt;Text type=&quot;muted&quot;&gt;muted&lt;/Text&gt; &lt;Text type=&quot;primary&quot;&gt;primary&lt;/Text&gt; &lt;Text type=&quot;secondary&quot;&gt;secondary&lt;/Text&gt; &lt;Text type=&quot;warning&quot;&gt;warning&lt;/Text&gt; &lt;Text type=&quot;danger&quot;&gt;danger&lt;/Text&gt;
+        &lt;/Paragraph&gt;
+        &lt;Text numeric&gt;1,234.50&lt;/Text&gt;
+
+        {/* Stack: a row or a column, with a gap from a scale (&quot;none&quot; &quot;xs&quot; &quot;sm&quot; &quot;md&quot; &quot;lg&quot; &quot;xl&quot;) or any CSS length */}
+        &lt;Stack&gt;one&lt;span&gt;two&lt;/span&gt;&lt;span&gt;three&lt;/span&gt;&lt;/Stack&gt;
+        &lt;Stack direction=&quot;column&quot; gap=&quot;xs&quot; align=&quot;start&quot;&gt;
+            &lt;span&gt;a column&lt;/span&gt;
+            &lt;span&gt;that does not stretch its children&lt;/span&gt;
+        &lt;/Stack&gt;
+        &lt;Stack justify=&quot;between&quot; align=&quot;center&quot; gap=&quot;2rem&quot; wrap={false}&gt;
+            &lt;span&gt;left&lt;/span&gt;&lt;span&gt;right&lt;/span&gt;
+        &lt;/Stack&gt;
+        &lt;Stack inline gap=&quot;sm&quot;&gt;&lt;span&gt;an inline&lt;/span&gt;&lt;span&gt;stack&lt;/span&gt;&lt;/Stack&gt;
+
+        {/* Grid: as many columns as fit minColumnWidth, with no media query. A fixed count is columns. */}
+        &lt;Grid minColumnWidth=&quot;10em&quot; gap=&quot;md&quot;&gt;
+            &lt;div&gt;one&lt;/div&gt;&lt;div&gt;two&lt;/div&gt;&lt;div&gt;three&lt;/div&gt;&lt;div&gt;four&lt;/div&gt;
+        &lt;/Grid&gt;
+        &lt;Grid columns={3} gap=&quot;sm&quot; align=&quot;start&quot;&gt;
+            &lt;div&gt;one&lt;/div&gt;&lt;div&gt;two&lt;/div&gt;&lt;div&gt;three&lt;/div&gt;
+        &lt;/Grid&gt;
+    &lt;/Stack&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velodesign","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velodesign/layout-and-typography/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

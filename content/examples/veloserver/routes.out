@@ -1,0 +1,8 @@
+GET /: 200 home
+GET /users/42: 200 {"id":"42"}
+GET /users/me: 200 the current user
+GET /files/a/b.txt: 200 file: a/b.txt
+GET /guides/intro: 200 documentation
+GET /slow: 200 done waiting
+POST /echo: 200 hello
+HEAD /: yes

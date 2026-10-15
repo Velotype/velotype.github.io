@@ -1,0 +1,4 @@
+app.js: 200 text/javascript; charset=UTF-8 gzip
+has an ETag: true
+style.css: 200 "body { margin: 0 }\n"
+favicon.ico: 200 "icon"

@@ -13,7 +13,8 @@
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/streams@^1.2.0": "1.2.0",
     "jsr:@velotype/velodesign@0.1": "0.1.0",
-    "jsr:@velotype/velotype@^0.0.27": "0.0.27"
+    "jsr:@velotype/velotype@^0.0.27": "0.0.27",
+    "npm:marked@15.0.12": "15.0.12"
   },
   "jsr": {
     "@std/cli@1.0.32": {
@@ -71,6 +72,12 @@
     },
     "@velotype/velotype@0.0.27": {
       "integrity": "40512f9bcebfcf9c1bbfd6e5190b381c2f55991935b23adf833499b70afaafff"
+    }
+  },
+  "npm": {
+    "marked@15.0.12": {
+      "integrity": "sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA==",
+      "bin": true
     }
   },
   "workspace": {

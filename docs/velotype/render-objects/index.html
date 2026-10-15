@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RenderObjects - Velotype docs</title>
+<meta name="description" content="A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how Velotype updates the page in place, without a virtual DOM.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="renderobjects">RenderObjects</h1>
+<p>A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how Velotype updates the page in place, without a virtual DOM.</p>
+<p>Create RenderObjects as fields of Component classes. Using them in any other way is advanced behavior.</p>
+<h2 id="renderobject">RenderObject</h2>
+<p><code>new RenderObject&lt;DataType&gt;(initialValue, renderFunction)</code> holds a value and a function that renders a value into an element. Put the RenderObject in TSX as a child and it renders there. Put it in as many places as you like, and each one is rendered.</p>
+<p>Setting <code>value</code> (or calling <code>set()</code>) renders the new value only when it is a different value (<code>!==</code>). <code>get()</code> and <code>value</code> read it.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderObject } from &quot;@velotype/velotype&quot;
+
+type Person = {
+    name: string
+    address: string
+    phone: string
+}
+
+class PersonSelector extends Component&lt;EmptyAttrs&gt; {
+    // The first argument is the initial value, the second renders a value into an element
+    selectedPerson = new RenderObject&lt;Person | null&gt;(null, function(person: Person | null) {
+        if (!person) {
+            return &lt;div&gt;&lt;/div&gt;
+        } else {
+            return &lt;div&gt;
+                &lt;div&gt;Person:&lt;/div&gt;
+                &lt;div&gt;Name: {person.name}&lt;/div&gt;
+                &lt;div&gt;Address: {person.address}&lt;/div&gt;
+                &lt;div&gt;Phone: {person.phone}&lt;/div&gt;
+            &lt;/div&gt;
+        }
+    })
+
+    override render() {
+        const people = [
+            {name: &quot;One person&quot;, address: &quot;somewhere&quot;, phone: &quot;123&quot;},
+            {name: &quot;Two person&quot;, address: &quot;elsewhere&quot;, phone: &quot;456&quot;},
+            {name: &quot;Three person&quot;, address: &quot;nowhere&quot;, phone: &quot;789&quot;},
+        ]
+        return &lt;div&gt;
+            {people.map((person) =&gt; &lt;button type=&quot;button&quot; onClick={() =&gt; {
+                // Setting value renders the new value in both places below.
+                // It renders only when the new value is a different value (!==).
+                this.selectedPerson.value = person
+            }}&gt;{person.name}&lt;/button&gt;)}
+            &lt;div&gt;Render selected Person in one place: {this.selectedPerson}&lt;/div&gt;
+            &lt;div&gt;Render selected Person in another place: {this.selectedPerson}&lt;/div&gt;
+        &lt;/div&gt;
+    }
+}
+
+// get() and set() do the same as reading and writing value
+const selector = new PersonSelector({}, [])
+void selector
+
+// When a value that is an object or Array is changed in place, render it again with rerenderElements()
+class TagList extends Component&lt;EmptyAttrs&gt; {
+    tags = new RenderObject&lt;string[]&gt;([&quot;velotype&quot;], (tags: string[]) =&gt; &lt;ul&gt;{tags.map(tag =&gt; &lt;li&gt;{tag}&lt;/li&gt;)}&lt;/ul&gt;)
+
+    override render() {
+        return &lt;div&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; {
+                const tags = this.tags.get()
+                tags.push(&quot;tsx&quot;)
+                this.tags.rerenderElements(tags)
+            }}&gt;Add a tag&lt;/button&gt;
+            {this.tags}
+        &lt;/div&gt;
+    }
+}
+void TagList
+</code></pre>
+<p>When a value that is an object or an Array is changed in place, <code>!==</code> sees no change. Call <code>rerenderElements(value)</code> to render it again.</p>
+<h3 id="listening-for-changes">Listening for changes</h3>
+<ul>
+<li><code>registerOnChangeListener(listener, options)</code> runs <code>listener</code> after each change of <code>value</code></li>
+<li><code>registerOnMount(onMount, onUnmount)</code> adds callbacks that run when the Component whose field holds the RenderObject mounts and unmounts</li>
+</ul>
+<p>Both return the RenderObject, so they can be chained onto its creation. The options of <code>registerOnChangeListener()</code> are:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hasVtKey</code></td>
+<td>Removes the listener with this Component&#39;s lifecycle instead of the RenderObject&#39;s. It must already have a <code>vtKey</code>, so call it from the Component&#39;s <code>mount()</code></td>
+</tr>
+<tr>
+<td><code>triggerOnRegistration</code></td>
+<td>Also runs the listener once, just after it is registered</td>
+</tr>
+<tr>
+<td><code>eventDispatchDelay</code></td>
+<td>Waits this many milliseconds before running the listener, and runs it at most once in that time</td>
+</tr>
+</tbody></table>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderBasic, RenderObject } from &quot;@velotype/velotype&quot;
+
+class Search extends Component&lt;EmptyAttrs&gt; {
+    // Runs the listener after each change of value.
+    // eventDispatchDelay waits that many milliseconds before running it, and runs it at most once
+    // in that time, so it reads the latest value.
+    query = new RenderBasic&lt;string&gt;(&quot;&quot;).registerOnChangeListener(() =&gt; {
+        console.log(&quot;search for&quot;, this.query.value)
+    }, {eventDispatchDelay: 250})
+
+    // Callbacks that run when the Component whose field holds the RenderObject mounts and unmounts
+    status = new RenderBasic&lt;string&gt;(&quot;idle&quot;).registerOnMount(
+        () =&gt; console.log(&quot;mounted&quot;),
+        () =&gt; console.log(&quot;unmounted&quot;),
+    )
+
+    // triggerOnRegistration also runs the listener once, just after it is registered
+    log = new RenderObject&lt;string[]&gt;([], (lines: string[]) =&gt; &lt;pre&gt;{lines.join(&quot;\n&quot;)}&lt;/pre&gt;)
+        .registerOnChangeListener(() =&gt; console.log(&quot;log changed&quot;), {triggerOnRegistration: true})
+
+    override mount() {
+        // hasVtKey removes the listener with this Component&#39;s lifecycle instead of the
+        // RenderObject&#39;s. The Component has its vtKey by the time mount() runs.
+        this.status.registerOnChangeListener(() =&gt; console.log(&quot;status is&quot;, this.status.value), {hasVtKey: this})
+    }
+
+    override render() {
+        return &lt;div&gt;
+            &lt;input type=&quot;search&quot; onInput={(event: Event) =&gt; this.query.value = (event.target as HTMLInputElement).value}/&gt;
+            &lt;div&gt;Status: {this.status}&lt;/div&gt;
+            {this.log}
+        &lt;/div&gt;
+    }
+}
+void Search
+</code></pre>
+<h3 id="updating-in-place-with-handleupdate">Updating in place with handleUpdate</h3>
+<p>By default a new value renders new elements. For elements that change often, return an <code>UpdateHandlerLink</code> from the render function with references to the parts that change, and pass a <code>handleUpdate</code> function as the third argument. It updates those parts in place instead. The second type parameter of RenderObject types the references.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderObject, UpdateHandlerLink } from &quot;@velotype/velotype&quot;
+
+type Score = {player: string, points: number}
+// The references the render function keeps for handleUpdate: the parts that change
+type ScoreRefs = {points: HTMLElement}
+
+class ScoreBoard extends Component&lt;EmptyAttrs&gt; {
+    // By default a new value renders new elements. Return an UpdateHandlerLink from the render
+    // function, with references to the parts that change, and pass a handleUpdate function that
+    // changes those parts in place.
+    score = new RenderObject&lt;Score, ScoreRefs&gt;({player: &quot;Ada&quot;, points: 0}, (score: Score) =&gt; {
+        const points = &lt;span&gt;{score.points}&lt;/span&gt;
+        return new UpdateHandlerLink(&lt;div&gt;{score.player}: {points}&lt;/div&gt;, {points})
+    }, (_element, refs, _oldScore, newScore) =&gt; {
+        refs.points.textContent = String(newScore.points)
+    })
+
+    override render() {
+        return &lt;div&gt;
+            {this.score}
+            &lt;button type=&quot;button&quot; onClick={() =&gt; {
+                this.score.value = {player: this.score.value.player, points: this.score.value.points + 1}
+            }}&gt;Add a point&lt;/button&gt;
+        &lt;/div&gt;
+    }
+}
+void ScoreBoard
+</code></pre>
+<h2 id="renderbasic">RenderBasic</h2>
+<p><code>RenderBasic&lt;DataType&gt;</code> is a RenderObject for a <code>string</code>, <code>number</code>, <code>bigint</code>, or <code>boolean</code>. It renders its value as text inside a <code>&lt;span style=&quot;display:contents;&quot;&gt;</code> and updates that text in place, so it needs no render function.</p>
+<p>It adds <code>getString()</code> and <code>setString()</code>, which convert the value to and from a string.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderBasic } from &quot;@velotype/velotype&quot;
+
+class Counter extends Component&lt;EmptyAttrs&gt; {
+    // A RenderBasic holds a string, number, bigint, or boolean, and renders it as text inside a
+    // &lt;span style=&quot;display:contents;&quot;&gt;, which it updates in place
+    count = new RenderBasic&lt;number&gt;(0)
+
+    override render() {
+        return &lt;div&gt;
+            &lt;div&gt;Counter value: {this.count}&lt;/div&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.count.value += 1}&gt;Increment&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.count.value -= 1}&gt;Decrement&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.count.setString(&quot;100&quot;)}&gt;Set to 100&lt;/button&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; console.log(this.count.getString())}&gt;Log it&lt;/button&gt;
+        &lt;/div&gt;
+    }
+}
+void Counter
+</code></pre>
+<h2 id="other-methods">Other methods</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>getElements()</code></td>
+<td>The elements this RenderObject has rendered. Advanced: use carefully</td>
+</tr>
+<tr>
+<td><code>removeAll()</code></td>
+<td>Removes every element this RenderObject has rendered</td>
+</tr>
+<tr>
+<td><code>render(renderFunction, handleUpdate?)</code></td>
+<td>Renders one more element with a different render function than the default</td>
+</tr>
+</tbody></table>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/render-objects/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

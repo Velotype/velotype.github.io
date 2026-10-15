@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VBIN - velojson (VSON) docs</title>
+<meta name="description" content="VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the fastest format, and one of the smallest.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velojson">
+<div id="app"><article id="doc">
+<h1 id="vbin">VBIN</h1>
+<p>VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the fastest format, and one of the smallest.</p>
+<p>Because the KeyIDs are agreed ahead of time, using VBIN takes more code than <code>VSON.encode()</code>: you write the values with writers, and read them with a mapper.</p>
+<h2 id="writing">Writing</h2>
+<p>Create a <code>VBINRootWriter</code>, start the root object, write each value under its KeyID, and finalize the object. The root of a VBIN message must be an object.</p>
+<table>
+<thead>
+<tr>
+<th>Writer</th>
+<th>Writes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>VBINRootWriter</code></td>
+<td>The root: <code>startRootObject()</code>, <code>finalizeRootObject(object)</code>, and <code>toUint8ArrayAndRelease()</code></td>
+</tr>
+<tr>
+<td><code>VBINObjectWriter</code></td>
+<td>An object&#39;s fields: <code>encodePosIntValue</code>, <code>encodeDoubleValue</code>, <code>encodeNumberValue</code>, <code>encodeStringValue</code>, <code>encodeBooleanValue</code>, and the <code>finalize...</code> methods for nested values</td>
+</tr>
+<tr>
+<td><code>VBINArrayWriter</code></td>
+<td>An Array of mixed values</td>
+</tr>
+<tr>
+<td><code>VBINNumberArrayWriter</code></td>
+<td>An Array of numbers, some integers and some doubles</td>
+</tr>
+<tr>
+<td><code>VBINHomogenousStringArrayWriter</code></td>
+<td>An Array of only strings</td>
+</tr>
+<tr>
+<td><code>VBINHomogenousPosIntArrayWriter</code></td>
+<td>An Array of only non-negative integers</td>
+</tr>
+<tr>
+<td><code>VBINHomogenousDoubleArrayWriter</code></td>
+<td>An Array of only doubles</td>
+</tr>
+<tr>
+<td><code>VBINHomogenousObjectArrayWriter</code></td>
+<td>An Array of only objects</td>
+</tr>
+</tbody></table>
+<p>An array or a nested object is written with its own writer, and then finalized into its parent under a KeyID: <code>finalizeArray</code>, <code>finalizeNumberArray</code>, <code>finalizeHomogenousStringArray</code>, <code>finalizeHomogenousPosIntArray</code>, <code>finalizeHomogenousDoubleArray</code>, <code>finalizeHomogenousObjectArray</code>, and <code>finalizeObject</code>.</p>
+<p>The <code>encode...Value</code> methods of an object accept <code>undefined</code>, which writes nothing, as an <code>undefined</code> key is left out in the other formats.</p>
+<h2 id="reading">Reading</h2>
+<p><code>VBIN.decode(bytes, mapper)</code> reads a message with a <code>VBINObjectMapper</code>, which maps each KeyID back to a field:</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>assignValue(object, keyID, value)</code></td>
+<td>Sets the field for <code>keyID</code> on the object being built</td>
+</tr>
+<tr>
+<td><code>hasAllRequiredFields(object)</code></td>
+<td>Called at the end of an object. Return <code>false</code> to reject a message with a missing field. <code>decode()</code> then throws</td>
+</tr>
+<tr>
+<td><code>fieldMapper(keyID)</code></td>
+<td>For a field that is itself an object, returns the mapper for its fields</td>
+</tr>
+</tbody></table>
+<pre><code class="language-tsx">import {
+    VBIN,
+    type VBINObjectMapper,
+    VBINObjectWriter,
+    VBINHomogenousStringArrayWriter,
+    VBINRootWriter,
+    VSON,
+} from &quot;@velotype/velojson&quot;
+
+// VBIN does not send key names. The encoder and decoder agree on a number for each key (a KeyID)
+// ahead of time, which is why it is smaller and faster than the other formats.
+type Product = {
+    id: number        // KeyID 1
+    name: string      // KeyID 2
+    inStock: boolean  // KeyID 3
+    tags: string[]    // KeyID 4
+}
+
+const product: Product = {id: 7, name: &quot;Widget&quot;, inStock: true, tags: [&quot;tools&quot;, &quot;metal&quot;]}
+
+// Encode with writers. Each value is written under its KeyID.
+function encodeProduct(product: Product): Uint8Array {
+    const root = new VBINRootWriter()
+    const object: VBINObjectWriter = root.startRootObject()
+    object.encodePosIntValue(1, product.id)
+    object.encodeStringValue(2, product.name)
+    object.encodeBooleanValue(3, product.inStock)
+
+    // An array is written with its own writer, and then finalized into the object under a KeyID
+    const tags = new VBINHomogenousStringArrayWriter()
+    product.tags.forEach(tag =&gt; tags.encodeStringValueInHomogenousArray(tag))
+    object.finalizeHomogenousStringArray(4, tags)
+
+    root.finalizeRootObject(object)
+    return root.toUint8ArrayAndRelease()
+}
+
+// Decode with a mapper that turns each KeyID back into a field
+const productMapper: VBINObjectMapper = {
+    assignValue: (object, keyID, value) =&gt; {
+        switch (keyID) {
+            case 1: object.id = value; break
+            case 2: object.name = value; break
+            case 3: object.inStock = value; break
+            case 4: object.tags = value; break
+        }
+    },
+    // Called at the end of an object: return false to reject it, such as when a field is missing
+    hasAllRequiredFields: (object) =&gt; object.id !== undefined &amp;&amp; object.name !== undefined,
+    // For a field that is itself an object, return the mapper for its KeyID
+    fieldMapper: () =&gt; undefined,
+}
+
+const bytes = encodeProduct(product)
+console.log(&quot;VBIN bytes:&quot;, bytes.length)
+console.log(&quot;VSON bytes:&quot;, VSON.encode(product).length)
+console.log(&quot;JSON bytes:&quot;, JSON.stringify(product).length)
+
+const decoded: Product = VBIN.decode(bytes, productMapper)
+console.log(JSON.stringify(decoded))
+
+// VSON.decode() reads VBIN too, in a debug format: a plain object keyed by KeyID
+console.log(JSON.stringify(VSON.decode(bytes)))
+
+// A message that is missing a required field is rejected
+const incomplete = new VBINRootWriter()
+const empty = incomplete.startRootObject()
+empty.encodePosIntValue(1, 1)
+incomplete.finalizeRootObject(empty)
+try {
+    VBIN.decode(incomplete.toUint8ArrayAndRelease(), productMapper)
+} catch (error) {
+    console.log(&quot;rejected:&quot;, (error as Error).message)
+}
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">VBIN bytes: 28
+VSON bytes: 51
+JSON bytes: 64
+{&quot;id&quot;:7,&quot;name&quot;:&quot;Widget&quot;,&quot;inStock&quot;:true,&quot;tags&quot;:[&quot;tools&quot;,&quot;metal&quot;]}
+{&quot;1&quot;:7,&quot;2&quot;:&quot;Widget&quot;,&quot;3&quot;:true,&quot;4&quot;:[&quot;tools&quot;,&quot;metal&quot;]}
+rejected: velojson: missing required field
+</code></pre>
+<h2 id="debugging">Debugging</h2>
+<p><code>VSON.decode()</code> reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as <code>{&quot;1&quot;: 7, &quot;2&quot;: &quot;Widget&quot;}</code>. This is what the <a href="/docs/velodevtools/">VeloJSON panel</a> of the DevTools extension shows for a VBIN payload.</p>
+<h2 id="generating-the-code">Generating the code</h2>
+<p>Writers and mappers are repetitive, and must agree with each other. Generate them from a schema rather than writing them by hand.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velojson","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velojson/vbin/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

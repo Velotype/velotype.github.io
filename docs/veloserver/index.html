@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - veloserver docs</title>
+<meta name="description" content="veloserver is a web server framework for Deno. It has a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates Velotype apps.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="veloserver">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>veloserver is a web server framework for Deno. It has a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates Velotype apps.</p>
+<p>Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed. veloserver also logs its own messages when it starts, stops, and mounts files. Those are not shown.</p>
+<h2 id="install">Install</h2>
+<p>veloserver is a <a href="https://jsr.io/@velotype/veloserver">JSR package</a> for Deno:</p>
+<pre><code class="language-sh">deno add jsr:@velotype/veloserver
+</code></pre>
+<h2 id="a-server">A server</h2>
+<p>A <code>Router</code> holds routes, and a <code>Server</code> serves a router. <code>serve(hostname, port)</code> calls <code>Deno.serve()</code>. The server needs <code>--allow-net</code> and no other permission to serve:</p>
+<pre><code class="language-sh">deno run --allow-net server.ts
+</code></pre>
+<pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
+
+const router = new Router&lt;never&gt;({})
+
+router.get(&quot;/&quot;, () =&gt; {
+    const response = new Response(&quot;&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;Hello veloserver!&lt;/body&gt;&lt;/html&gt;&quot;)
+    response.headers.set(&quot;content-type&quot;, &quot;text/html; charset=utf-8&quot;)
+    return response
+})
+
+// A Server wraps a Router. serve() starts it with Deno.serve() on a hostname and port.
+// The server needs --allow-net and no other permission to serve.
+const server = new Server(router)
+server.serve(&quot;127.0.0.1&quot;, 3201)
+
+const response = await fetch(&quot;http://127.0.0.1:3201/&quot;)
+console.log(response.status, response.headers.get(&quot;content-type&quot;))
+console.log(await response.text())
+
+server.close()
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">200 text/html; charset=utf-8
+&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;Hello veloserver!&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<p>The <code>&lt;never&gt;</code> in <code>new Router&lt;never&gt;({})</code> is the type of the router&#39;s <a href="/docs/veloserver/request-metadata/">request metadata</a>. <code>never</code> means this router has none.</p>
+<h2 id="next-steps">Next steps</h2>
+<ul>
+<li><a href="/docs/veloserver/routes/">Routes</a>: paths, path variables, wildcards, and error responses</li>
+<li><a href="/docs/veloserver/request-metadata/">Request metadata</a>: typed data for each request</li>
+<li><a href="/docs/veloserver/inspectors/">Inspectors</a>: code that runs before and after handlers</li>
+<li><a href="/docs/veloserver/static-files/">Static files</a>: serving a directory</li>
+<li><a href="/docs/veloserver/running-the-server/">Running the server</a>: shutting down, and the development server</li>
+</ul>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"veloserver","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/veloserver/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

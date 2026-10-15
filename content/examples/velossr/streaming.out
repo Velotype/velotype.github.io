@@ -1,0 +1,3 @@
+<!DOCTYPE html><html><body><h1>Shown first</h1><p>The slow part</p><footer>Shown last</footer></body></html>
+The first part arrived before the slow part resolved: true
+The slow part arrived after it resolved: true

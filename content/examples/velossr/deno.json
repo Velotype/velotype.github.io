@@ -1,0 +1,21 @@
+{
+    "minimumDependencyAge": {
+        "age": "P1D",
+        "exclude": [
+            "jsr:@velotype/*"
+        ]
+    },
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "@velotype/velossr",
+        "lib": [
+            "dom",
+            "deno.ns",
+            "esnext"
+        ]
+    },
+    "imports": {
+        "@velotype/velossr": "jsr:@velotype/velossr@0.0.9",
+        "@velotype/veloserver": "jsr:@velotype/veloserver@0.3.1"
+    }
+}

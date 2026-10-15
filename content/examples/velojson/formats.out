@@ -1,0 +1,7 @@
+JSON text: 5056 bytes
+Base:      3893 bytes
+KeyTable:  1988 bytes
+The default is KeyTable: true
+true
+true
+velojson: KeyTable encoding format only supported for root Object or Array types

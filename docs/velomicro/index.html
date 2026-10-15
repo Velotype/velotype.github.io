@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - velomicro docs</title>
+<meta name="description" content="velomicro is a strictly minimal TSX framework, about 1kb, that shows how TSX rendering works. It is small enough to read in one sitting: a createElement that returns real DOM elements, and function components. The [Medium article](https://argoday.medium.com/a-1kb-tsx-framework-to-demonstrate-how-tsx-works-velotype-tsx-micro-337c32ff0648) walks through its source line by line.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velomicro">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>velomicro is a strictly minimal TSX framework, about 1kb, that shows how TSX rendering works. It is small enough to read in one sitting: a <code>createElement</code> that returns real DOM elements, and function components. The <a href="https://argoday.medium.com/a-1kb-tsx-framework-to-demonstrate-how-tsx-works-velotype-tsx-micro-337c32ff0648">Medium article</a> walks through its source line by line.</p>
+<p>It is a teaching tool and a starting point, not a framework for an app. It has no state management and no lifecycle. For an app, see <a href="/docs/velotype/">Velotype</a>, which keeps this model of TSX that returns real elements, and adds the rest. <a href="/docs/velomini/">velomini</a> is the next step up.</p>
+<p>Every example in these docs is a file that is type-checked against the published package, and run in a browser.</p>
+<h2 id="install">Install</h2>
+<p>velomicro is a <a href="https://jsr.io/@velotype/velomicro">JSR package</a> for Deno:</p>
+<pre><code class="language-sh">deno add jsr:@velotype/velomicro
+</code></pre>
+<pre><code class="language-json">{
+    &quot;compilerOptions&quot;: {
+        &quot;jsx&quot;: &quot;react-jsx&quot;,
+        &quot;jsxImportSource&quot;: &quot;@velotype/velomicro&quot;
+    }
+}
+</code></pre>
+<h2 id="how-it-works">How it works</h2>
+<p>Each tag is a call to <code>createElement</code>, which creates a real <code>HTMLElement</code>, sets its attributes, and appends its children. So a tag&#39;s value is the element:</p>
+<pre><code class="language-tsx">// Every tag evaluates to a real HTMLElement
+const divTag: HTMLDivElement = &lt;div&gt;this is a div&lt;/div&gt;
+
+// Attributes are set with setAttribute(), so you write TSX the way you write HTML
+const withClass: HTMLDivElement = &lt;div class=&quot;exampleClass&quot; id=&quot;main&quot;&gt;this has a class&lt;/div&gt;
+
+// style takes an object, with camelCase keys, or a string
+const styleObject: HTMLDivElement = &lt;div style={{display: &quot;inline&quot;, marginTop: &quot;4px&quot;}}&gt;an object of styles&lt;/div&gt;
+const styleString: HTMLDivElement = &lt;div style=&quot;display:inline;margin-top:4px;&quot;&gt;a string of styles&lt;/div&gt;
+
+// Attributes that start with &quot;on&quot; add event listeners
+const clicked: HTMLButtonElement = &lt;button type=&quot;button&quot; onClick={() =&gt; console.log(&quot;clicked&quot;)}&gt;Click me&lt;/button&gt;
+
+// A boolean attribute is set empty when true, and left out when false
+const input: HTMLInputElement = &lt;input type=&quot;checkbox&quot; checked={true} disabled={false}/&gt;
+
+// Fragments group children without a wrapper element, and arrays of elements are children too
+const items = &lt;&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/&gt;
+const list: HTMLUListElement = &lt;ul&gt;{items}{[&quot;three&quot;, &quot;four&quot;].map(name =&gt; &lt;li&gt;{name}&lt;/li&gt;)}&lt;/ul&gt;
+
+// null and undefined render nothing. A boolean child is written as text, so for a condition use a
+// ternary that gives null rather than {condition &amp;&amp; &lt;div/&gt;}, which writes &quot;false&quot;.
+const signedIn = false
+const conditional: HTMLDivElement = &lt;div&gt;{signedIn ? &lt;span&gt;Account&lt;/span&gt; : null}&lt;/div&gt;
+
+document.body.append(divTag, withClass, styleObject, styleString, clicked, input, list, conditional)
+</code></pre>
+<ul>
+<li><strong>Attributes</strong> are set with <code>setAttribute()</code>, so you write them as you would in HTML (<code>class</code>, not <code>className</code>)</li>
+<li><strong>Attributes that start with <code>on</code></strong> add event listeners</li>
+<li><strong><code>style</code></strong> takes an object with camelCase keys, or a string</li>
+<li><strong>Boolean attributes</strong> are set empty when <code>true</code> and left out when <code>false</code></li>
+<li><strong>Children</strong> can be elements, strings, numbers, and arrays of them. Fragments (<code>&lt;&gt;...&lt;/&gt;</code>) return their children as an array</li>
+<li><strong><code>null</code> and <code>undefined</code></strong> render nothing. A boolean child is written as text, so <code>{condition &amp;&amp; &lt;div/&gt;}</code> writes <code>false</code> when the condition is false. Use <code>{condition ? &lt;div/&gt; : null}</code></li>
+</ul>
+<h2 id="function-components">Function components</h2>
+<p>A function component is a function from its attrs to an element, and it receives its children as a second argument.</p>
+<pre><code class="language-tsx">import type { ChildrenAttr, FunctionComponent, IdAttr, StylePassthroughAttrs } from &quot;@velotype/velomicro/tsx-micro&quot;
+
+type GreetingAttrsType = {name: string}
+
+// A function component receives its attrs, and its children as a second argument
+const Greeting: FunctionComponent&lt;GreetingAttrsType&gt; = function(attrs: GreetingAttrsType) {
+    return &lt;div&gt;Hello {attrs.name}!&lt;/div&gt;
+}
+
+// ChildrenAttr, IdAttr, and StylePassthroughAttrs describe the children, id, class, and style that
+// a component accepts and passes on to the element it renders
+type PanelAttrsType = {title: string} &amp; ChildrenAttr &amp; IdAttr &amp; StylePassthroughAttrs
+
+const Panel: FunctionComponent&lt;PanelAttrsType&gt; = function(attrs: PanelAttrsType, children) {
+    return &lt;section id={attrs.id} class={attrs.class} style={attrs.style}&gt;
+        &lt;h2&gt;{attrs.title}&lt;/h2&gt;
+        {children}
+    &lt;/section&gt;
+}
+
+document.body.append(
+    &lt;Panel title=&quot;Greetings&quot; id=&quot;greetings&quot; class=&quot;panel&quot; style={{marginTop: &quot;8px&quot;}}&gt;
+        &lt;Greeting name=&quot;Ada&quot;/&gt;
+        &lt;Greeting name=&quot;Grace&quot;/&gt;
+    &lt;/Panel&gt;,
+)
+</code></pre>
+<p>The attrs helper types are <code>EmptyAttrs</code> (no attrs), <code>ChildrenAttr</code>, <code>IdAttr</code>, and <code>StylePassthroughAttrs</code> (<code>class</code> and <code>style</code>). They describe what a component accepts and passes on, and a component passes them on itself.</p>
+<h2 id="a-counter">A counter</h2>
+<p>A function component runs once. Its state is a variable, and updating the page is up to you: here, by changing the label element.</p>
+<pre><code class="language-tsx">import type { EmptyAttrs, FunctionComponent } from &quot;@velotype/velomicro/tsx-micro&quot;
+
+// A function component returns an element. State is a variable, and updating the page is up to you.
+const Counter: FunctionComponent&lt;EmptyAttrs&gt; = function(_attrs: EmptyAttrs): HTMLDivElement {
+    let count = 0
+    const counterLabel = &lt;span&gt;{count}&lt;/span&gt;
+    return &lt;div&gt;
+        &lt;div&gt;Counter value: {counterLabel}&lt;/div&gt;
+        &lt;button type=&quot;button&quot; onClick={() =&gt; {
+            count += 1
+            counterLabel.innerText = String(count)
+        }}&gt;Increment&lt;/button&gt;
+        &lt;button type=&quot;button&quot; onClick={() =&gt; {
+            count -= 1
+            counterLabel.innerText = String(count)
+        }}&gt;Decrement&lt;/button&gt;
+    &lt;/div&gt;
+}
+
+// TSX returns real elements, so mounting is appending
+document.body.append(&lt;Counter/&gt;)
+</code></pre>
+<p>This is the limit of velomicro. When you need a value that updates the page for you, a lifecycle, or classes, move up to <a href="/docs/velomini/">velomini</a> or <a href="/docs/velotype/">Velotype</a>.</p>
+<h2 id="the-classic-runtime">The classic runtime</h2>
+<p>The automatic JSX runtime is <code>@velotype/velomicro</code>. With the classic transform, <code>h</code> and <code>f</code> from <code>@velotype/velomicro/tsx-micro</code> are what tags and fragments compile to:</p>
+<pre><code class="language-tsx">/** @jsxRuntime classic */
+/** @jsx h */
+/** @jsxFrag f */
+// With the classic JSX transform, `h` and `f` are what tags and fragments compile to: createElement
+// and createFragment, with short names. Set them per file with the pragmas above, or with
+// &quot;jsx&quot;: &quot;react&quot;, &quot;jsxFactory&quot;: &quot;h&quot;, and &quot;jsxFragmentFactory&quot;: &quot;f&quot; in deno.json.
+import { f, h } from &quot;@velotype/velomicro/tsx-micro&quot;
+
+const list = &lt;ul&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/ul&gt;
+const fragment = &lt;&gt;&lt;span&gt;a&lt;/span&gt;&lt;span&gt;b&lt;/span&gt;&lt;/&gt;
+
+document.body.append(list, ...fragment)
+</code></pre>
+<h2 id="api">API</h2>
+<table>
+<thead>
+<tr>
+<th>Export</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>h(tag, attrs, ...children)</code></td>
+<td><code>createElement</code>: creates an element, sets its attributes, and appends its children</td>
+</tr>
+<tr>
+<td><code>f(attrs, ...children)</code></td>
+<td><code>createFragment</code>: returns its children as an array</td>
+</tr>
+<tr>
+<td><code>jsx</code>, <code>jsxs</code>, <code>Fragment</code></td>
+<td>The automatic JSX runtime. <code>jsx</code> and <code>jsxs</code> are the same</td>
+</tr>
+<tr>
+<td><code>FunctionComponent&lt;AttrsType&gt;</code></td>
+<td><code>(attrs, children) =&gt; RenderableElements</code></td>
+</tr>
+<tr>
+<td><code>RenderableElements</code></td>
+<td><code>BasicTypes | HTMLElement | RenderableElements[] | null | undefined</code></td>
+</tr>
+<tr>
+<td><code>BasicTypes</code></td>
+<td><code>string | bigint | number | boolean</code></td>
+</tr>
+<tr>
+<td><code>EmptyAttrs</code>, <code>ChildrenAttr</code>, <code>IdAttr</code>, <code>StylePassthroughAttrs</code></td>
+<td>Attrs helper types</td>
+</tr>
+</tbody></table>
+<p>Imports: <code>@velotype/velomicro</code> is the runtime, and <code>@velotype/velomicro/tsx-micro</code> has <code>h</code>, <code>f</code>, and the types. In velomicro the JSX types accept any attribute on any element.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velomicro","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velomicro/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

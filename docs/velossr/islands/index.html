@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Islands - velossr docs</title>
+<meta name="description" content="A page can be mostly static HTML from the server, with interactive parts, called islands, that Velotype takes over in the browser.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velossr">
+<div id="app"><article id="doc">
+<h1 id="islands">Islands</h1>
+<p>A page can be mostly static HTML from the server, with interactive parts, called islands, that Velotype takes over in the browser.</p>
+<p>There is no hydration step that turns the server&#39;s HTML into live components. The server renders the markup for each island, and the data its component is created with. The browser then creates the component from the data and swaps it in with <code>replaceElementWithRoot()</code>. The server&#39;s HTML is shown until the swap, which happens in one step when the page&#39;s script runs.</p>
+<h2 id="the-server-half">The server half</h2>
+<p>The server writes two things for each island: its markup, in an element with an <code>id</code>, and its data, as JSON in a <code>&lt;script type=&quot;application/json&quot;&gt;</code> next to it. The JSON is written so that no string in it can end the script early, which is why the data below can contain <code>&lt;/script&gt;</code>.</p>
+<p>Keep the server&#39;s markup the same structure as what the browser component renders, so that nothing moves when the island is replaced.</p>
+<pre><code class="language-tsx">import { type ChildrenAttr, prepareHTMLVNodeForRendering, renderServerVNode, type ServerVNode, type StaticServerComponent } from &quot;@velotype/velossr&quot;
+
+type CounterData = {start: number, label: string}
+
+// The server&#39;s markup for the counter, the same structure the client Component renders
+const CounterMarkup: StaticServerComponent&lt;CounterData&gt; = function(attrs) {
+    return &lt;div class=&quot;counter&quot;&gt;&lt;span&gt;{attrs.label}: {attrs.start}&lt;/span&gt;&lt;input name=&quot;note&quot;/&gt;&lt;button type=&quot;button&quot;&gt;+1&lt;/button&gt;&lt;/div&gt;
+}
+
+/** Server-rendered markup for a client Component, and the data the client creates it with */
+const Island: StaticServerComponent&lt;{id: string, data: unknown} &amp; ChildrenAttr&gt; = function(attrs, children): ServerVNode {
+    return [
+        &lt;div id={attrs.id}&gt;{children}&lt;/div&gt;,
+        &lt;script type=&quot;application/json&quot; id={attrs.id + &quot;-data&quot;}&gt;{JSON.stringify(attrs.data)}&lt;/script&gt;,
+    ]
+}
+
+const data: CounterData = {start: 5, label: &quot;Clicks &lt;/script&gt; &amp; &lt;b&gt;&quot;}
+const page = &lt;html&gt;&lt;body&gt;
+    &lt;Island id=&quot;counter&quot; data={data}&gt;&lt;CounterMarkup {...data}/&gt;&lt;/Island&gt;
+    &lt;script type=&quot;module&quot; src=&quot;/main.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+const output = renderServerVNode(prepareHTMLVNodeForRendering(page), new Request(&quot;http://localhost/&quot;), {})
+console.log(new TextDecoder().decode(await output.toUint8Array()))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;div id=&quot;counter&quot;&gt;&lt;div class=&quot;counter&quot;&gt;&lt;span&gt;Clicks &amp;lt;/script&gt; &amp;amp; &amp;lt;b&gt;: 5&lt;/span&gt;&lt;input name=&quot;note&quot;&gt;&lt;button type=&quot;button&quot;&gt;+1&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;script type=&quot;application/json&quot; id=&quot;counter-data&quot;&gt;{&quot;start&quot;:5,&quot;label&quot;:&quot;Clicks \u003c/script&gt; &amp; &lt;b&gt;&quot;}&lt;/script&gt;&lt;script type=&quot;module&quot; src=&quot;/main.js&quot;&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<h2 id="the-browser-half">The browser half</h2>
+<p>The browser half is in the <a href="/docs/velotype/server-rendering/">Velotype docs</a>. It reads each island&#39;s data, creates the component, copies what the visitor typed into the server&#39;s form fields, and swaps the element in.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velossr","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velossr/islands/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

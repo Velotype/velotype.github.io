@@ -1,0 +1,5 @@
+/missing: 404 Nothing here
+/explode: 500 Something went wrong
+/check: 400 That request was malformed
+/check?id=1: 200 ok
+/fail: 500 Something went wrong

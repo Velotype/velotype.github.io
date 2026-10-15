@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - Velotype docs</title>
+<meta name="description" content="Velotype is a TSX framework that creates real DOM elements as your code runs. There is no virtual DOM and no reconciler, so the elements you create are the ones on the page, and a value that changes renders only the part of the page that depends on it.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>Velotype is a TSX framework that creates real DOM elements as your code runs. There is no virtual DOM and no reconciler, so the elements you create are the ones on the page, and a value that changes renders only the part of the page that depends on it.</p>
+<p>This guide installs Velotype, mounts an app, and covers the basics of writing TSX with it. Every example in these docs is a file that is type-checked against the published package, and run in a browser, so what you see compiles and runs.</p>
+<h2 id="install">Install</h2>
+<p>Velotype is a <a href="https://jsr.io/@velotype/velotype">JSR package</a> for Deno, and its code is bundled for the browser. Add it to a Deno project, and point the TSX compiler at it in <code>deno.json</code>:</p>
+<pre><code class="language-sh">deno add jsr:@velotype/velotype
+</code></pre>
+<pre><code class="language-json">{
+    &quot;compilerOptions&quot;: {
+        &quot;jsx&quot;: &quot;react-jsx&quot;,
+        &quot;jsxImportSource&quot;: &quot;@velotype/velotype&quot;,
+        &quot;lib&quot;: [&quot;dom&quot;, &quot;deno.ns&quot;, &quot;esnext&quot;]
+    }
+}
+</code></pre>
+<p><code>&quot;jsx&quot;: &quot;react-jsxdev&quot;</code> uses the development runtime instead, which supports <a href="/docs/velotype/development-tools/#hot-reloading">hot reloading</a>.</p>
+<p>Velotype is about 21kb minified and 7.7kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with <code>deno bundle</code> or any bundler that supports Deno specifiers.</p>
+<h2 id="mounting-an-app">Mounting an app</h2>
+<p><code>replaceElementWithRoot(root, element)</code> replaces an element that is already in the page with the app&#39;s root element and mounts its Components. It accepts <code>null</code>, so the result of <code>document.getElementById()</code> can be passed directly. It returns the new root element.</p>
+<p><code>removeElementRoot(element)</code> is its counterpart: it unmounts and releases the Components and RenderObjects in <code>element</code>, then removes it. Velotype only unmounts what it removes itself, so content that is removed with DOM methods is not unmounted.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, removeElementRoot, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+class App extends Component&lt;EmptyAttrs&gt; {
+    override render() {
+        return &lt;h1&gt;Hello Velotype&lt;/h1&gt;
+    }
+}
+
+// Replace the placeholder element with the app. The Components in it are mounted.
+// replaceElementWithRoot() accepts null, so getElementById() can be passed directly.
+const root = replaceElementWithRoot(&lt;App/&gt;, document.getElementById(&quot;app&quot;))
+
+// A Dialog, widget, or any part of a page that other code manages can hold Velotype content too:
+// insert a placeholder there, then replace it.
+const placeholder = document.createElement(&quot;div&quot;)
+document.body.append(placeholder)
+const dialogContent = replaceElementWithRoot(&lt;App/&gt;, placeholder)
+
+// removeElementRoot() unmounts and releases the Components in an element, then removes it.
+// Use it before other code removes content that Velotype put on the page.
+removeElementRoot(dialogContent)
+removeElementRoot(root)
+</code></pre>
+<p><code>replaceElementWithRoot()</code> is not limited to the app&#39;s root element. To add Velotype content to a part of the page that other code manages (such as a dialog or a third-party widget), insert a placeholder element there and replace it. Call <code>removeElementRoot()</code> before that code removes the content.</p>
+<h2 id="writing-tsx">Writing TSX</h2>
+<p>TSX is a way to write element creation that looks like HTML. In Velotype each tag creates an element, so its value is an <code>HTMLElement</code> and you can use it like any other.</p>
+<pre><code class="language-tsx">// TSX creates real DOM elements, so every one of these is an HTMLElement.
+const heading: HTMLHeadingElement = &lt;h1 class=&quot;title&quot;&gt;Attributes are HTML attributes&lt;/h1&gt;
+
+// Style objects are type checked: property names, keywords, units, and colors.
+// lowerCamelCase and hyphen-case both work, and so do custom properties.
+const styled: HTMLDivElement = &lt;div style={{
+    display: &quot;inline-block&quot;,
+    marginTop: &quot;4px&quot;,
+    &quot;margin-bottom&quot;: &quot;4px&quot;,
+    &quot;--brand-color&quot;: &quot;#336699&quot;,
+    color: &quot;var(--brand-color)&quot;,
+    opacity: 0.8,
+    width: &quot;calc(100% - 2rem)&quot;,
+    zIndex: 2,
+}}&gt;An object of styles&lt;/div&gt;
+
+// Attributes that start with &quot;on&quot; add event listeners
+const clicked: HTMLButtonElement = &lt;button type=&quot;button&quot; onClick={() =&gt; console.log(&quot;clicked&quot;)}&gt;Click me&lt;/button&gt;
+
+// Pass {handler, options} to set addEventListener() options
+const once: HTMLButtonElement = &lt;button type=&quot;button&quot; onClick={{handler: () =&gt; console.log(&quot;clicked once&quot;), options: {once: true}}}&gt;Click me once&lt;/button&gt;
+
+// on- listens for a custom event by its exact name
+const custom: HTMLDivElement = &lt;div on-my-event={() =&gt; console.log(&quot;my-event received&quot;)}&gt;&lt;/div&gt;
+custom.dispatchEvent(new CustomEvent(&quot;my-event&quot;))
+
+// false, null, and undefined render nothing
+const showDetails = false
+const conditional: HTMLDivElement = &lt;div&gt;{showDetails &amp;&amp; &lt;div&gt;Details&lt;/div&gt;}&lt;/div&gt;
+
+// Fragments group children without a wrapper element, and return them as an Array
+const items = &lt;&gt;&lt;li&gt;one&lt;/li&gt;&lt;li&gt;two&lt;/li&gt;&lt;/&gt;
+const list: HTMLUListElement = &lt;ul&gt;{items}&lt;/ul&gt;
+
+// Arrays of elements are children too
+const names = [&quot;Ada&quot;, &quot;Grace&quot;, &quot;Katherine&quot;]
+const people: HTMLUListElement = &lt;ul&gt;{names.map(name =&gt; &lt;li&gt;{name}&lt;/li&gt;)}&lt;/ul&gt;
+
+document.body.append(heading, styled, clicked, once, custom, conditional, list, people)
+</code></pre>
+<h3 id="elements-are-real-elements">Elements are real elements</h3>
+<p>A tag such as <code>&lt;div&gt;</code> evaluates to an <code>HTMLDivElement</code>. You can read its properties, call its methods, and append it with DOM APIs.</p>
+<h3 id="attributes-are-html-attributes">Attributes are HTML attributes</h3>
+<p>Velotype sets attributes the way HTML does, so you write <code>class</code> rather than <code>className</code>, and <code>for</code> rather than <code>htmlFor</code>.</p>
+<h3 id="style-objects">Style objects</h3>
+<p>The <code>style</code> attribute takes an object. Property names must be CSS properties, in lowerCamelCase (<code>marginTop</code>) or hyphen-case (<code>&quot;margin-top&quot;</code>), or custom properties (<code>&quot;--brand-color&quot;</code>). The values of commonly used properties are checked too: keywords must be ones the property accepts, lengths and times need a unit, and colors must be a named color, <code>#hex</code>, or a color function. Numbers are accepted only for properties that take no unit, such as <code>opacity</code> and <code>zIndex</code>. A value can end with <code> !important</code>, and values using <code>var()</code>, <code>calc()</code> and other CSS functions are always accepted.</p>
+<h3 id="event-listeners">Event listeners</h3>
+<p>Attributes that start with <code>on</code> add event listeners with <code>addEventListener()</code>: <code>onClick</code> listens for <code>click</code>. Pass <code>{handler, options}</code> to set the <code>addEventListener()</code> options. Use <code>on-</code> followed by the exact name to listen for a custom event, such as <code>on-my-event</code>.</p>
+<h3 id="conditional-rendering">Conditional rendering</h3>
+<p><code>false</code>, <code>null</code>, and <code>undefined</code> children render nothing, so <code>{condition &amp;&amp; &lt;div/&gt;}</code> works as expected.</p>
+<h3 id="fragments">Fragments</h3>
+<p><code>&lt;&gt;...&lt;/&gt;</code> groups children without a wrapper element. It returns them as an Array that can be used as children.</p>
+<h2 id="next-steps">Next steps</h2>
+<ul>
+<li><a href="/docs/velotype/components/">Components</a>: function components, class components, and their lifecycle</li>
+<li><a href="/docs/velotype/render-objects/">RenderObjects</a>: values that update the page in place</li>
+<li><a href="/docs/velotype/lists/">Lists</a>: lists that render, move, and remove only the rows that changed</li>
+</ul>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

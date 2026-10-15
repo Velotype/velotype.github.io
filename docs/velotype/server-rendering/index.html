@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server rendering - Velotype docs</title>
+<meta name="description" content="Velotype renders in the browser. To send a page's HTML from the server, render it with [velossr](/docs/velossr/), the server-side version of Velotype. It has its own components built for rendering on the server: static parts are prepared once, and async parts are streamed.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velotype">
+<div id="app"><article id="doc">
+<h1 id="server-rendering">Server rendering</h1>
+<p>Velotype renders in the browser. To send a page&#39;s HTML from the server, render it with <a href="/docs/velossr/">velossr</a>, the server-side version of Velotype. It has its own components built for rendering on the server: static parts are prepared once, and async parts are streamed.</p>
+<h2 id="no-hydration-step">No hydration step</h2>
+<p>There is no hydration step that turns the server&#39;s HTML into live Velotype Components. Velotype creates elements as TSX runs, so the interactive parts of a page are rendered again in the browser, and each one replaces the server&#39;s HTML for it with <code>replaceElementWithRoot()</code>. Rendering again is fast, the swap happens in one step when the page&#39;s script runs, and the server&#39;s HTML is shown until then.</p>
+<p>This is the island pattern:</p>
+<ol>
+<li>The server renders the markup for each interactive part (an island), and the data its Component is created with, as JSON in a <code>&lt;script type=&quot;application/json&quot;&gt;</code></li>
+<li>The browser creates each island&#39;s Component from its data and swaps it in, keeping what the user typed into the server&#39;s form fields before the script ran</li>
+</ol>
+<p>The server half is in the <a href="/docs/velossr/">velossr docs</a>. This is the browser half:</p>
+<pre><code class="language-tsx">import { Component, RenderBasic, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+type CounterData = {start: number, label: string}
+
+class Counter extends Component&lt;CounterData&gt; {
+    count = new RenderBasic&lt;number&gt;(this.attrs.start)
+
+    override render(attrs: Readonly&lt;CounterData&gt;) {
+        return &lt;div class=&quot;counter&quot;&gt;
+            &lt;span&gt;{attrs.label}: {this.count}&lt;/span&gt;
+            &lt;input name=&quot;note&quot;/&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; { this.count.value += 1 }}&gt;+1&lt;/button&gt;
+        &lt;/div&gt;
+    }
+}
+
+/** Replace the server-rendered island id with the element that render creates from the island&#39;s data */
+function hydrate&lt;DataType&gt;(id: string, render: (data: DataType) =&gt; HTMLElement): void {
+    const serverElement = document.getElementById(id)
+    const dataElement = document.getElementById(id + &quot;-data&quot;)
+    if (!serverElement || !dataElement) {
+        return
+    }
+    const element = render(JSON.parse(dataElement.textContent || &quot;null&quot;))
+    // Keep what the user typed or picked before this script ran, pairing form fields by their order
+    const fields = &quot;input, textarea, select&quot;
+    const serverFields = serverElement.querySelectorAll&lt;HTMLInputElement&gt;(fields)
+    const newFields = element.querySelectorAll&lt;HTMLInputElement&gt;(fields)
+    let focused: HTMLElement | null = null
+    for (let i = 0; i &lt; serverFields.length &amp;&amp; i &lt; newFields.length; i++) {
+        newFields[i].value = serverFields[i].value
+        newFields[i].checked = serverFields[i].checked
+        if (serverFields[i] === document.activeElement) {
+            focused = newFields[i]
+        }
+    }
+    replaceElementWithRoot(element, serverElement)
+    if (focused) {
+        focused.focus()
+    }
+}
+
+hydrate&lt;CounterData&gt;(&quot;counter&quot;, data =&gt; &lt;Counter {...data}/&gt;)
+</code></pre>
+<ul>
+<li>Keep the server&#39;s markup and the Component&#39;s render the same structure, so that nothing moves when the island is replaced</li>
+<li>The server and browser files use different JSX settings (<code>&quot;jsxImportSource&quot;: &quot;@velotype/velossr&quot;</code> and <code>&quot;@velotype/velotype&quot;</code>), so keep them in separate directories with their own <code>deno.json</code>, or set it per file with a <code>/** @jsxImportSource @velotype/velossr */</code> comment</li>
+</ul>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velotype","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velotype/server-rendering/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - velodesign docs</title>
+<meta name="description" content="velodesign is a themed component library for [Velotype](/docs/velotype/). Where HTML has an element for the job (input, button, details, dialog), the component is that element, so keyboard support, form participation, and browser autofill come from the platform. Colors come from a small set of CSS custom properties, so you can re-theme the whole library without touching a component.">
+<link rel="icon" href="data:,">
+</head>
+<body data-doc="velodesign">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>velodesign is a themed component library for <a href="/docs/velotype/">Velotype</a>. Where HTML has an element for the job (<code>input</code>, <code>button</code>, <code>details</code>, <code>dialog</code>), the component is that element, so keyboard support, form participation, and browser autofill come from the platform. Colors come from a small set of CSS custom properties, so you can re-theme the whole library without touching a component.</p>
+<p>This guide covers what the components have in common, and the parts of the library that are not components. For each component&#39;s props and a live preview, see the <a href="https://velotype.github.io/velodesign/">showcase</a>. The <a href="/docs/velodesign/components/">components</a> page lists all of them, grouped by category, with a link to each.</p>
+<p>Every example in these docs is a file that is type-checked against the published package, and run in a browser. This site is built with velodesign.</p>
+<h2 id="install">Install</h2>
+<p>velodesign is a <a href="https://jsr.io/@velotype/velodesign">JSR package</a> for Deno. It is built on Velotype, and velodesign 0.1.0 uses Velotype 0.0.27, so add both and use that Velotype version. Mixing Velotype versions in one app is not supported.</p>
+<pre><code class="language-sh">deno add jsr:@velotype/velotype@0.0.27 jsr:@velotype/velodesign@0.1.0
+</code></pre>
+<pre><code class="language-json">{
+    &quot;compilerOptions&quot;: {
+        &quot;jsx&quot;: &quot;react-jsx&quot;,
+        &quot;jsxImportSource&quot;: &quot;@velotype/velotype&quot;,
+        &quot;lib&quot;: [&quot;dom&quot;, &quot;deno.ns&quot;, &quot;esnext&quot;]
+    }
+}
+</code></pre>
+<h2 id="use-it">Use it</h2>
+<p><code>Theme.injectStyles()</code> runs once, before any component renders. It sets up the CSS custom properties every component reads, and a small CSS reset. Then use components as tags in a Velotype app:</p>
+<pre><code class="language-tsx">import { Button, Checkbox, Stack, Theme } from &quot;@velotype/velodesign&quot;
+import { replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+// Theme.injectStyles() runs once, before any component renders. It sets up the CSS custom
+// properties every component reads, and a small CSS reset.
+Theme.injectStyles()
+
+replaceElementWithRoot(
+    &lt;Stack direction=&quot;column&quot;&gt;
+        &lt;Checkbox&gt;Enable notifications&lt;/Checkbox&gt;
+        &lt;Button type=&quot;primary&quot; onClick={() =&gt; console.log(&quot;clicked&quot;)}&gt;Save&lt;/Button&gt;
+    &lt;/Stack&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+<h2 id="a-tour">A tour</h2>
+<p>A few components from different categories, to show how they fit together. Form components are native elements with the usual attributes, feedback and overlay components show what happened, and <code>showToast()</code> is a function you call from a handler.</p>
+<pre><code class="language-tsx">import { Alert, Badge, Button, Card, Checkbox, Select, showToast, Stack, Tabs, Tag, TextBox, Tooltip } from &quot;@velotype/velodesign&quot;
+import { replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+replaceElementWithRoot(
+    &lt;Stack direction=&quot;column&quot;&gt;
+        {/* Form: native inputs, buttons, and selects */}
+        &lt;Stack&gt;
+            &lt;TextBox type=&quot;text&quot; name=&quot;name&quot; placeholder=&quot;Your name&quot; required/&gt;
+            &lt;Select name=&quot;role&quot; placeholder=&quot;Choose a role&quot; options={[
+                {value: &quot;admin&quot;, label: &quot;Administrator&quot;},
+                {value: &quot;user&quot;, label: &quot;User&quot;},
+            ]}/&gt;
+            &lt;Checkbox name=&quot;terms&quot; checked&gt;I agree&lt;/Checkbox&gt;
+        &lt;/Stack&gt;
+        &lt;Stack&gt;
+            &lt;Button type=&quot;primary&quot; onClick={() =&gt; showToast(&quot;Saved&quot;, {type: &quot;success&quot;, duration: 3000})}&gt;Save&lt;/Button&gt;
+            &lt;Button type=&quot;secondary&quot;&gt;Cancel&lt;/Button&gt;
+            &lt;Button type=&quot;danger&quot; disabled&gt;Delete&lt;/Button&gt;
+        &lt;/Stack&gt;
+
+        {/* Feedback */}
+        &lt;Alert type=&quot;warning&quot; title=&quot;Heads up&quot;&gt;This action cannot be undone.&lt;/Alert&gt;
+
+        {/* Data display */}
+        &lt;Card header=&quot;A card&quot; footer={&lt;Button type=&quot;text&quot;&gt;Details&lt;/Button&gt;}&gt;
+            &lt;Badge type=&quot;primary&quot;&gt;new&lt;/Badge&gt; &lt;Tag type=&quot;secondary&quot;&gt;tagged&lt;/Tag&gt;
+        &lt;/Card&gt;
+        &lt;Tabs tabs={[
+            {key: &quot;one&quot;, label: &quot;One&quot;, content: &lt;p&gt;The first tab&lt;/p&gt;},
+            {key: &quot;two&quot;, label: &quot;Two&quot;, content: &lt;p&gt;The second tab&lt;/p&gt;},
+        ]}/&gt;
+
+        {/* Overlays */}
+        &lt;Tooltip content=&quot;More about this&quot; placement=&quot;top&quot;&gt;&lt;Button type=&quot;text&quot;&gt;Hover me&lt;/Button&gt;&lt;/Tooltip&gt;
+    &lt;/Stack&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+<h2 id="what-is-in-the-library">What is in the library</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Typography</td>
+<td><code>Heading</code>, <code>Text</code>, <code>Paragraph</code>, <code>Icon</code></td>
+</tr>
+<tr>
+<td>Layout</td>
+<td><code>Stack</code>, <code>Grid</code></td>
+</tr>
+<tr>
+<td>Form</td>
+<td><code>Button</code>, <code>Checkbox</code>, <code>Select</code>, <code>TextBox</code>, <code>Textarea</code>, <code>Toggle</code>, <code>RadioButton</code></td>
+</tr>
+<tr>
+<td>Navigation</td>
+<td><code>Link</code>, <code>NavLink</code>, <code>Navbar</code>, <code>Sidebar</code>, <code>Breadcrumbs</code>, <code>Pagination</code>, <code>Menu</code>, <code>Steps</code></td>
+</tr>
+<tr>
+<td>Feedback</td>
+<td><code>Alert</code>, <code>Toast</code>, <code>Tooltip</code>, <code>Spinner</code>, <code>Progress</code>, <code>Skeleton</code>, <code>Empty</code></td>
+</tr>
+<tr>
+<td>Overlays</td>
+<td><code>Modal</code>, <code>Drawer</code>, <code>Popover</code>, <code>Popconfirm</code>, <code>ContextMenu</code>, <code>Command</code></td>
+</tr>
+<tr>
+<td>Data display</td>
+<td><code>Card</code>, <code>Table</code>, <code>DataTable</code>, <code>Tabs</code>, <code>Tree</code>, <code>Calendar</code>, <code>CodeBlock</code>, <code>Badge</code>, <code>Tag</code></td>
+</tr>
+<tr>
+<td>Data entry</td>
+<td><code>DatePicker</code>, <code>Slider</code>, <code>Combobox</code>, <code>Upload</code>, <code>Rate</code>, <code>Form</code></td>
+</tr>
+<tr>
+<td>Charts</td>
+<td><code>LineChart</code>, <code>AreaChart</code>, <code>BarChart</code>, <code>PieChart</code>, <code>Gauge</code>, <code>Sparkline</code></td>
+</tr>
+</tbody></table>
+<h2 id="next-steps">Next steps</h2>
+<ul>
+<li><a href="/docs/velodesign/theming/">Theming</a>: colors, light and dark, and the symbols components draw</li>
+<li><a href="/docs/velodesign/layout-and-typography/">Layout and typography</a>: <code>Stack</code>, <code>Grid</code>, and the text components</li>
+<li><a href="/docs/velodesign/conventions/">Conventions</a>: attrs every component accepts, strings, icons, toasts, and routing</li>
+</ul>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velodesign","nav":[{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velodevtools","name":"Velotype DevTools","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodevtools/"},{"slug":"panels","title":"Panels","url":"/docs/velodevtools/panels/"},{"slug":"limitations","title":"Known limitations","url":"/docs/velodevtools/limitations/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"Velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"}]}],"current":"/docs/velodesign/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>
