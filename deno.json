@@ -1,4 +1,5 @@
 {
+    "minimumDependencyAge": {"age": "P1D", "exclude": ["jsr:@velotype/*"]},
     "tasks": {
         "check": "deno run -A ./scripts/check-examples.ts",
         "run-examples": "deno run -A ./scripts/run-examples.ts",
@@ -12,9 +13,9 @@
         "lib": ["dom", "deno.ns", "esnext"]
     },
     "imports": {
-        "@velotype/velotype": "jsr:@velotype/velotype@^0.0.27",
-        "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.0.27",
-        "@velotype/velodesign": "jsr:@velotype/velodesign@^0.1.0"
+        "@velotype/velotype": "jsr:@velotype/velotype@^0.3.1",
+        "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.3.1",
+        "@velotype/velodesign": "jsr:@velotype/velodesign@^0.1.3"
     },
     "lint": {"rules": {"exclude": ["jsx-key"]}}
 }
