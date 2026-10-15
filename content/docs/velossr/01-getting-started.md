@@ -43,7 +43,7 @@ velossr writes attributes as strings, so you write TSX the same as if you were w
 
 ### Conditional rendering
 
-`null` and `undefined` children render nothing, and so does a ternary that gives `null`. In velossr 0.0.9, a `false` child is written as the text `false`, so `{condition && <li/>}` writes `false` when the condition is false. Use `{condition ? <li/> : null}` until the next release, which fixes this.
+`false`, `null`, and `undefined` children render nothing, so `{condition && <li/>}` works as it does in Velotype. `true` is written as text. Before velossr 0.0.10 a `false` child was written as the text `false`, so use `{condition ? <li/> : null}` if you are on an older version.
 
 ### Fragments
 

@@ -7,6 +7,6 @@
     },
     "imports": {
         "@velotype/velotype": "jsr:@velotype/velotype@0.0.27",
-        "@velotype/velodesign": "jsr:@velotype/velodesign@0.1.0"
+        "@velotype/velodesign": "jsr:@velotype/velodesign@0.1.1"
     }
 }

@@ -78,7 +78,11 @@
 </thead>
 <tbody><tr>
 <td><code>getColorScheme()</code></td>
-<td>The scheme in effect: <code>&quot;light&quot;</code> or <code>&quot;dark&quot;</code></td>
+<td>The scheme in effect: <code>&quot;light&quot;</code> or <code>&quot;dark&quot;</code>. A choice of <code>&quot;default&quot;</code> has already become one of these</td>
+</tr>
+<tr>
+<td><code>getColorSchemePreference()</code></td>
+<td>What the reader chose: <code>&quot;light&quot;</code>, <code>&quot;dark&quot;</code>, or <code>&quot;default&quot;</code>. A theme picker shows this one as selected, because <code>getColorScheme()</code> cannot tell a reader who chose light from one whose browser prefers it</td>
 </tr>
 <tr>
 <td><code>setColorScheme(scheme)</code></td>
@@ -111,8 +115,15 @@ console.log(ColorScheme.getColorScheme())
 
 // setColorScheme() takes &quot;light&quot;, &quot;dark&quot;, or &quot;default&quot; (follow the browser&#39;s preference), and
 // remembers the choice in localStorage
+ColorScheme.setColorScheme(&quot;default&quot;)
+
+// getColorScheme() is what is in effect, so &quot;default&quot; has already become &quot;light&quot; or &quot;dark&quot;.
+// getColorSchemePreference() is what the reader chose, &quot;default&quot; included, which is what a theme
+// picker needs to show as selected.
+console.log(ColorScheme.getColorScheme(), ColorScheme.getColorSchemePreference())
+
 ColorScheme.setColorScheme(&quot;dark&quot;)
-console.log(ColorScheme.getColorScheme())
+console.log(ColorScheme.getColorScheme(), ColorScheme.getColorSchemePreference())
 
 // Go back to the stored choice, or the browser&#39;s preference when there is none
 ColorScheme.resetColorScheme()

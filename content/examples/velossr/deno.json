@@ -15,7 +15,7 @@
         ]
     },
     "imports": {
-        "@velotype/velossr": "jsr:@velotype/velossr@0.0.9",
+        "@velotype/velossr": "jsr:@velotype/velossr@0.0.10",
         "@velotype/veloserver": "jsr:@velotype/veloserver@0.3.1"
     }
 }

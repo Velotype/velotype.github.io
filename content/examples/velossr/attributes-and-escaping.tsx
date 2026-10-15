@@ -18,8 +18,7 @@ await show(<input type="checkbox" checked={true} disabled={false}/>)
 const untrusted = `<script>alert("hi")</script> & "quotes"`
 await show(<p title={untrusted}>{untrusted}</p>)
 
-// Fragments group children without a wrapper element.
-// For a condition, use a ternary that gives null. A boolean child is written as text, so
-// {signedIn && <li/>} would write "false" when signedIn is false.
+// Fragments group children without a wrapper element. false, null, and undefined render nothing,
+// so {condition && <li/>} works as it does in Velotype. true is written as text.
 const signedIn = false
-await show(<ul>{signedIn ? <li>Account</li> : null}<><li>one</li><li>two</li></></ul>)
+await show(<ul>{signedIn && <li>Account</li>}<><li>one</li><li>two</li></></ul>)

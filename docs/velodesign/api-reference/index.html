@@ -32,6 +32,10 @@
 <td>The scheme in effect: <code>&quot;light&quot;</code> or <code>&quot;dark&quot;</code></td>
 </tr>
 <tr>
+<td><code>ColorScheme.getColorSchemePreference()</code></td>
+<td>What the reader chose: <code>&quot;light&quot;</code>, <code>&quot;dark&quot;</code>, or <code>&quot;default&quot;</code></td>
+</tr>
+<tr>
 <td><code>ColorScheme.setColorScheme(scheme)</code></td>
 <td>Sets and remembers <code>&quot;light&quot;</code>, <code>&quot;dark&quot;</code>, or <code>&quot;default&quot;</code></td>
 </tr>
@@ -121,6 +125,18 @@
 </tr>
 </thead>
 <tbody><tr>
+<td><code>History.configureBasePath(path)</code></td>
+<td>Sets the path the app is served from, such as <code>&quot;/my-repo&quot;</code>. Call it once at startup</td>
+</tr>
+<tr>
+<td><code>History.getPathname()</code></td>
+<td>The location&#39;s path, without the base path</td>
+</tr>
+<tr>
+<td><code>History.resolveHref(path)</code></td>
+<td>A path with the base path added</td>
+</tr>
+<tr>
 <td><code>History.changeLocation(path)</code></td>
 <td><code>pushState</code>, and dispatches <code>locationchange</code></td>
 </tr>

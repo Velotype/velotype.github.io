@@ -88,7 +88,16 @@ document.body.append(toastButton, &lt;p&gt;Done &lt;I i=&quot;check&quot;/&gt;&l
 <p><code>Link</code> is a plain anchor, so open in a new tab, copy link address, and drag to a bookmark all work. Add <code>spa</code> and a click changes the location with <code>history.pushState()</code> instead of loading a page.</p>
 <p><code>NavLink</code> is a <code>Link</code> that knows whether it is the current page. It gets the class <code>vtd-nav-link-active</code>, or the <code>activeClass</code> you give it. <code>exact</code> is <code>true</code> by default, and matches the whole path. With <code>false</code> it matches any path that starts with <code>to</code>.</p>
 <p><code>History.changeLocation(path)</code> does a <code>pushState</code> and dispatches a <code>locationchange</code> event, which <code>NavLink</code> and <code>PageSelector</code> listen for. <code>History.loadNewPageLocation(path)</code> loads the page.</p>
+<h3 id="serving-from-a-sub-path">Serving from a sub-path</h3>
+<p>An app that is not at the root of its domain, such as a GitHub Pages project site at <code>/my-repo/</code>, calls <code>History.configureBasePath(&quot;/my-repo&quot;)</code> once at startup. The app&#39;s own paths then leave the base path out: <code>Link</code> and <code>NavLink</code> add it to what they write, <code>NavLink</code> and <code>PageSelector</code> match against the path without it, and <code>changeLocation()</code> adds it. <code>History.getPathname()</code> is the location&#39;s path without the base path, and <code>History.resolveHref(path)</code> is a path with it.</p>
 <pre><code class="language-tsx">import { History, Link, NavLink, Navbar } from &quot;@velotype/velodesign&quot;
+
+// An app served from a sub-path, such as a GitHub Pages project site at /my-repo/, sets its base path
+// once at startup. Paths in the app then do not include it: Link and NavLink add it to hrefs, and
+// getPathname() takes it off the location.
+History.configureBasePath(&quot;/my-repo&quot;)
+console.log(History.resolveHref(&quot;/docs/&quot;))   // /my-repo/docs/
+console.log(History.getPathname())           // the location&#39;s path, without /my-repo
 
 // A Link is a plain anchor, so open-in-new-tab, copy-link, and drag-to-bookmark all work.
 // spa makes a click change the location with history.pushState() instead of loading a page.

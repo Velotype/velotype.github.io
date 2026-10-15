@@ -1,5 +1,12 @@
 import { History, Link, NavLink, Navbar } from "@velotype/velodesign"
 
+// An app served from a sub-path, such as a GitHub Pages project site at /my-repo/, sets its base path
+// once at startup. Paths in the app then do not include it: Link and NavLink add it to hrefs, and
+// getPathname() takes it off the location.
+History.configureBasePath("/my-repo")
+console.log(History.resolveHref("/docs/"))   // /my-repo/docs/
+console.log(History.getPathname())           // the location's path, without /my-repo
+
 // A Link is a plain anchor, so open-in-new-tab, copy-link, and drag-to-bookmark all work.
 // spa makes a click change the location with history.pushState() instead of loading a page.
 const links = <nav>

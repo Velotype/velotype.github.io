@@ -31,7 +31,8 @@ The theme is `light` or `dark`, set as `data-theme` on the `<html>` element. `Co
 
 | Function | Does |
 |---|---|
-| `getColorScheme()` | The scheme in effect: `"light"` or `"dark"` |
+| `getColorScheme()` | The scheme in effect: `"light"` or `"dark"`. A choice of `"default"` has already become one of these |
+| `getColorSchemePreference()` | What the reader chose: `"light"`, `"dark"`, or `"default"`. A theme picker shows this one as selected, because `getColorScheme()` cannot tell a reader who chose light from one whose browser prefers it |
 | `setColorScheme(scheme)` | Takes `"light"`, `"dark"`, or `"default"` to follow the browser's preference, and remembers it in `localStorage` |
 | `resetColorScheme()` | Applies the stored choice, or the browser's preference when there is none |
 
