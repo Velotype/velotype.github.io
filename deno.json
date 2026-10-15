@@ -1,0 +1,17 @@
+{
+    "tasks": {
+        "build": "deno bundle ./src/main.tsx --output ./build/main.js --minify --platform browser",
+        "serve": "deno run --allow-read --allow-net jsr:@std/http@^1.0.20/file-server . --port 8000"
+    },
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "@velotype/velotype",
+        "lib": ["dom", "deno.ns", "esnext"]
+    },
+    "imports": {
+        "@velotype/velotype": "jsr:@velotype/velotype@^0.0.27",
+        "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.0.27",
+        "@velotype/velodesign": "jsr:@velotype/velodesign@^0.1.0"
+    },
+    "lint": {"rules": {"exclude": ["jsx-key"]}}
+}
