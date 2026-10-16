@@ -16,7 +16,15 @@ const root = new URL("../", import.meta.url)
 const docsSource = new URL("content/docs/", root)
 const examplesSource = new URL("content/examples/", root)
 
-type Page = {slug: string, title: string, description: string, url: string, body: string, markdown: string}
+type Page = {slug: string, title: string, description: string, url: string, body: string, markdown: string, section?: string, mdPath: string}
+
+// A directory inside a project's docs is a section: its pages follow the project's own in the sidebar,
+// under a heading, at /docs/<project>/<dir>/. Its examples are another project's (they are type-checked
+// and run by that name), and projectId is the project page that links to the section.
+type Section = {dir: string, title: string, examples: string, projectId: string}
+const sections: Record<string, Section[]> = {
+    velotype: [{dir: "devtools", title: "Velotype DevTools", examples: "velodevtools", projectId: "velodevtools"}],
+}
 
 const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const slugify = (text: string) => text.toLowerCase().replace(/<[^>]*>/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
@@ -56,32 +64,42 @@ function inlineOutputs(project: string, markdown: string, source: string): strin
     })
 }
 
-function readPages(project: string): Page[] {
-    const files = [...Deno.readDirSync(new URL(`${project}/`, docsSource))]
+function readDirPages(project: string, examples: string, section?: Section): Page[] {
+    const subdir = section ? `${project}/${section.dir}` : project
+    const files = [...Deno.readDirSync(new URL(`${subdir}/`, docsSource))]
         .filter(entry => entry.isFile && entry.name.endsWith(".md"))
         .map(entry => entry.name)
         .sort()
     return files.map((file, index) => {
-        const source = `content/docs/${project}/${file}`
-        const text = Deno.readTextFileSync(new URL(`${project}/${file}`, docsSource))
+        const source = `content/docs/${subdir}/${file}`
+        const text = Deno.readTextFileSync(new URL(`${subdir}/${file}`, docsSource))
         const title = text.match(/^# (.+)$/m)?.[1]
         if (!title) {
             throw new Error(`${source} has no # heading`)
         }
         const description = text.replace(/^# .+$/m, "").trim().split(/\n\s*\n/)[0].replace(/\s+/g, " ").replace(/[`*_]/g, "")
         const slug = file.replace(/^\d+-/, "").replace(/\.md$/, "")
-        const markdown = inlineOutputs(project, inlineExamples(project, text, source), source)
+        const markdown = inlineOutputs(examples, inlineExamples(examples, text, source), source)
+        const base = `/docs/${subdir}/`
         return {
-            slug, title, description, markdown,
-            url: index == 0 ? `/docs/${project}/` : `/docs/${project}/${slug}/`,
+            slug, title, description, markdown, section: section?.title,
+            mdPath: `docs/${subdir}/${slug}.md`,
+            url: index == 0 ? base : `${base}${slug}/`,
             body: marked.parse(markdown) as string,
         }
     })
 }
 
+function readPages(project: string): Page[] {
+    return [
+        ...readDirPages(project, project),
+        ...(sections[project] ?? []).flatMap(section => readDirPages(project, section.examples, section)),
+    ]
+}
+
 const projectsWithDocs = [...Deno.readDirSync(docsSource)].filter(entry => entry.isDirectory).map(entry => entry.name).sort()
 
-const nav = projectsWithDocs.map(id => ({id, name: projectById.get(id)!.name, pages: readPages(id).map(({slug, title, url}) => ({slug, title, url}))}))
+const nav = projectsWithDocs.map(id => ({id, name: projectById.get(id)!.name, pages: readPages(id).map(({slug, title, url, section}) => ({slug, title, url, section}))}))
 
 // Every link to another docs page, and every #anchor in it, must exist
 const pagesByUrl = new Map<string, string>()
@@ -112,18 +130,18 @@ if (brokenLinks.length > 0) {
 for (const project of projectsWithDocs) {
     const name = projectById.get(project)!.name
     const pages = readPages(project)
-    for (const [index, page] of pages.entries()) {
-        const dir = new URL(index == 0 ? `docs/${project}/` : `docs/${project}/${page.slug}/`, root)
+    for (const page of pages) {
+        const dir = new URL(page.url.slice(1), root)
         await Deno.mkdir(dir, {recursive: true})
         // The same page as Markdown, with its examples and outputs inlined, for llms.txt to link to
-        await Deno.writeTextFile(new URL(`docs/${project}/${page.slug}.md`, root), page.markdown)
+        await Deno.writeTextFile(new URL(page.mdPath, root), page.markdown)
         const navJson = JSON.stringify({project, nav, current: page.url}).replace(/</g, "\\u003c")
         await Deno.writeTextFile(new URL("index.html", dir), `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(page.title)} - ${escapeHtml(name)} docs</title>
+<title>${escapeHtml(page.title)} - ${escapeHtml(page.section ? `${page.section}, ${name}` : name)} docs</title>
 <meta name="description" content="${escapeHtml(page.description)}">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="icon" type="image/png" href="/assets/logo.png">
@@ -140,7 +158,14 @@ ${page.body}</article></div>
     }
 }
 // The bundle uses this to link each project to its docs
-await Deno.writeTextFile(new URL("src/docs-index.json", root), JSON.stringify(Object.fromEntries(nav.map(entry => [entry.id, entry.pages[0].url])), null, 4) + "\n")
+// (a project whose docs are a section of another's links to that section)
+const docsLanding = new Map(nav.map(entry => [entry.id, entry.pages[0].url]))
+for (const [project, list] of Object.entries(sections)) {
+    for (const section of list) {
+        docsLanding.set(section.projectId, `/docs/${project}/${section.dir}/`)
+    }
+}
+await Deno.writeTextFile(new URL("src/docs-index.json", root), JSON.stringify(Object.fromEntries(docsLanding), null, 4) + "\n")
 console.log(`Built docs for ${projectsWithDocs.join(", ") || "no projects"}`)
 
 // llms.txt: what a visiting agent should know about the projects, from content/llms-intro.md plus a
@@ -168,13 +193,13 @@ if (designOn) {
 }
 lines.push("", "## Projects", "")
 for (const project of projects) {
-    const docs = nav.find(entry => entry.id == project.id)
-    lines.push(`- [${project.name}](${site}/projects/${project.id}/): ${project.tagline} Repository: ${project.links[0].to}${docs ? ` Docs: ${site}${docs.pages[0].url}` : ""}`)
+    const docs = docsLanding.get(project.id)
+    lines.push(`- [${project.name}](${site}/projects/${project.id}/): ${project.tagline} Repository: ${project.links[0].to}${docs ? ` Docs: ${site}${docs}` : ""}`)
 }
 for (const entry of nav) {
     lines.push("", `## ${entry.name} docs`, "")
     for (const page of readPages(entry.id)) {
-        lines.push(`- [${page.title}](${site}/docs/${entry.id}/${page.slug}.md): ${page.description}`)
+        lines.push(`- [${page.section ? `${page.section}: ` : ""}${page.title}](${site}/${page.mdPath}): ${page.description}`)
     }
 }
 lines.push("", "## Optional", "",

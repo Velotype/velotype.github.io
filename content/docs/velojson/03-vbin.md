@@ -41,7 +41,7 @@ Output:
 
 ## Debugging
 
-`VSON.decode()` reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as `{"1": 7, "2": "Widget"}`. This is what the [VeloJSON panel](/docs/velodevtools/) of the DevTools extension shows for a VBIN payload.
+`VSON.decode()` reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as `{"1": 7, "2": "Widget"}`. This is what the [VeloJSON panel](/docs/velotype/devtools/) of the DevTools extension shows for a VBIN payload.
 
 ## Generating the code
 

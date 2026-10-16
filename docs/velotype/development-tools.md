@@ -21,7 +21,7 @@ The development server talks to the dev runtime through `globalThis.__VELOTYPE_H
 
 ## Debugging
 
-The [Velotype DevTools](/docs/velodevtools/) extension shows the live component tree, the event bus, and VSON payloads.
+The [Velotype DevTools](/docs/velotype/devtools/) extension shows the live component tree, the event bus, and VSON payloads.
 
 `@velotype/velotype/devtools` exports read-only access to Velotype's internal state (`__vtAppMetadata`) and the devtools hook (`getDevtoolsHook()`), for debugging and for the extension. Applications do not need to import it, because Velotype registers with the devtools hook from any entry point.
 

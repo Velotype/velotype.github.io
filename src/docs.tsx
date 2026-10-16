@@ -1,9 +1,9 @@
 import { Breadcrumbs, CodeBlock, Grid, Heading, Link, NavLink, Stack, TableOfContents, Text } from "@velotype/velodesign"
 import type { TableOfContentsItemType } from "@velotype/velodesign"
 import { setStylesheet } from "@velotype/velotype"
-import { projectById } from "./projects.ts"
+import { groups, projectById } from "./projects.ts"
 
-type DocsPage = {slug: string, title: string, url: string}
+type DocsPage = {slug: string, title: string, url: string, section?: string}
 type DocsNav = {project: string, nav: {id: string, name: string, pages: DocsPage[]}[], current: string}
 
 const languageOf = (code: Element): "tsx" | "css" | "plain" => {
@@ -28,6 +28,17 @@ function headings(article: HTMLElement): TableOfContentsItemType[] {
         label: heading.textContent,
         level: heading.tagName == "H2" ? 1 : 2,
     }))
+}
+
+/** The other projects' docs under their group's name. The teaching frameworks are left out */
+function otherDocs(data: DocsNav): HTMLElement {
+    return <Stack direction="column" gap="sm">{groups.filter(group => group.inDocsNav).map(group => {
+        const entries = group.ids.filter(id => id != data.project).flatMap(id => data.nav.filter(entry => entry.id == id))
+        return entries.length > 0 && <div>
+            <Text type="muted" style={{display: "block", margin: "0 0.5em 0.25em"}}>{group.title}</Text>
+            {entries.map(entry => <Link to={entry.pages[0].url}>{entry.name}</Link>)}
+        </div>
+    })}</Stack>
 }
 
 export function DocsPage(): HTMLElement {
@@ -73,10 +84,12 @@ export function DocsPage(): HTMLElement {
         <nav class="vtp-docs-nav" aria-label={`${project.name} documentation`}>
             <Stack direction="column" gap="sm">
                 <Heading level={2} style={{fontSize: "1.1em"}}>{project.name}</Heading>
-                <div>{entry.pages.map(docsPage => <NavLink to={docsPage.url}>{docsPage.title}</NavLink>)}</div>
-                <Text type="muted">Other docs</Text>
-                <div>{data.nav.filter(other => other.id != data.project).map(other =>
-                    <Link to={other.pages[0].url}>{other.name}</Link>)}</div>
+                <div>{entry.pages.map((docsPage, i) => <>
+                    {docsPage.section && docsPage.section != entry.pages[i - 1]?.section &&
+                        <Text type="muted" style={{display: "block", margin: "0.75em 0.5em 0.25em"}}>{docsPage.section}</Text>}
+                    <NavLink to={docsPage.url}>{docsPage.title}</NavLink>
+                </>)}</div>
+                {otherDocs(data)}
             </Stack>
         </nav>
         <div class="vtp-docs-article">

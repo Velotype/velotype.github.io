@@ -25,7 +25,8 @@ export type Project = {
     links: Link[]
     resources?: Resource[]
 }
-export type Group = {title: string, note?: string, ids: string[]}
+/** inDocsNav: whether the docs sidebar lists the group's projects (the teaching frameworks are not for adopting, so it does not) */
+export type Group = {title: string, note?: string, ids: string[], inDocsNav: boolean}
 
 const gh = (repo: string): Link => ({label: "GitHub", to: `https://github.com/Velotype/${repo}`})
 const jsr = (pkg: string): Link => ({label: "JSR", to: `https://jsr.io/@velotype/${pkg}`})
@@ -114,6 +115,11 @@ class ServerList extends Component<EmptyAttrs> {
         },
         links: [gh("velotype"), jsr("velotype")],
         resources: [
+            {
+                name: "Velotype DevTools", tag: "Chrome extension",
+                text: "Chrome DevTools panels for debugging Velotype apps: the live component tree with each component's fields, the event bus's registrations, and a decoder for VSON and VBIN payloads. It is built from source and loaded unpacked.",
+                links: [{label: "Docs", to: "/docs/velotype/devtools/"}, {label: "Learn more", to: "/projects/velodevtools/"}, gh("velodevtools")],
+            },
             {
                 name: "velotype-perf-demo", tag: "benchmark",
                 text: "The same fleet dashboard written in Velotype, Solid, Svelte, Vue, React, Preact, Lit, and plain DOM code, with 10,000 rows by default. The page loads each one and times creating rows, live updates, typing a filter, sorting, and moving a row in your own browser.",
@@ -412,9 +418,9 @@ return <div><ComplexComponent foo="Component!"></ComplexComponent></div>`,
 ]
 
 export const groups: Group[] = [
-    {title: "Front end", note: "TSX that creates real DOM elements, with no virtual DOM.", ids: ["velotype", "velodesign", "velossr", "velodevtools"]},
-    {title: "Server and wire format", ids: ["veloserver", "velojson"]},
-    {title: "Learn", note: "The smallest versions of the idea, written to be read.", ids: ["velomicro", "velomini"]},
+    {title: "Front end", note: "TSX that creates real DOM elements, with no virtual DOM.", ids: ["velotype", "velodesign"], inDocsNav: true},
+    {title: "Server", note: "Serve pages and APIs, render HTML, and carry the data between server and browser.", ids: ["velossr", "veloserver", "velojson"], inDocsNav: true},
+    {title: "Learn", note: "The smallest versions of the idea, written to be read.", ids: ["velomicro", "velomini"], inDocsNav: false},
 ]
 
 export const projectById = new Map(projects.map(project => [project.id, project]))
