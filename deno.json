@@ -4,7 +4,7 @@
         "check": "deno run -A ./scripts/check-examples.ts",
         "run-examples": "deno run -A ./scripts/run-examples.ts",
         "smoke": "deno run -A ./scripts/smoke-examples.ts",
-        "build": "deno run --allow-read --allow-write ./scripts/build-docs.ts && deno bundle ./src/main.tsx --output ./build/main.js --minify --platform browser && deno run --allow-read --allow-write ./scripts/build-pages.ts",
+        "build": "deno run --allow-read --allow-write ./scripts/build-docs.ts && deno bundle ./src/main.tsx --output ./build/main.js --minify --platform browser && deno bundle ./src/playground.tsx --output ./build/playground.js --minify --platform browser && deno run --allow-read --allow-write ./scripts/build-pages.ts",
         "serve": "deno run --allow-read --allow-net jsr:@std/http@^1.0.20/file-server . --port 8000"
     },
     "compilerOptions": {
@@ -15,7 +15,8 @@
     "imports": {
         "@velotype/velotype": "jsr:@velotype/velotype@^0.3.1",
         "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.3.1",
-        "@velotype/velodesign": "jsr:@velotype/velodesign@^0.1.3"
+        "@velotype/velodesign": "jsr:@velotype/velodesign@^0.1.3",
+        "@velotype/velojson": "jsr:@velotype/velojson@^0.1.0"
     },
     "lint": {"rules": {"exclude": ["jsx-key"]}}
 }

@@ -346,7 +346,7 @@ console.log(JSON.stringify(endObj))
 // In the browser:
 import { VSON } from "jsr:@velotype/velojson/browser"`,
         },
-        links: [gh("velojson"), jsr("velojson")],
+        links: [gh("velojson"), jsr("velojson"), {label: "Playground", to: "/projects/velojson/playground/"}],
     },
     {
         id: "velomicro", name: "velomicro", tag: "1kb", tagKind: "neutral",

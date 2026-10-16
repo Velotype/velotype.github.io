@@ -2,6 +2,8 @@
 
 velojson, or VSON (Velocity JSON), is a compact binary wire format for JavaScript JSON data. Any data representable with JSON in JavaScript is representable with VSON, and the other way around. No types or capabilities are added: it is a one-to-one mapping, so it can replace JSON between two programs without changing what they send.
 
+To try it without installing anything, use the [playground](/projects/velojson/playground/), which encodes JSON to VSON and decodes bytes back to JSON in your browser.
+
 Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed.
 
 ## Install

@@ -1,7 +1,7 @@
-import { Breadcrumbs, Button, Card, CodeBlock, Grid, Heading, Link, Navbar, Paragraph, Statistic, Stack, Tag, Text, Theme } from "@velotype/velodesign"
-import { replaceElementWithRoot } from "@velotype/velotype"
+import { Breadcrumbs, Button, Card, CodeBlock, Grid, Heading, Link, Paragraph, Statistic, Stack, Tag, Text } from "@velotype/velodesign"
 import { DocsPage } from "./docs.tsx"
 import docsIndex from "./docs-index.json" with { type: "json" }
+import { Logo, mountPage } from "./shell.tsx"
 import { groups, projectById, projects } from "./projects.ts"
 import type { Project, Resource, Sample } from "./projects.ts"
 
@@ -10,26 +10,6 @@ const projectUrl = (project: Project) => `/projects/${project.id}/`
 const docsUrl = (project: Project): string | undefined => (docsIndex as Record<string, string>)[project.id]
 
 const goTo = (to: string) => () => { location.assign(to) }
-
-/** The Velotype mark. It is a dark square, so it gets rounded corners to sit on either theme */
-const Logo = (attrs: {size: `${number}em` | `${number}rem`}) => <img src="/assets/logo.svg" alt="" width="64" height="64"
-    style={{width: attrs.size, height: attrs.size, borderRadius: "0.2em", flexShrink: 0}}/>
-
-const Header = () => <Navbar
-    style={{borderBottom: "1px solid var(--background-4)"}}
-    brand={<Link to="/" style={{fontWeight: "bold", color: "inherit", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5em"}}>
-        <Logo size="1.75em"/>
-        The Velocity Project
-    </Link>}>
-    <Link to={docsIndex.velotype}>Docs</Link>
-    <Link to="https://github.com/Velotype">GitHub</Link>
-    <Link to="https://jsr.io/@velotype">JSR</Link>
-    <Link to="https://argoday.medium.com/">Articles</Link>
-</Navbar>
-
-const Footer = () => <Text type="muted">
-    All projects live under the <Link to="https://github.com/Velotype">Velotype</Link> organization on GitHub and are published to <Link to="https://jsr.io/@velotype">JSR</Link>. Articles are on <Link to="https://argoday.medium.com/">Medium</Link>. This site is built with Velotype and velodesign.
-</Text>
 
 const Code = (sample: Sample) => <Stack direction="column" gap="sm">
     <Heading level={3}>{sample.title}</Heading>
@@ -140,17 +120,8 @@ const ProjectPage = (project: Project) => <Stack direction="column" gap="lg">
     </Stack>
 </Stack>
 
-Theme.injectStyles()
-
 const page = document.body.dataset.page
 const project = page ? projectById.get(page) : undefined
 
-replaceElementWithRoot(<div style={{fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif"}}>
-    {Header()}
-    <main style={{maxWidth: document.body.dataset.doc ? "84rem" : "60rem", margin: "0 auto", padding: "2rem 1rem 4rem"}}>
-        <Stack direction="column" gap="lg">
-            {document.body.dataset.doc ? DocsPage() : project ? ProjectPage(project) : HomePage()}
-            {Footer()}
-        </Stack>
-    </main>
-</div>, document.getElementById("app"))
+mountPage(document.body.dataset.doc ? DocsPage() : project ? ProjectPage(project) : HomePage(),
+    document.body.dataset.doc ? "84rem" : "60rem")

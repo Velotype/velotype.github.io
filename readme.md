@@ -4,6 +4,8 @@ The Velocity Project site, built with [Velotype](https://github.com/Velotype/vel
 
 - `src/projects.ts` - the projects on the home page and the project pages
 - `src/main.tsx` - the home and project pages
+- `src/shell.tsx` - the header, footer, and mounting that every page shares
+- `src/playground.tsx` - the velojson playground at `/projects/velojson/playground/`, its own bundle (`build/playground.js`) so that the other pages do not carry velojson
 - `src/docs.tsx` - the shell around a docs page: navigation, code blocks, and the table of contents
 - `content/docs/<project>/*.md` - the developer docs, one directory per project, with pages in file name order. A subdirectory is a section that follows the project's pages in the sidebar (`sections` in `scripts/build-docs.ts`), like the DevTools docs inside Velotype's
 - `content/examples/<project>/` - the example code that the docs show, with its own `deno.json` that pins the published package versions

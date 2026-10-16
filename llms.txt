@@ -112,6 +112,7 @@ velodesign 0.1.3 is built on Velotype 0.3.1, so use that Velotype version with i
 
 - [llms-full.txt](https://velotype.github.io/llms-full.txt): this file's introduction and versions, followed by every docs page, in one file
 - [Home page](https://velotype.github.io/): the project overview for people
+- [velojson playground](https://velotype.github.io/projects/velojson/playground/): encode JSON to VSON and decode bytes to JSON in a browser
 - [GitHub organization](https://github.com/Velotype): every repository
 - [JSR scope](https://jsr.io/@velotype): every published package
 - [Medium articles](https://argoday.medium.com/): walkthroughs of velomicro and velomini
