@@ -11,6 +11,7 @@
 // - Each page is complete HTML, and the bundle then adds the navigation around it.
 import { marked } from "npm:marked@15.0.12"
 import { projectById, projects } from "../src/projects.ts"
+import { headPrelude } from "./head-prelude.ts"
 
 const root = new URL("../", import.meta.url)
 const docsSource = new URL("content/docs/", root)
@@ -146,6 +147,7 @@ for (const project of projectsWithDocs) {
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="icon" type="image/png" href="/assets/logo.png">
 <link rel="apple-touch-icon" href="/assets/logo.png">
+${headPrelude}
 </head>
 <body data-doc="${project}">
 <div id="app"><article id="doc">
