@@ -4,7 +4,7 @@
 import { projects } from "../src/projects.ts"
 import { headPrelude } from "./head-prelude.ts"
 
-const page = (title: string, description: string, id: string | null, noscript: string) => `<!doctype html>
+const page = (title: string, description: string, id: string | null, noscript: string, bundle: string = "main") => `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -18,7 +18,7 @@ ${headPrelude}
 <body${id ? ` data-page="${id}"` : ""}>
 <div id="app"></div>
 <noscript>${noscript}</noscript>
-<script src="/build/main.js" type="module"></script>
+<script src="/build/${bundle}.js" type="module"></script>
 </body>
 </html>
 `
@@ -42,3 +42,14 @@ for (const project of projects) {
         `${project.name}: ${project.tagline} See <a href="${project.links[0].to}">${project.links[0].label}</a>.`,
     ))
 }
+
+// The velojson playground is its own bundle, so that the other pages do not carry velojson
+const playground = new URL("projects/velojson/playground/", root)
+await Deno.mkdir(playground, {recursive: true})
+await Deno.writeTextFile(new URL("index.html", playground), page(
+    "velojson playground - The Velocity Project",
+    "Encode JSON to VSON bytes and decode bytes back to JSON, live in your browser.",
+    "velojson-playground",
+    `The velojson playground encodes JSON to VSON and decodes it back, and needs JavaScript. See <a href="/projects/velojson/">velojson</a>.`,
+    "playground",
+))

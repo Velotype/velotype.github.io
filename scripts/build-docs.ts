@@ -206,6 +206,7 @@ for (const entry of nav) {
 lines.push("", "## Optional", "",
     `- [llms-full.txt](${site}/llms-full.txt): this file's introduction and versions, followed by every docs page, in one file`,
     `- [Home page](${site}/): the project overview for people`,
+    `- [velojson playground](${site}/projects/velojson/playground/): encode JSON to VSON and decode bytes to JSON in a browser`,
     "- [GitHub organization](https://github.com/Velotype): every repository",
     "- [JSR scope](https://jsr.io/@velotype): every published package",
     "- [Medium articles](https://argoday.medium.com/): walkthroughs of velomicro and velomini")
