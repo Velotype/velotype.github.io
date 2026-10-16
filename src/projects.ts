@@ -37,7 +37,7 @@ export const projects: Project[] = [
         tagline: "A fast and small TSX framework that updates the DOM in place.",
         about: [
             "Velotype creates real DOM elements as your TSX runs. There is no virtual DOM and no reconciler: a value that changes renders only the part of the page that depends on it, and a list that changes renders, moves, or removes only the rows that changed.",
-            "Components are classes with fields and methods, not functions with hooks, and you write TSX the way you would write HTML.",
+            "Components are classes with fields and methods, and you write TSX the way you write HTML.",
         ],
         stats: [
             {title: "Minified", value: "21", suffix: "kb"},
@@ -46,12 +46,12 @@ export const projects: Project[] = [
         ],
         statsNote: "Velotype 0.3.1, the jsx-runtime entry point, minified with deno bundle. Bundlers drop the parts an app does not import.",
         features: [
-            {title: "Closer to the DOM", text: "TSX returns real HTMLElements. Attributes are HTML attributes (class, not className), event listeners are added with addEventListener, and there is nothing between your code and the page to learn."},
-            {title: "Updates in place", text: "RenderObject renders a value to every place it appears and renders again when it changes. RenderObjectArray and RenderTemplateArray render only the affected rows, and sort(), move(), and filter() move the rows that already exist instead of rendering them again."},
-            {title: "Classes, not hooks", text: "A Component is a class: fields hold state, methods change it, and Velotype calls mount(), render(), and unmount() for you. There are no use*() calls and no call-order rules."},
-            {title: "Small, and tree-shakeable", text: "About 21kb minified and 7.7kb gzipped for the whole runtime (Velotype 0.3.1), and bundlers drop the parts an app does not import."},
-            {title: "Type-checked styles and events", text: "Style objects are checked against CSS: property names, keywords, units, and colors. on* attributes take a handler or {handler, options}, and on- listens for a custom event by its exact name."},
-            {title: "Made for development", text: "Hot reloading keeps component state, ErrorBoundary contains a failing component, AsyncRenderObject shows only the latest request's result, and the Velotype DevTools extension shows the live component tree."},
+            {title: "Real DOM elements", text: "TSX gives you actual HTMLElements. Write class and for the way you do in HTML, add listeners with addEventListener, and use every DOM API you already know."},
+            {title: "Updates in place", text: "A RenderObject renders its value everywhere it appears and re-renders just those spots when it changes. Lists update only the rows that changed, and sort(), move(), and filter() move the rows already on the page."},
+            {title: "Components are classes", text: "Fields hold your state, methods change it, and Velotype calls mount(), render(), and unmount() at the right moments. It reads like the object-oriented code you already write."},
+            {title: "Small and tree-shakeable", text: "About 21kb minified and 7.7kb gzipped for the entire runtime (Velotype 0.3.1), and your bundler drops whatever your app does not import."},
+            {title: "Typed styles and events", text: "Style objects are checked against CSS: property names, keywords, units, and colors. on* attributes take a handler or {handler, options}, and on- listens for a custom event by its exact name."},
+            {title: "Built for development", text: "Hot reloading keeps component state. ErrorBoundary contains a failing component, AsyncRenderObject shows only the latest request's result, and the DevTools extension shows your live component tree."},
         ],
         samples: [
             {
@@ -144,12 +144,12 @@ class ServerList extends Component<EmptyAttrs> {
             {title: "Colors set by", value: "CSS variables"},
         ],
         features: [
-            {title: "Native elements first", text: "A Checkbox is a real input, a Modal is a real dialog, and an Accordion is built on details. Nothing reimplements what the browser already does."},
-            {title: "Re-theme with variables", text: "Colors come from a small set of CSS custom properties (--text, --background, --primary, --secondary, --warning, --accent, each with a light-to-dark ramp). Change them and every component follows, with no component code touched."},
+            {title: "Native elements", text: "A Checkbox is a real input, a Modal is a real dialog, and an Accordion is built on details. Keyboard support, form participation, and browser autofill come with them."},
+            {title: "Re-theme with variables", text: "A handful of CSS variables (--text, --background, --primary, --secondary, --warning, --accent, each with a ramp from light to dark) color everything. Change them and every component follows."},
             {title: "Light and dark", text: "The theme follows the browser's color scheme, or a reader's choice through [data-theme=\"light\"|\"dark\"]."},
-            {title: "A broad set", text: "Typography, layout, form, navigation, feedback, overlays, data display, data entry, and charts: from Stack, Grid, and Button to DataTable, DatePicker, Command, and LineChart."},
-            {title: "Spacing from one scale", text: "Stack and Grid draw gaps from a shared scale in em, so two rows that look the same are the same, and spacing follows the type size."},
-            {title: "Updates only what changed", text: "Handlers do the smallest DOM update that expresses a change, and none when nothing changed, so focus, caret, selection, and scroll position survive."},
+            {title: "A broad set", text: "Typography, layout, forms, navigation, feedback, overlays, data display, data entry, and charts: from Stack, Grid, and Button to DataTable, DatePicker, Command, and LineChart."},
+            {title: "One spacing scale", text: "Stack and Grid take their gaps from a shared scale in em, so spacing follows the type size and rows that look alike are alike."},
+            {title: "Smooth updates", text: "Handlers make the smallest DOM change for an update, and none when nothing changed, so focus, caret, selection, and scroll position stay where they are."},
         ],
         samples: [
             {
@@ -190,12 +190,12 @@ replaceElementWithRoot(
             {title: "Client runtime", value: "None"},
         ],
         features: [
-            {title: "Static and dynamic components", text: "A StaticServerComponent is a plain function that renders synchronously. A DynamicServerComponent is a class that can see the Request and render async."},
-            {title: "Streaming", text: "Render a page all at once, or as a ReadableStream where async components flush in place as they resolve."},
-            {title: "Prepared once", text: "prepareHTMLVNodeForRendering() prepares a page at module load, so the static parts are not rebuilt for every request."},
-            {title: "Escaped by default", text: "Text, attribute values, and attribute names are escaped where they are written. Inline style and script text is written as is, changing only the sequences that would end the element early."},
-            {title: "Contained failures", text: "If a dynamic component throws, its onFail() renders instead, so one failing component does not take down the rest of the page."},
-            {title: "Same TSX as Velotype", text: "HTML attributes, style objects, and fragments work as they do in the browser, so markup moves between server and client unchanged."},
+            {title: "Static and dynamic components", text: "A StaticServerComponent is a plain function that renders synchronously. A DynamicServerComponent is a class that sees the Request and can render async."},
+            {title: "Streaming", text: "Send a page all at once, or as a ReadableStream where async components flush in place as they resolve."},
+            {title: "Prepared once", text: "prepareHTMLVNodeForRendering() prepares a page when your module loads, so its static parts are built once and not on every request."},
+            {title: "Escaped by default", text: "Text, attribute values, and attribute names are escaped where they are written. Inline style and script text is written as it is, with only the sequences that would end the element early changed."},
+            {title: "Contained failures", text: "If a dynamic component throws, its onFail() renders in its place and the rest of the page goes out."},
+            {title: "Same TSX as Velotype", text: "HTML attributes, style objects, and fragments behave as they do in the browser, so markup moves between server and client unchanged."},
         ],
         samples: [
             {
@@ -238,16 +238,16 @@ new Server(router).serve("127.0.0.1", 3000)`,
         tagline: "Chrome DevTools panels for debugging Velotype apps.",
         about: [
             "A Chrome extension with three DevTools panels, plus a toolbar popup that shows whether Velotype is present on the page.",
-            "It works with a Velotype build that installs the devtools hook, which every current Velotype entry point does. If a site uses Velotype and the tree is empty, its bundle predates the hook.",
+            "It works with any Velotype build that installs the devtools hook, which every current Velotype entry point does.",
         ],
         stats: [
             {title: "Panels", value: "3"},
         ],
         features: [
-            {title: "Velotype: the component tree", text: "The page's live component tree, like React DevTools: class names, DOM anchors, and for class components their attrs and instance fields, including live RenderObject values. Click a node to inspect it and highlight it on the page."},
-            {title: "Real expandable fields", text: "Any object, array, Map, or Set field expands to its live values, fetched fresh on each expand and kept live for branches that are already open."},
-            {title: "Velotype Events", text: "A snapshot of the event bus's current registrations: every listening key, how many listeners it has, and which live components or RenderObjects they belong to."},
-            {title: "VeloJSON", text: "Decodes VSON and VBIN payloads. It inspects network request and response bodies while the panel is open, and has a manual bytes-to-JSON and JSON-to-bytes tool."},
+            {title: "The component tree", text: "Your page's live component tree, like React DevTools: class names, DOM anchors, and for class components their attrs and instance fields, including live RenderObject values. Click a node to inspect it and highlight it on the page."},
+            {title: "Expandable fields", text: "Objects, arrays, Maps, and Sets expand to their live values, fetched fresh on each expand and kept live while open."},
+            {title: "Velotype Events", text: "Every key on the event bus with its listener count, and the live components and RenderObjects that are listening."},
+            {title: "VeloJSON", text: "Decode VSON and VBIN payloads from network requests and responses while the panel is open, or convert bytes and JSON by hand."},
         ],
         samples: [],
         install: {
@@ -267,12 +267,12 @@ new Server(router).serve("127.0.0.1", 3000)`,
         ],
         stats: [],
         features: [
-            {title: "A typed router", text: "get(), head(), and post() take a path or several paths. :name matches one segment and stores it as a path variable, a trailing * matches the rest, and a static segment beats a variable or wildcard."},
-            {title: "Typed request metadata", text: "Context.meta holds metadata for each request, created by a function you give the Router and typed by the Router's type parameter."},
-            {title: "Inspectors", text: "An Inspector runs before and after the handlers of a path. Its request side can answer the request itself, and its response side sees every response, which suits logging, timing, and auth."},
-            {title: "Static files", text: "mountFiles() and mountFile() serve a directory or a file, held in memory with an ETag and a gzip copy for clients that accept it."},
-            {title: "Clean shutdown", text: "serve() listens for SIGINT, SIGTERM, and SIGUSR1, and server.close() stops it from code."},
-            {title: "A development server", text: "@velotype/veloserver/dev serves a Velotype app and updates the page when files change: per-module, or by rebuilding the bundle."},
+            {title: "Routing", text: "Write /users/:id and your handler receives the id. A fixed path like /users/me beats any :name or * pattern that also matches."},
+            {title: "Typed request metadata", text: "Give every request its own typed data, such as the signed-in user or a request id, for every handler and inspector to read."},
+            {title: "Inspectors", text: "Run logging, timing, and auth before and after the handlers of a path. An inspector can answer a request itself, and it sees every response."},
+            {title: "Static files", text: "mountFiles() and mountFile() serve a directory or a file from memory, with an ETag and a gzip copy for clients that accept it."},
+            {title: "Clean shutdown", text: "SIGINT, SIGTERM, and SIGUSR1 stop the server cleanly, and server.close() does it from code."},
+            {title: "A development server", text: "@velotype/veloserver/dev serves your Velotype app and updates the page when files change, per module or by rebuilding the bundle."},
         ],
         samples: [
             {
@@ -308,7 +308,7 @@ deno run --allow-net server.ts`,
         tagline: "A compact binary encoding for JSON, and a faster one when both sides share a schema.",
         about: [
             "VSON (Velocity JSON) maps JavaScript JSON data to bytes one to one: anything JSON can hold, VSON can hold, and nothing else is added.",
-            "It has three formats. Each one solves a cost of the one before it.",
+            "It has three formats, each described below.",
         ],
         stats: [
             {title: "Base vs JSON text", value: "20-25%", suffix: " smaller"},
@@ -316,11 +316,11 @@ deno run --allow-net server.ts`,
             {title: "VBIN vs JSON text", value: "25-70%", suffix: " smaller"},
         ],
         features: [
-            {title: "VSON Base", text: "A direct structural translation of JSON, typically 20-25% smaller than the text. Because it mirrors JSON's structure it works for streaming and partial decoding."},
+            {title: "VSON Base", text: "A direct translation of JSON into bytes, typically 20-25% smaller than the text. It mirrors JSON's structure, so it works for streaming and partial decoding."},
             {title: "VSON Key Table", text: "Every unique key is stored once, in a table at the end of the message. About 20% smaller than JSON for a single object, and up to about 65% smaller for many records that share a wide set of keys."},
-            {title: "VBIN", text: "Encoder and decoder agree on a key-ID mapping ahead of time, so the table is not sent and key names are never encoded or decoded as strings. Typically 25-70% smaller, and significantly faster than native JSON."},
-            {title: "Honest about speed", text: "The VSON Base and Key Table formats typically run slower than native JSON.stringify() and JSON.parse(). The speed comes from VBIN."},
-            {title: "Server and browser builds", text: "The main module is tuned for speed and supports every format. The browser module is tuned for size (about 4.3kb minified) and supports Key Table."},
+            {title: "VBIN", text: "Encoder and decoder agree on key IDs ahead of time, so no table is sent and key names are never encoded or decoded as strings. Typically 25-70% smaller than JSON text, and significantly faster than native JSON."},
+            {title: "Faster than JSON", text: "VBIN encodes and decodes significantly faster than JSON.stringify() and JSON.parse(), with a smaller payload."},
+            {title: "Server and browser builds", text: "The main module is tuned for speed and supports every format. The browser module is tuned for size, about 4.3kb minified, and supports Key Table."},
             {title: "Debuggable", text: "The Velotype DevTools extension decodes VSON and VBIN payloads straight from the network panel."},
         ],
         samples: [
@@ -352,7 +352,7 @@ import { VSON } from "jsr:@velotype/velojson/browser"`,
         id: "velomicro", name: "velomicro", tag: "1kb", tagKind: "neutral",
         tagline: "A 1kb TSX framework that shows how TSX rendering works.",
         about: [
-            "velomicro is the smallest version of the idea: a createElement that returns real DOM elements, and function components. It exists to be read. The Medium article walks through its source line by line.",
+            "velomicro is the smallest version of the idea: a createElement that returns real DOM elements, and function components. It is meant to be read, and the Medium article walks through its source line by line.",
         ],
         stats: [
             {title: "Size", value: "1", suffix: "kb"},
@@ -387,14 +387,14 @@ import { VSON } from "jsr:@velotype/velojson/browser"`,
         id: "velomini", name: "velomini", tag: "2.5kb", tagKind: "neutral",
         tagline: "A 2.5kb TSX framework that adds classes to velomicro.",
         about: [
-            "velomini is velomicro plus a Component class with render, mount, unmount, and refresh. Its way to update the page is to tear down a component's subtree and render it again. The Medium article walks through the source.",
+            "velomini is velomicro plus a Component class with render, mount, unmount, and refresh. Its refresh() tears down a component's subtree and renders it again. The Medium article walks through the source.",
             "Velotype is the next step: it keeps classes and replaces refresh() with values that update in place.",
         ],
         stats: [
             {title: "Size", value: "2.5", suffix: "kb"},
         ],
         features: [
-            {title: "Class components", text: "Extend Component and implement render(). Velomini calls mount() and unmount() for you."},
+            {title: "Class components", text: "Extend Component and implement render(). velomini calls mount() and unmount() for you."},
             {title: "getComponent()", text: "Convert an element back to the class instance that built it, to call its methods."},
             {title: "Everything from velomicro", text: "Real HTMLElements, HTML attributes, style objects, and function components."},
         ],

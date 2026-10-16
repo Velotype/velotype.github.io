@@ -5,7 +5,7 @@
 The live component tree for the page, like React DevTools. Each node shows its class name and its DOM anchor, the element it is attached to. For a class Component it also shows its `attrs` and its own instance fields, including the live values of `RenderObject` and `RenderBasic` fields.
 
 * Click a node to inspect it, and the element is highlighted on the page
-* Fields are a real expand and collapse tree. An object, Array, Map, or Set field expands to its actual live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded. A field is never a dead end that just says "Object"
+* Fields are an expand and collapse tree. An object, Array, Map, or Set field expands to its live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded
 
 Try it on the [demo app](/docs/velotype/devtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
 

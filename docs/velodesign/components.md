@@ -108,7 +108,7 @@ The whole category: [Data Display on the showcase](https://velotype.github.io/ve
 | [`AspectRatio`](https://velotype.github.io/velodesign/components/aspect-ratio) | Constrains its children to a fixed width:height ratio, via pure CSS. |
 | [`ScrollArea`](https://velotype.github.io/velodesign/components/scroll-area) | A scrollable container with a themed thin scrollbar. |
 | [`Table`](https://velotype.github.io/velodesign/components/table) | A themed data table wrapping a native <table>, generic over the row type. |
-| [`DataTable`](https://velotype.github.io/velodesign/components/data-table) | A batteries-included data table: sortable and resizable columns, user-toggleable column visibility, an optional search box, and built-in pagination via Pagination. |
+| [`DataTable`](https://velotype.github.io/velodesign/components/data-table) | A data table with sortable and resizable columns, user-toggleable column visibility, an optional search box, and built-in pagination via Pagination. |
 | [`AsyncDataTable`](https://velotype.github.io/velodesign/components/async-data-table) | The same table, for data a server filters, sorts and pages. Give it a load() and it handles debouncing, out-of-order responses, loading and error states, and pagination. |
 | [`Carousel`](https://velotype.github.io/velodesign/components/carousel) | A single-slide-at-a-time carousel with prev/next arrows and optional dot indicators. |
 | [`Calendar`](https://velotype.github.io/velodesign/components/calendar) | A month-grid date picker with prev/next month navigation and a selectable day. |
