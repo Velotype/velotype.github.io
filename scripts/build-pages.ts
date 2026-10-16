@@ -12,7 +12,6 @@ const page = (title: string, description: string, id: string | null, noscript: s
 <title>${title}</title>
 <meta name="description" content="${description}">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
-<link rel="icon" type="image/png" href="/assets/logo.png">
 <link rel="apple-touch-icon" href="/assets/logo.png">
 ${headPrelude}
 </head>
