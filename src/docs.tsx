@@ -34,8 +34,8 @@ function headings(article: HTMLElement): TableOfContentsItemType[] {
 function otherDocs(data: DocsNav): HTMLElement {
     return <Stack direction="column" gap="sm">{groups.filter(group => group.inDocsNav).map(group => {
         const entries = group.ids.filter(id => id != data.project).flatMap(id => data.nav.filter(entry => entry.id == id))
-        return entries.length > 0 && <div>
-            <Text type="muted" style={{display: "block", margin: "0 0.5em 0.25em"}}>{group.title}</Text>
+        return entries.length > 0 && <div class="vtp-docs-group">
+            <Text type="muted" class="vtp-docs-group-title">{group.title}</Text>
             {entries.map(entry => <Link to={entry.pages[0].url}>{entry.name}</Link>)}
         </div>
     })}</Stack>
@@ -73,6 +73,10 @@ export function DocsPage(): HTMLElement {
 .vtp-docs-article th,.vtp-docs-article td{border:1px solid var(--background-4);padding:0.4em 0.7em;text-align:start;vertical-align:top;line-height:1.5;}
 .vtp-docs-article th{background:var(--background-2);}
 .vtp-docs-pager{display:flex;justify-content:space-between;gap:1rem;margin-top:3rem;}
+.vtp-docs-group-title{display:block;margin:0.75em 0.5em 0.25em;}
+.vtp-docs-group{border-top:1px solid var(--background-4);padding-top:0.5em;margin-top:0.5em;}
+.vtp-docs-section{border-top:1px solid var(--background-4);margin:0.5em 0 0.25em;padding:0.75em 0.5em 0;}
+.vtp-docs-group .vtp-docs-group-title{margin-top:0.25em;}
 .vtp-docs-nav a{display:block;padding:0.25em 0.5em;border-radius:0.25rem;text-decoration:none;color:inherit;line-height:1.5;}
 .vtp-docs-nav a:hover{background-color:var(--background-2);}
 .vtp-docs-nav .vtd-nav-link-active{background-color:var(--background-3);font-weight:bold;}
@@ -86,7 +90,7 @@ export function DocsPage(): HTMLElement {
                 <Heading level={2} style={{fontSize: "1.1em"}}>{project.name}</Heading>
                 <div>{entry.pages.map((docsPage, i) => <>
                     {docsPage.section && docsPage.section != entry.pages[i - 1]?.section &&
-                        <Text type="muted" style={{display: "block", margin: "0.75em 0.5em 0.25em"}}>{docsPage.section}</Text>}
+                        <Text type="muted" class="vtp-docs-group-title vtp-docs-section">{docsPage.section}</Text>}
                     <NavLink to={docsPage.url}>{docsPage.title}</NavLink>
                 </>)}</div>
                 {otherDocs(data)}
