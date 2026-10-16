@@ -703,164 +703,6 @@ See [Theming](/docs/velodesign/theming/#symbols).
 
 ---
 
-Source: https://velotype.github.io/docs/velodevtools/
-
-# Getting started
-
-Velotype DevTools is a Chrome extension for debugging [Velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether Velotype is on the page.
-
-| Panel | Shows |
-|---|---|
-| [Velotype](/docs/velodevtools/panels/#velotype) | The page's live component tree, and the fields of each component |
-| [Velotype Events](/docs/velodevtools/panels/#velotype-events) | What is registered on the event bus |
-| [VeloJSON](/docs/velodevtools/panels/#velojson) | VSON and VBIN payloads, decoded |
-
-## Install
-
-The extension is built from source, and loaded into Chrome as an unpacked extension. It needs [Deno](https://deno.com), and no npm or `node_modules`.
-
-```sh
-git clone https://github.com/Velotype/velodevtools
-cd velodevtools
-deno task build
-```
-
-`deno task build` copies the static files (including the icons) and bundles the extension into `dist/`. Then, in Chrome:
-
-1. Open `chrome://extensions`
-2. Turn on **Developer mode**
-3. Choose **Load unpacked**, and select the `dist/` folder
-
-Open DevTools on a page that uses Velotype, and the panels are in the tabs.
-
-While developing the extension, `deno task watch` rebuilds on change. After it rebuilds, reload the extension from `chrome://extensions`, and refresh the inspected page, since content scripts are only injected on navigation. `deno task typecheck` checks the source.
-
-## It needs the devtools hook
-
-Velotype keeps the map from DOM elements to its live Component and RenderObject instances to itself. The extension reads it through a hook, `window.__VELOTYPE_DEVTOOLS_HOOK__`, which every current Velotype entry point installs. If a site uses Velotype and the tree is empty, its Velotype bundle predates the hook: update Velotype.
-
-Several Velotype instances can be on one page (micro-frontends, or different versions in different bundles). Each registers separately with its own version, and their components do not collide.
-
-## An app to try it on
-
-This is a small Velotype app with fields worth looking at: a Component with attrs, a `RenderBasic`, a `RenderObject` that holds an object, a `Map`, and an event bus listener.
-
-```tsx
-import { Component, type EmptyAttrs, emitEvent, registerEventListener, RenderBasic, RenderObject, replaceElementWithRoot, VelotypeEvent } from "@velotype/velotype"
-
-type Settings = {theme: string, notifications: {email: boolean, sms: boolean}, tags: Set<string>}
-
-// A Component with fields to look at in the Velotype panel: attrs, a RenderBasic, a RenderObject
-// holding an object (which expands to its live values), and a Map
-class Profile extends Component<{name: string}> {
-    visits = new RenderBasic<number>(0)
-    settings = new RenderObject<Settings>(
-        {theme: "dark", notifications: {email: true, sms: false}, tags: new Set(["admin", "beta"])},
-        (settings: Settings) => <div>Theme: {settings.theme}</div>,
-    )
-    history: Map<string, number> = new Map([["login", 1], ["logout", 0]])
-
-    // A listener, which the Velotype Events panel lists under the key "profile-updated"
-    override mount() {
-        registerEventListener(this, "profile-updated", () => { this.visits.value += 1 })
-    }
-
-    override render(attrs: Readonly<{name: string}>) {
-        return <section>
-            <h2>{attrs.name}</h2>
-            <p>Visits: {this.visits}</p>
-            {this.settings}
-            <button type="button" onClick={() => emitEvent("profile-updated", new VelotypeEvent(this, "updated"))}>Update</button>
-        </section>
-    }
-}
-
-class App extends Component<EmptyAttrs> {
-    override render() {
-        return <main>
-            <Profile name="Ada"/>
-            <Profile name="Grace"/>
-        </main>
-    }
-}
-
-replaceElementWithRoot(<App/>, document.getElementById("app"))
-```
-Open it in a page, open DevTools, and look in the **Velotype** panel for `Profile`, and in **Velotype Events** for the `profile-updated` key.
-
----
-
-Source: https://velotype.github.io/docs/velodevtools/panels/
-
-# Panels
-
-## Velotype
-
-The live component tree for the page, like React DevTools. Each node shows its class name and its DOM anchor, the element it is attached to. For a class Component it also shows its `attrs` and its own instance fields, including the live values of `RenderObject` and `RenderBasic` fields.
-
-* Click a node to inspect it, and the element is highlighted on the page
-* Fields are a real expand and collapse tree. An object, Array, Map, or Set field expands to its actual live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded. A field is never a dead end that just says "Object"
-
-Try it on the [demo app](/docs/velodevtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
-
-## Velotype Events
-
-A snapshot of the event bus's current registrations: every listening key, how many listeners are on it, and, resolved against Velotype's registry, which live Components and RenderObjects they belong to.
-
-It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, `profile-updated` has one listener for each `Profile`.
-
-It shows what is registered, not what has fired. It is not a trace of events as they happen.
-
-## VeloJSON
-
-Decodes [velojson](/docs/velojson/) payloads.
-
-**Network.** While the panel is open it inspects the bodies of network requests and responses, and lists those that are VSON or VBIN, decoded as JSON. A body is decoded when its `Content-Type` is `application/vson` or `application/vbin`. A `; charset=utf-8` suffix does not matter. A body with another content type is never attempted, and a body with one of these content types is always decoded, so a failure shows the real error.
-
-The velojson docs' [browser](/docs/velojson/browser/) and the veloserver example below produce such responses:
-
-```tsx
-import { Router, Server } from "@velotype/veloserver"
-import { VSON } from "@velotype/velojson"
-
-// A server for trying the VeloJSON panel. The panel decodes a request or response body only when its
-// Content-Type is application/vson or application/vbin (a "; charset=utf-8" suffix is fine).
-const router = new Router<never>({})
-
-router.get("/api/orders", () => {
-    const orders = Array.from({length: 5}, (_, index) => ({id: index + 1, customer: "Ada", total: 9.99 * (index + 1)}))
-    return new Response(VSON.encode(orders), {headers: {"content-type": "application/vson"}})
-})
-
-router.post("/api/orders", async (request) => {
-    const order = VSON.decode(new Uint8Array(await request.arrayBuffer()))
-    return new Response(VSON.encode({received: order}), {headers: {"content-type": "application/vson; charset=utf-8"}})
-})
-
-new Server(router).serve("127.0.0.1", 3000)
-```
-**Manual.** A decode tool turns bytes into JSON, and an encode tool turns JSON into bytes. Use it for a payload that has no content type, since it has no HTTP request to read one from.
-
-**VBIN.** A VBIN payload can only be decoded in the debug format, where an object's keys are its numeric KeyIDs, such as `{"1": "hello"}`. The real field names come from a schema's `VBINObjectMapper`, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such.
-
-## The popup
-
-The toolbar popup shows whether Velotype is present on the current page, without opening DevTools.
-
----
-
-Source: https://velotype.github.io/docs/velodevtools/limitations/
-
-# Known limitations
-
-* **The component tree covers only the top frame.** Components rendered inside an `<iframe>` are not merged into the tree
-* **The Events panel is a registration snapshot, not a live trace.** It does not log events as they fire. A trace needs a small hook in `emitEvent()` itself, which Velotype does not include to keep its bundle small. The snapshot covers most debugging needs: leaked listeners, and whether anything is listening on a key
-* **Request body decoding is best-effort.** Chrome's DevTools extension API only gives a request's `postData` as text, which can be lossy for binary bodies depending on the Chrome version. Response bodies are reliable, because the API says whether the content is base64 binary. Use the manual decode tool for a request payload that does not decode automatically
-* **VSON and VBIN detection on the network tab uses the Content-Type only.** There is no fallback that looks at the bytes of a body with no content type, such as `application/octet-stream`. Use the manual decode tool for those
-* **VBIN is decoded in the debug format only,** with KeyIDs as keys. See [VeloJSON](/docs/velodevtools/panels/#velojson)
-
----
-
 Source: https://velotype.github.io/docs/velojson/
 
 # Getting started
@@ -1160,7 +1002,7 @@ rejected: velojson: missing required field
 ```
 ## Debugging
 
-`VSON.decode()` reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as `{"1": 7, "2": "Widget"}`. This is what the [VeloJSON panel](/docs/velodevtools/) of the DevTools extension shows for a VBIN payload.
+`VSON.decode()` reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as `{"1": 7, "2": "Widget"}`. This is what the [VeloJSON panel](/docs/velotype/devtools/) of the DevTools extension shows for a VBIN payload.
 
 ## Generating the code
 
@@ -1201,7 +1043,7 @@ Output:
 same bytes as the server module: true
 {"user":"ada","items":[{"id":1,"label":"one"},{"id":2,"label":"two"}]}
 ```
-Use it for sending data to a server and reading a server's responses in a browser, with the [Velotype DevTools](/docs/velodevtools/) extension to inspect them.
+Use it for sending data to a server and reading a server's responses in a browser, with the [Velotype DevTools](/docs/velotype/devtools/) extension to inspect them.
 
 ---
 
@@ -4235,7 +4077,7 @@ The development server talks to the dev runtime through `globalThis.__VELOTYPE_H
 
 ## Debugging
 
-The [Velotype DevTools](/docs/velodevtools/) extension shows the live component tree, the event bus, and VSON payloads.
+The [Velotype DevTools](/docs/velotype/devtools/) extension shows the live component tree, the event bus, and VSON payloads.
 
 `@velotype/velotype/devtools` exports read-only access to Velotype's internal state (`__vtAppMetadata`) and the devtools hook (`getDevtoolsHook()`), for debugging and for the extension. Applications do not need to import it, because Velotype registers with the devtools hook from any entry point.
 
@@ -4452,3 +4294,161 @@ The package also exports the DOM and JSX types (`HTMLAttributes`, event handler 
 | `@velotype/velotype/jsx-runtime` | The production JSX runtime |
 | `@velotype/velotype/jsx-dev-runtime` | The development JSX runtime, with [hot reloading](/docs/velotype/development-tools/#hot-reloading) |
 | `@velotype/velotype/devtools` | `__vtAppMetadata` and `getDevtoolsHook()` |
+
+---
+
+Source: https://velotype.github.io/docs/velotype/devtools/
+
+# Getting started
+
+Velotype DevTools is a Chrome extension for debugging [Velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether Velotype is on the page.
+
+| Panel | Shows |
+|---|---|
+| [Velotype](/docs/velotype/devtools/panels/#velotype) | The page's live component tree, and the fields of each component |
+| [Velotype Events](/docs/velotype/devtools/panels/#velotype-events) | What is registered on the event bus |
+| [VeloJSON](/docs/velotype/devtools/panels/#velojson) | VSON and VBIN payloads, decoded |
+
+## Install
+
+The extension is built from source, and loaded into Chrome as an unpacked extension. It needs [Deno](https://deno.com), and no npm or `node_modules`.
+
+```sh
+git clone https://github.com/Velotype/velodevtools
+cd velodevtools
+deno task build
+```
+
+`deno task build` copies the static files (including the icons) and bundles the extension into `dist/`. Then, in Chrome:
+
+1. Open `chrome://extensions`
+2. Turn on **Developer mode**
+3. Choose **Load unpacked**, and select the `dist/` folder
+
+Open DevTools on a page that uses Velotype, and the panels are in the tabs.
+
+While developing the extension, `deno task watch` rebuilds on change. After it rebuilds, reload the extension from `chrome://extensions`, and refresh the inspected page, since content scripts are only injected on navigation. `deno task typecheck` checks the source.
+
+## It needs the devtools hook
+
+Velotype keeps the map from DOM elements to its live Component and RenderObject instances to itself. The extension reads it through a hook, `window.__VELOTYPE_DEVTOOLS_HOOK__`, which every current Velotype entry point installs. If a site uses Velotype and the tree is empty, its Velotype bundle predates the hook: update Velotype.
+
+Several Velotype instances can be on one page (micro-frontends, or different versions in different bundles). Each registers separately with its own version, and their components do not collide.
+
+## An app to try it on
+
+This is a small Velotype app with fields worth looking at: a Component with attrs, a `RenderBasic`, a `RenderObject` that holds an object, a `Map`, and an event bus listener.
+
+```tsx
+import { Component, type EmptyAttrs, emitEvent, registerEventListener, RenderBasic, RenderObject, replaceElementWithRoot, VelotypeEvent } from "@velotype/velotype"
+
+type Settings = {theme: string, notifications: {email: boolean, sms: boolean}, tags: Set<string>}
+
+// A Component with fields to look at in the Velotype panel: attrs, a RenderBasic, a RenderObject
+// holding an object (which expands to its live values), and a Map
+class Profile extends Component<{name: string}> {
+    visits = new RenderBasic<number>(0)
+    settings = new RenderObject<Settings>(
+        {theme: "dark", notifications: {email: true, sms: false}, tags: new Set(["admin", "beta"])},
+        (settings: Settings) => <div>Theme: {settings.theme}</div>,
+    )
+    history: Map<string, number> = new Map([["login", 1], ["logout", 0]])
+
+    // A listener, which the Velotype Events panel lists under the key "profile-updated"
+    override mount() {
+        registerEventListener(this, "profile-updated", () => { this.visits.value += 1 })
+    }
+
+    override render(attrs: Readonly<{name: string}>) {
+        return <section>
+            <h2>{attrs.name}</h2>
+            <p>Visits: {this.visits}</p>
+            {this.settings}
+            <button type="button" onClick={() => emitEvent("profile-updated", new VelotypeEvent(this, "updated"))}>Update</button>
+        </section>
+    }
+}
+
+class App extends Component<EmptyAttrs> {
+    override render() {
+        return <main>
+            <Profile name="Ada"/>
+            <Profile name="Grace"/>
+        </main>
+    }
+}
+
+replaceElementWithRoot(<App/>, document.getElementById("app"))
+```
+Open it in a page, open DevTools, and look in the **Velotype** panel for `Profile`, and in **Velotype Events** for the `profile-updated` key.
+
+---
+
+Source: https://velotype.github.io/docs/velotype/devtools/panels/
+
+# Panels
+
+## Velotype
+
+The live component tree for the page, like React DevTools. Each node shows its class name and its DOM anchor, the element it is attached to. For a class Component it also shows its `attrs` and its own instance fields, including the live values of `RenderObject` and `RenderBasic` fields.
+
+* Click a node to inspect it, and the element is highlighted on the page
+* Fields are a real expand and collapse tree. An object, Array, Map, or Set field expands to its actual live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded. A field is never a dead end that just says "Object"
+
+Try it on the [demo app](/docs/velotype/devtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
+
+## Velotype Events
+
+A snapshot of the event bus's current registrations: every listening key, how many listeners are on it, and, resolved against Velotype's registry, which live Components and RenderObjects they belong to.
+
+It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, `profile-updated` has one listener for each `Profile`.
+
+It shows what is registered, not what has fired. It is not a trace of events as they happen.
+
+## VeloJSON
+
+Decodes [velojson](/docs/velojson/) payloads.
+
+**Network.** While the panel is open it inspects the bodies of network requests and responses, and lists those that are VSON or VBIN, decoded as JSON. A body is decoded when its `Content-Type` is `application/vson` or `application/vbin`. A `; charset=utf-8` suffix does not matter. A body with another content type is never attempted, and a body with one of these content types is always decoded, so a failure shows the real error.
+
+The velojson docs' [browser](/docs/velojson/browser/) and the veloserver example below produce such responses:
+
+```tsx
+import { Router, Server } from "@velotype/veloserver"
+import { VSON } from "@velotype/velojson"
+
+// A server for trying the VeloJSON panel. The panel decodes a request or response body only when its
+// Content-Type is application/vson or application/vbin (a "; charset=utf-8" suffix is fine).
+const router = new Router<never>({})
+
+router.get("/api/orders", () => {
+    const orders = Array.from({length: 5}, (_, index) => ({id: index + 1, customer: "Ada", total: 9.99 * (index + 1)}))
+    return new Response(VSON.encode(orders), {headers: {"content-type": "application/vson"}})
+})
+
+router.post("/api/orders", async (request) => {
+    const order = VSON.decode(new Uint8Array(await request.arrayBuffer()))
+    return new Response(VSON.encode({received: order}), {headers: {"content-type": "application/vson; charset=utf-8"}})
+})
+
+new Server(router).serve("127.0.0.1", 3000)
+```
+**Manual.** A decode tool turns bytes into JSON, and an encode tool turns JSON into bytes. Use it for a payload that has no content type, since it has no HTTP request to read one from.
+
+**VBIN.** A VBIN payload can only be decoded in the debug format, where an object's keys are its numeric KeyIDs, such as `{"1": "hello"}`. The real field names come from a schema's `VBINObjectMapper`, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such.
+
+## The popup
+
+The toolbar popup shows whether Velotype is present on the current page, without opening DevTools.
+
+---
+
+Source: https://velotype.github.io/docs/velotype/devtools/limitations/
+
+# Known limitations
+
+* **The component tree covers only the top frame.** Components rendered inside an `<iframe>` are not merged into the tree
+* **The Events panel is a registration snapshot, not a live trace.** It does not log events as they fire. A trace needs a small hook in `emitEvent()` itself, which Velotype does not include to keep its bundle small. The snapshot covers most debugging needs: leaked listeners, and whether anything is listening on a key
+* **Request body decoding is best-effort.** Chrome's DevTools extension API only gives a request's `postData` as text, which can be lossy for binary bodies depending on the Chrome version. Response bodies are reliable, because the API says whether the content is base64 binary. Use the manual decode tool for a request payload that does not decode automatically
+* **VSON and VBIN detection on the network tab uses the Content-Type only.** There is no fallback that looks at the bytes of a body with no content type, such as `application/octet-stream`. Use the manual decode tool for those
+* **VBIN is decoded in the debug format only,** with KeyIDs as keys. See [VeloJSON](/docs/velotype/devtools/panels/#velojson)

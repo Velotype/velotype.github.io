@@ -10,4 +10,4 @@ Output:
 
 @output browser.ts
 
-Use it for sending data to a server and reading a server's responses in a browser, with the [Velotype DevTools](/docs/velodevtools/) extension to inspect them.
+Use it for sending data to a server and reading a server's responses in a browser, with the [Velotype DevTools](/docs/velotype/devtools/) extension to inspect them.

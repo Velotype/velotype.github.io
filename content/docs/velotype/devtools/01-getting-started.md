@@ -4,9 +4,9 @@ Velotype DevTools is a Chrome extension for debugging [Velotype](/docs/velotype/
 
 | Panel | Shows |
 |---|---|
-| [Velotype](/docs/velodevtools/panels/#velotype) | The page's live component tree, and the fields of each component |
-| [Velotype Events](/docs/velodevtools/panels/#velotype-events) | What is registered on the event bus |
-| [VeloJSON](/docs/velodevtools/panels/#velojson) | VSON and VBIN payloads, decoded |
+| [Velotype](/docs/velotype/devtools/panels/#velotype) | The page's live component tree, and the fields of each component |
+| [Velotype Events](/docs/velotype/devtools/panels/#velotype-events) | What is registered on the event bus |
+| [VeloJSON](/docs/velotype/devtools/panels/#velojson) | VSON and VBIN payloads, decoded |
 
 ## Install
 
@@ -38,45 +38,6 @@ Several Velotype instances can be on one page (micro-frontends, or different ver
 
 This is a small Velotype app with fields worth looking at: a Component with attrs, a `RenderBasic`, a `RenderObject` that holds an object, a `Map`, and an event bus listener.
 
-```tsx
-import { Component, type EmptyAttrs, emitEvent, registerEventListener, RenderBasic, RenderObject, replaceElementWithRoot, VelotypeEvent } from "@velotype/velotype"
+@example demo-app.tsx
 
-type Settings = {theme: string, notifications: {email: boolean, sms: boolean}, tags: Set<string>}
-
-// A Component with fields to look at in the Velotype panel: attrs, a RenderBasic, a RenderObject
-// holding an object (which expands to its live values), and a Map
-class Profile extends Component<{name: string}> {
-    visits = new RenderBasic<number>(0)
-    settings = new RenderObject<Settings>(
-        {theme: "dark", notifications: {email: true, sms: false}, tags: new Set(["admin", "beta"])},
-        (settings: Settings) => <div>Theme: {settings.theme}</div>,
-    )
-    history: Map<string, number> = new Map([["login", 1], ["logout", 0]])
-
-    // A listener, which the Velotype Events panel lists under the key "profile-updated"
-    override mount() {
-        registerEventListener(this, "profile-updated", () => { this.visits.value += 1 })
-    }
-
-    override render(attrs: Readonly<{name: string}>) {
-        return <section>
-            <h2>{attrs.name}</h2>
-            <p>Visits: {this.visits}</p>
-            {this.settings}
-            <button type="button" onClick={() => emitEvent("profile-updated", new VelotypeEvent(this, "updated"))}>Update</button>
-        </section>
-    }
-}
-
-class App extends Component<EmptyAttrs> {
-    override render() {
-        return <main>
-            <Profile name="Ada"/>
-            <Profile name="Grace"/>
-        </main>
-    }
-}
-
-replaceElementWithRoot(<App/>, document.getElementById("app"))
-```
 Open it in a page, open DevTools, and look in the **Velotype** panel for `Profile`, and in **Velotype Events** for the `profile-updated` key.

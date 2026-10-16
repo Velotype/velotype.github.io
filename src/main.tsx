@@ -12,7 +12,7 @@ const docsUrl = (project: Project): string | undefined => (docsIndex as Record<s
 const goTo = (to: string) => () => { location.assign(to) }
 
 /** The Velotype mark. It is a dark square, so it gets rounded corners to sit on either theme */
-const Logo = (attrs: {size: string}) => <img src="/assets/logo.svg" alt="" width="64" height="64"
+const Logo = (attrs: {size: `${number}em` | `${number}rem`}) => <img src="/assets/logo.svg" alt="" width="64" height="64"
     style={{width: attrs.size, height: attrs.size, borderRadius: "0.2em", flexShrink: 0}}/>
 
 const Header = () => <Navbar
@@ -124,7 +124,7 @@ const ProjectPage = (project: Project) => <Stack direction="column" gap="lg">
     </Stack>
 
     {project.resources && <Stack direction="column">
-        <Heading level={2}>Demos and examples</Heading>
+        <Heading level={2}>Tools, demos, and examples</Heading>
         <Grid minColumnWidth="22em">{project.resources.map(ResourceCard)}</Grid>
     </Stack>}
 

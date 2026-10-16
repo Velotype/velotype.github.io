@@ -1,10 +1,10 @@
 {
     "velodesign": "/docs/velodesign/",
-    "velodevtools": "/docs/velodevtools/",
     "velojson": "/docs/velojson/",
     "velomicro": "/docs/velomicro/",
     "velomini": "/docs/velomini/",
     "veloserver": "/docs/veloserver/",
     "velossr": "/docs/velossr/",
-    "velotype": "/docs/velotype/"
+    "velotype": "/docs/velotype/",
+    "velodevtools": "/docs/velotype/devtools/"
 }
