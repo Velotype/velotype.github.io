@@ -197,4 +197,4 @@ The package also exports the DOM and JSX types (`HTMLAttributes`, event handler 
 | `@velotype/velotype` | The runtime, and the `jsx-runtime` |
 | `@velotype/velotype/jsx-runtime` | The production JSX runtime |
 | `@velotype/velotype/jsx-dev-runtime` | The development JSX runtime, with [hot reloading](/docs/velotype/development-tools/#hot-reloading) |
-| `@velotype/velotype/devtools` | `__vtAppMetadata` and `getDevtoolsHook()` |
+| `@velotype/velotype/devtools` | `__vtAppMetadata` (with `setEventTracer()` from 0.3.2) and `getDevtoolsHook()` |
