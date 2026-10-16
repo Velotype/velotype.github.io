@@ -145,7 +145,6 @@ for (const project of projectsWithDocs) {
 <title>${escapeHtml(page.title)} - ${escapeHtml(page.section ? `${page.section}, ${name}` : name)} docs</title>
 <meta name="description" content="${escapeHtml(page.description)}">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
-<link rel="icon" type="image/png" href="/assets/logo.png">
 <link rel="apple-touch-icon" href="/assets/logo.png">
 ${headPrelude}
 </head>
