@@ -2,6 +2,7 @@
 // so it has its own URL, title, and description with no client-side routing. They all load the
 // same bundle, which reads <body data-page> to choose what to render.
 import { projects } from "../src/projects.ts"
+import { headPrelude } from "./head-prelude.ts"
 
 const page = (title: string, description: string, id: string | null, noscript: string) => `<!doctype html>
 <html lang="en">
@@ -13,6 +14,7 @@ const page = (title: string, description: string, id: string | null, noscript: s
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="icon" type="image/png" href="/assets/logo.png">
 <link rel="apple-touch-icon" href="/assets/logo.png">
+${headPrelude}
 </head>
 <body${id ? ` data-page="${id}"` : ""}>
 <div id="app"></div>
