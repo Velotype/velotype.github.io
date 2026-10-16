@@ -29,7 +29,7 @@ Two lines are special in a docs page:
 
 The build fails when an example or output is missing, or a link to another docs page or an anchor in one does not exist.
 
-## Keeping the examples honest
+## Checking the examples
 
 The examples are real files, so they can be checked:
 

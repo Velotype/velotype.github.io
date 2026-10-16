@@ -602,7 +602,7 @@ The whole category: [Data Display on the showcase](https://velotype.github.io/ve
 | [`AspectRatio`](https://velotype.github.io/velodesign/components/aspect-ratio) | Constrains its children to a fixed width:height ratio, via pure CSS. |
 | [`ScrollArea`](https://velotype.github.io/velodesign/components/scroll-area) | A scrollable container with a themed thin scrollbar. |
 | [`Table`](https://velotype.github.io/velodesign/components/table) | A themed data table wrapping a native <table>, generic over the row type. |
-| [`DataTable`](https://velotype.github.io/velodesign/components/data-table) | A batteries-included data table: sortable and resizable columns, user-toggleable column visibility, an optional search box, and built-in pagination via Pagination. |
+| [`DataTable`](https://velotype.github.io/velodesign/components/data-table) | A data table with sortable and resizable columns, user-toggleable column visibility, an optional search box, and built-in pagination via Pagination. |
 | [`AsyncDataTable`](https://velotype.github.io/velodesign/components/async-data-table) | The same table, for data a server filters, sorts and pages. Give it a load() and it handles debouncing, out-of-order responses, loading and error states, and pagination. |
 | [`Carousel`](https://velotype.github.io/velodesign/components/carousel) | A single-slide-at-a-time carousel with prev/next arrows and optional dot indicators. |
 | [`Calendar`](https://velotype.github.io/velodesign/components/calendar) | A month-grid date picker with prev/next month navigation and a selectable day. |
@@ -4393,7 +4393,7 @@ Source: https://velotype.github.io/docs/velotype/devtools/panels/
 The live component tree for the page, like React DevTools. Each node shows its class name and its DOM anchor, the element it is attached to. For a class Component it also shows its `attrs` and its own instance fields, including the live values of `RenderObject` and `RenderBasic` fields.
 
 * Click a node to inspect it, and the element is highlighted on the page
-* Fields are a real expand and collapse tree. An object, Array, Map, or Set field expands to its actual live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded. A field is never a dead end that just says "Object"
+* Fields are an expand and collapse tree. An object, Array, Map, or Set field expands to its live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded
 
 Try it on the [demo app](/docs/velotype/devtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
 
