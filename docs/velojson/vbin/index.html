@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VBIN - velojson (VSON) docs</title>
-<meta name="description" content="VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the fastest format, and one of the smallest.">
+<meta name="description" content="VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the smallest of the three formats.">
 <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 <link rel="apple-touch-icon" href="/assets/logo.png">
 <style>html{background:#fff;color:#050505}html[data-theme=dark]{background:#151515;color:#fafafa}#app{visibility:hidden;animation:vtp-show 0s 3s forwards}@keyframes vtp-show{to{visibility:visible}}</style>
@@ -14,7 +14,7 @@
 <body data-doc="velojson">
 <div id="app"><article id="doc">
 <h1 id="vbin">VBIN</h1>
-<p>VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the fastest format, and one of the smallest.</p>
+<p>VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the smallest of the three formats.</p>
 <p>Because the KeyIDs are agreed ahead of time, using VBIN takes more code than <code>VSON.encode()</code>: you write the values with writers, and read them with a mapper.</p>
 <h2 id="writing">Writing</h2>
 <p>Create a <code>VBINRootWriter</code>, start the root object, write each value under its KeyID, and finalize the object. The root of a VBIN message must be an object.</p>

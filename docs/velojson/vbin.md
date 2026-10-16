@@ -1,6 +1,6 @@
 # VBIN
 
-VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the fastest format, and one of the smallest.
+VBIN is the format for two programs that share a schema, such as a server and a client generated from the same definition. Instead of sending key names, or a table of them, it sends a number for each key, called a KeyID. It is the smallest of the three formats.
 
 Because the KeyIDs are agreed ahead of time, using VBIN takes more code than `VSON.encode()`: you write the values with writers, and read them with a mapper.
 

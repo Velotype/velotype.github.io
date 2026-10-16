@@ -24,7 +24,7 @@ The root value must be an object or an Array. It is the default for those.
 
 The Key Id format. It is like Key Table, but the table is not in the message. The encoder and decoder must already have agreed on a number for each key. VBIN is typically about 25% to 70% smaller than JSON text, following the same shape-dependent pattern, and it also skips the table's own overhead.
 
-It is also much faster, because the key names are never encoded or decoded as UTF-8 strings or used as a string index on the constructed object. See [VBIN](/docs/velojson/vbin/).
+It also never encodes or decodes the key names as UTF-8 strings, or uses them as a string index on the constructed object. See [VBIN](/docs/velojson/vbin/).
 
 ## Comparing sizes
 
@@ -36,6 +36,6 @@ Output:
 
 ## Speed
 
-The VSON formats (Base and Key Table) typically run slower than native `JSON.stringify()` and `JSON.parse()`, which are heavily optimized in the engine. For the rare case of many complex numbers VSON outperforms them. The VBIN format performs significantly faster than native JSON.
+The formats are implemented in TypeScript, and typically run slower than the engine's native `JSON.stringify()` and `JSON.parse()`, which are heavily optimized. For the rare case of many complex numbers VSON outperforms them.
 
-Choose VSON for the smaller payload, and VBIN for speed and size.
+Choose them for the smaller payload: VSON when the encoder and decoder share nothing, and VBIN when they share a schema.

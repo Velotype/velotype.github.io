@@ -14,7 +14,7 @@ Each project stands on its own and they are designed to fit together: veloserver
 - **Conditionals:** `{condition && <li/>}` works in Velotype and in velossr 0.0.10 or later. In velomicro and velomini (and velossr before 0.0.10) a `false` child is written as the text "false", so use `{condition ? <li/> : null}`.
 - **velodesign:** call `Theme.injectStyles()` once before any component renders. The library has no built-in text, so ARIA labels and placeholders have no defaults: pass them in.
 - **veloserver:** `new Router<Metadata>({})`, add routes with `get`, `head`, and `post`, then `new Server(router).serve("127.0.0.1", 3000)`. Serving needs `--allow-net` and nothing else.
-- **velojson:** `VSON.encode(value)` and `VSON.decode(bytes)`. The Key Table format is the default for objects and arrays. VSON Base and Key Table are smaller than JSON text but usually slower than native JSON, and VBIN (which needs agreed key IDs) is the fast one. The `/browser` module supports Key Table only.
+- **velojson:** `VSON.encode(value)` and `VSON.decode(bytes)`. The Key Table format is the default for objects and arrays. All three formats are smaller than JSON text (VBIN, which needs agreed key IDs, is the smallest), but on current engines they run slower than native JSON.stringify() and JSON.parse(), so choose them for payload size. The `/browser` module supports Key Table only.
 - **velomicro and velomini** are small teaching frameworks (about 1kb and 2.5kb), not for applications. Use Velotype for an app.
 - **Velotype DevTools** is a Chrome extension that is built from source and loaded unpacked. It is not a library.
 
