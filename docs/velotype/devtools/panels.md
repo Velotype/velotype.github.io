@@ -7,6 +7,8 @@ The live component tree for the page, like React DevTools. Each node shows its c
 * Click a node to inspect it, and the element is highlighted on the page
 * Fields are an expand and collapse tree. An object, Array, Map, or Set field expands to its live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded
 
+A page with iframes shows each frame that has Velotype as its own root, labelled with its address.
+
 Try it on the [demo app](/docs/velotype/devtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
 
 ## Velotype Events
@@ -15,13 +17,15 @@ A snapshot of the event bus's current registrations: every listening key, how ma
 
 It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, `profile-updated` has one listener for each `Profile`.
 
-It shows what is registered, not what has fired. It is not a trace of events as they happen.
+**Trace.** Press Start trace to list events as they are emitted, newest first: the listening key, the event's name, what emitted it, a summary of its data, and who was listening. Hover a component to highlight it on the page. The trace starts when you press Start and keeps the last 1,000 events, and Stop ends it. It needs Velotype 0.3.2 or later, which calls the extension's tracer just before the first listener of each event runs.
 
 ## VeloJSON
 
 Decodes [velojson](/docs/velojson/) payloads.
 
 **Network.** While the panel is open it inspects the bodies of network requests and responses, and lists those that are VSON or VBIN, decoded as JSON. A body is decoded when its `Content-Type` is `application/vson` or `application/vbin`. A `; charset=utf-8` suffix does not matter. A body with another content type is never attempted, and a body with one of these content types is always decoded, so a failure shows the real error.
+
+Request bodies are read as the exact bytes your page sent. While the panel is open, the extension watches the page's `fetch`, `XMLHttpRequest`, and `navigator.sendBeacon` calls and keeps the bytes of VSON and VBIN bodies, so binary bodies decode correctly. A request that did not come from your page's JavaScript has no captured bytes and is not decoded.
 
 The velojson docs' [browser](/docs/velojson/browser/) and the veloserver example below produce such responses:
 

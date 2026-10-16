@@ -20,14 +20,16 @@
 <li>Click a node to inspect it, and the element is highlighted on the page</li>
 <li>Fields are an expand and collapse tree. An object, Array, Map, or Set field expands to its live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded</li>
 </ul>
+<p>A page with iframes shows each frame that has Velotype as its own root, labelled with its address.</p>
 <p>Try it on the <a href="/docs/velotype/devtools/#an-app-to-try-it-on">demo app</a>: <code>Profile</code> has a <code>settings</code> RenderObject whose value is an object holding a nested object and a <code>Set</code>, and a <code>history</code> <code>Map</code>.</p>
 <h2 id="velotype-events">Velotype Events</h2>
 <p>A snapshot of the event bus&#39;s current registrations: every listening key, how many listeners are on it, and, resolved against Velotype&#39;s registry, which live Components and RenderObjects they belong to.</p>
 <p>It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, <code>profile-updated</code> has one listener for each <code>Profile</code>.</p>
-<p>It shows what is registered, not what has fired. It is not a trace of events as they happen.</p>
+<p><strong>Trace.</strong> Press Start trace to list events as they are emitted, newest first: the listening key, the event&#39;s name, what emitted it, a summary of its data, and who was listening. Hover a component to highlight it on the page. The trace starts when you press Start and keeps the last 1,000 events, and Stop ends it. It needs Velotype 0.3.2 or later, which calls the extension&#39;s tracer just before the first listener of each event runs.</p>
 <h2 id="velojson">VeloJSON</h2>
 <p>Decodes <a href="/docs/velojson/">velojson</a> payloads.</p>
 <p><strong>Network.</strong> While the panel is open it inspects the bodies of network requests and responses, and lists those that are VSON or VBIN, decoded as JSON. A body is decoded when its <code>Content-Type</code> is <code>application/vson</code> or <code>application/vbin</code>. A <code>; charset=utf-8</code> suffix does not matter. A body with another content type is never attempted, and a body with one of these content types is always decoded, so a failure shows the real error.</p>
+<p>Request bodies are read as the exact bytes your page sent. While the panel is open, the extension watches the page&#39;s <code>fetch</code>, <code>XMLHttpRequest</code>, and <code>navigator.sendBeacon</code> calls and keeps the bytes of VSON and VBIN bodies, so binary bodies decode correctly. A request that did not come from your page&#39;s JavaScript has no captured bytes and is not decoded.</p>
 <p>The velojson docs&#39; <a href="/docs/velojson/browser/">browser</a> and the veloserver example below produce such responses:</p>
 <pre><code class="language-tsx">import { Router, Server } from &quot;@velotype/veloserver&quot;
 import { VSON } from &quot;@velotype/velojson&quot;

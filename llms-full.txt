@@ -4077,9 +4077,11 @@ The development server talks to the dev runtime through `globalThis.__VELOTYPE_H
 
 ## Debugging
 
-The [Velotype DevTools](/docs/velotype/devtools/) extension shows the live component tree, the event bus, and VSON payloads.
+The [Velotype DevTools](/docs/velotype/devtools/) extension shows the live component tree, the event bus and a trace of its events, and VSON payloads.
 
 `@velotype/velotype/devtools` exports read-only access to Velotype's internal state (`__vtAppMetadata`) and the devtools hook (`getDevtoolsHook()`), for debugging and for the extension. Applications do not need to import it, because Velotype registers with the devtools hook from any entry point.
+
+From Velotype 0.3.2, `__vtAppMetadata.setEventTracer(tracer)` calls `tracer(listeningKey, event)` once for each event that has listeners, just before the first listener receives it, and `setEventTracer(undefined)` stops. Tracing wraps the registered listeners, so emitting an event runs the same code whether or not anything is tracing. A tracer that throws does not affect the event or its listeners.
 
 ```tsx
 // Read-only access to Velotype's internal state, for debugging and for the Velotype DevTools
@@ -4293,7 +4295,7 @@ The package also exports the DOM and JSX types (`HTMLAttributes`, event handler 
 | `@velotype/velotype` | The runtime, and the `jsx-runtime` |
 | `@velotype/velotype/jsx-runtime` | The production JSX runtime |
 | `@velotype/velotype/jsx-dev-runtime` | The development JSX runtime, with [hot reloading](/docs/velotype/development-tools/#hot-reloading) |
-| `@velotype/velotype/devtools` | `__vtAppMetadata` and `getDevtoolsHook()` |
+| `@velotype/velotype/devtools` | `__vtAppMetadata` (with `setEventTracer()` from 0.3.2) and `getDevtoolsHook()` |
 
 ---
 
@@ -4395,6 +4397,8 @@ The live component tree for the page, like React DevTools. Each node shows its c
 * Click a node to inspect it, and the element is highlighted on the page
 * Fields are an expand and collapse tree. An object, Array, Map, or Set field expands to its live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded
 
+A page with iframes shows each frame that has Velotype as its own root, labelled with its address.
+
 Try it on the [demo app](/docs/velotype/devtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
 
 ## Velotype Events
@@ -4403,13 +4407,15 @@ A snapshot of the event bus's current registrations: every listening key, how ma
 
 It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, `profile-updated` has one listener for each `Profile`.
 
-It shows what is registered, not what has fired. It is not a trace of events as they happen.
+**Trace.** Press Start trace to list events as they are emitted, newest first: the listening key, the event's name, what emitted it, a summary of its data, and who was listening. Hover a component to highlight it on the page. The trace starts when you press Start and keeps the last 1,000 events, and Stop ends it. It needs Velotype 0.3.2 or later, which calls the extension's tracer just before the first listener of each event runs.
 
 ## VeloJSON
 
 Decodes [velojson](/docs/velojson/) payloads.
 
 **Network.** While the panel is open it inspects the bodies of network requests and responses, and lists those that are VSON or VBIN, decoded as JSON. A body is decoded when its `Content-Type` is `application/vson` or `application/vbin`. A `; charset=utf-8` suffix does not matter. A body with another content type is never attempted, and a body with one of these content types is always decoded, so a failure shows the real error.
+
+Request bodies are read as the exact bytes your page sent. While the panel is open, the extension watches the page's `fetch`, `XMLHttpRequest`, and `navigator.sendBeacon` calls and keeps the bytes of VSON and VBIN bodies, so binary bodies decode correctly. A request that did not come from your page's JavaScript has no captured bytes and is not decoded.
 
 The velojson docs' [browser](/docs/velojson/browser/) and the veloserver example below produce such responses:
 
@@ -4447,8 +4453,7 @@ Source: https://velotype.github.io/docs/velotype/devtools/limitations/
 
 # Known limitations
 
-* **The component tree covers only the top frame.** Components rendered inside an `<iframe>` are not merged into the tree
-* **The Events panel is a registration snapshot, not a live trace.** It does not log events as they fire. A trace needs a small hook in `emitEvent()` itself, which Velotype does not include to keep its bundle small. The snapshot covers most debugging needs: leaked listeners, and whether anything is listening on a key
-* **Request body decoding is best-effort.** Chrome's DevTools extension API only gives a request's `postData` as text, which can be lossy for binary bodies depending on the Chrome version. Response bodies are reliable, because the API says whether the content is base64 binary. Use the manual decode tool for a request payload that does not decode automatically
-* **VSON and VBIN detection on the network tab uses the Content-Type only.** There is no fallback that looks at the bytes of a body with no content type, such as `application/octet-stream`. Use the manual decode tool for those
-* **VBIN is decoded in the debug format only,** with KeyIDs as keys. See [VeloJSON](/docs/velotype/devtools/panels/#velojson)
+* **Request bodies are decoded only when your page sent them.** The extension keeps the bytes of a VSON or VBIN body sent with `fetch`, `XMLHttpRequest`, or `navigator.sendBeacon` while the VeloJSON panel is open, so a request made before the panel opened, or by a worker or the browser itself, is listed but not decoded. Chrome's network API gives a request body only as UTF-8 text, which would show corrupted bytes for a binary body, so the panel does not use it. A form post cannot send VSON or VBIN as binary anyway. Use the manual decode tool for those bytes. Response bodies are always decoded, because Chrome says whether they are base64
+* **The event trace starts when you press Start,** and keeps the last 1,000 events. It needs Velotype 0.3.2 or later, and the registration table works with earlier versions
+* **VSON and VBIN detection on the network tab uses the Content-Type.** velojson has a content type for each format, so the extension trusts it: a body with another content type is never guessed at from its bytes, and a body with one of these content types always shows its real decoding error. Use the manual decode tool for a body with no content type, such as `application/octet-stream`
+* **VBIN is decoded in the debug format,** with KeyIDs as keys. The real field names come from a schema's mapper, which the extension cannot know for an arbitrary site. See [VeloJSON](/docs/velotype/devtools/panels/#velojson)

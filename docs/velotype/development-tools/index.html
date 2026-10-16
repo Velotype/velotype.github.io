@@ -31,8 +31,9 @@
 </ul>
 <p>The development server talks to the dev runtime through <code>globalThis.__VELOTYPE_HOT__</code>, and other development servers can use it too.</p>
 <h2 id="debugging">Debugging</h2>
-<p>The <a href="/docs/velotype/devtools/">Velotype DevTools</a> extension shows the live component tree, the event bus, and VSON payloads.</p>
+<p>The <a href="/docs/velotype/devtools/">Velotype DevTools</a> extension shows the live component tree, the event bus and a trace of its events, and VSON payloads.</p>
 <p><code>@velotype/velotype/devtools</code> exports read-only access to Velotype&#39;s internal state (<code>__vtAppMetadata</code>) and the devtools hook (<code>getDevtoolsHook()</code>), for debugging and for the extension. Applications do not need to import it, because Velotype registers with the devtools hook from any entry point.</p>
+<p>From Velotype 0.3.2, <code>__vtAppMetadata.setEventTracer(tracer)</code> calls <code>tracer(listeningKey, event)</code> once for each event that has listeners, just before the first listener receives it, and <code>setEventTracer(undefined)</code> stops. Tracing wraps the registered listeners, so emitting an event runs the same code whether or not anything is tracing. A tracer that throws does not affect the event or its listeners.</p>
 <pre><code class="language-tsx">// Read-only access to Velotype&#39;s internal state, for debugging and for the Velotype DevTools
 // extension. Applications do not need it: Velotype registers with the devtools hook from any entry point.
 import { __vtAppMetadata, getDevtoolsHook } from &quot;@velotype/velotype/devtools&quot;
