@@ -1,16 +1,16 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@velotype/velotype@0.3.1": "0.3.1"
+    "jsr:@velotype/velotype@0.3.2": "0.3.2"
   },
   "jsr": {
-    "@velotype/velotype@0.3.1": {
-      "integrity": "d1fe7c6c8c1c4e896add41ee156b7e646c998d841c321d599cc79fb5a3ac1694"
+    "@velotype/velotype@0.3.2": {
+      "integrity": "c181a7699e97747c9216e2a725fcc8d1e983376568cce106297aa7af9e013a08"
     }
   },
   "workspace": {
     "dependencies": [
-      "jsr:@velotype/velotype@0.3.1"
+      "jsr:@velotype/velotype@0.3.2"
     ]
   }
 }

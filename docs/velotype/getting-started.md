@@ -24,7 +24,7 @@ deno add jsr:@velotype/velotype
 
 `"jsx": "react-jsxdev"` uses the development runtime instead, which supports [hot reloading](/docs/velotype/development-tools/#hot-reloading).
 
-velotype is about 21kb minified and 7.7kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with `deno bundle` or any bundler that supports Deno specifiers.
+velotype is about 21kb minified and 7.9kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with `deno bundle` or any bundler that supports Deno specifiers.
 
 ## Mounting an app
 
