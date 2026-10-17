@@ -1,6 +1,6 @@
 # Components
 
-Components are the objects that you create as tags in TSX. Velotype has two kinds: function components for simple, stateless markup, and class components for anything with state, a lifecycle, or methods.
+Components are the objects that you create as tags in TSX. velotype has two kinds: function components for simple, stateless markup, and class components for anything with state, a lifecycle, or methods.
 
 ## Function components
 
@@ -50,7 +50,7 @@ replaceElementWithRoot(
 ```
 ## Class components
 
-A class component extends `Component<AttrsType>` and implements `render()`. Velotype calls its lifecycle methods for you.
+A class component extends `Component<AttrsType>` and implements `render()`. velotype calls its lifecycle methods for you.
 
 The attrs a Component is created with are `this.attrs`, and its children are `this.children`. They are also passed to `render()`.
 
@@ -152,9 +152,9 @@ replaceElementWithRoot(
 * `unmount()` runs just before the Component is removed, while it is still in the page
 * `refresh()` unmounts and mounts the Component's children, and the Component itself stays mounted. If `render()` throws, the current render is kept and the error is thrown to the caller of `refresh()`
 * Moving an element (such as `swap()`, or moving it with DOM methods) does not unmount or mount it
-* A Component mounts and unmounts once. Once Velotype removes it, it is released, and inserting its element again does not mount it (Velotype warns in the console). Create a new Component instead
-* Velotype mounts Components that are inserted through Velotype: `replaceElementWithRoot()`, a Component's child methods, and RenderObjects. An element inserted with DOM methods such as `appendChild()` is not mounted
-* Likewise Velotype unmounts Components that are removed through Velotype: `removeElementRoot()`, a Component's child methods, `refresh()`, and RenderObjects. An element removed with DOM methods is not unmounted
+* A Component mounts and unmounts once. Once velotype removes it, it is released, and inserting its element again does not mount it (velotype warns in the console). Create a new Component instead
+* velotype mounts Components that are inserted through velotype: `replaceElementWithRoot()`, a Component's child methods, and RenderObjects. An element inserted with DOM methods such as `appendChild()` is not mounted
+* Likewise velotype unmounts Components that are removed through velotype: `removeElementRoot()`, a Component's child methods, `refresh()`, and RenderObjects. An element removed with DOM methods is not unmounted
 * The RenderObjects in a Component's fields mount and unmount with it (calling their `registerOnMount()` callbacks), and the ones in public fields are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a `#private` field
 * Errors thrown by `mount()` and `unmount()` are reported with `reportError()`, and the other Components still run. See [Errors](/docs/velotype/events-and-errors/#when-code-throws)
 

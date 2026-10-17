@@ -7,17 +7,17 @@ The live component tree for the page, like React DevTools. Each node shows its c
 * Click a node to inspect it, and the element is highlighted on the page
 * Fields are an expand and collapse tree. An object, Array, Map, or Set field expands to its live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded
 
-A page with iframes shows each frame that has Velotype as its own root, labelled with its address.
+A page with iframes shows each frame that has velotype as its own root, labelled with its address.
 
 Try it on the [demo app](/docs/velotype/devtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
 
 ## Velotype Events
 
-A snapshot of the event bus's current registrations: every listening key, how many listeners are on it, and, resolved against Velotype's registry, which live Components and RenderObjects they belong to.
+A snapshot of the event bus's current registrations: every listening key, how many listeners are on it, and, resolved against velotype's registry, which live Components and RenderObjects they belong to.
 
 It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, `profile-updated` has one listener for each `Profile`.
 
-**Trace.** Press Start trace to list events as they are emitted, newest first: the listening key, the event's name, what emitted it, a summary of its data, and who was listening. Hover a component to highlight it on the page. The trace starts when you press Start and keeps the last 1,000 events, and Stop ends it. It needs Velotype 0.3.2 or later, which calls the extension's tracer just before the first listener of each event runs.
+**Trace.** Press Start trace to list events as they are emitted, newest first: the listening key, the event's name, what emitted it, a summary of its data, and who was listening. Hover a component to highlight it on the page. The trace starts when you press Start and keeps the last 1,000 events, and Stop ends it. It needs velotype 0.3.2 or later, which calls the extension's tracer just before the first listener of each event runs.
 
 ## VeloJSON
 
@@ -37,4 +37,4 @@ The velojson docs' [browser](/docs/velojson/browser/) and the veloserver example
 
 ## The popup
 
-The toolbar popup shows whether Velotype is present on the current page, without opening DevTools.
+The toolbar popup shows whether velotype is present on the current page, without opening DevTools.

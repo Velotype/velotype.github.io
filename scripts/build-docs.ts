@@ -190,7 +190,7 @@ for (const [name, version] of [...pins].sort()) {
 const designConfig = Deno.readTextFileSync(new URL("velodesign/deno.json", examplesSource))
 const designOn = designConfig.match(/jsr:@velotype\/velotype@\^?(\d+\.\d+\.\d+)/)?.[1]
 if (designOn) {
-    lines.push("", `velodesign ${pins.get("velodesign")} is built on Velotype ${designOn}, so use that Velotype version with it.`)
+    lines.push("", `velodesign ${pins.get("velodesign")} is built on velotype ${designOn}, so use that velotype version with it.`)
 }
 lines.push("", "## Projects", "")
 for (const project of projects) {

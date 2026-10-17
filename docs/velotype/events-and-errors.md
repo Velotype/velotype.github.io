@@ -55,7 +55,7 @@ void Saver
 ```
 ## When code throws
 
-Velotype keeps its own state consistent whatever an app's code throws.
+velotype keeps its own state consistent whatever an app's code throws.
 
 * **Errors in rendering are thrown to the caller:** a Component's constructor or `render()`, a function component, and a RenderObject's render function or `handleUpdate`. What the failed render created is released. `refresh()` keeps the current render, a RenderObject keeps its current value, and RenderObjectArray and RenderTemplateArray keep their data and rows matching
 * **Errors in `mount()`, `unmount()`, `registerOnMount()` callbacks, and event bus listeners are reported** with `reportError()`, which logs them and dispatches an `error` event on the window. The other Components and listeners still run

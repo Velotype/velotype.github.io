@@ -19,7 +19,7 @@ export const Header = () => <Navbar
 </Navbar>
 
 export const Footer = () => <Text type="muted">
-    All projects live under the <Link to="https://github.com/Velotype">Velotype</Link> organization on GitHub and are published to <Link to="https://jsr.io/@velotype">JSR</Link>. Articles are on <Link to="https://argoday.medium.com/">Medium</Link>. This site is built with Velotype and velodesign.
+    All projects live under the <Link to="https://github.com/Velotype">Velotype</Link> organization on GitHub and are published to <Link to="https://jsr.io/@velotype">JSR</Link>. Articles are on <Link to="https://argoday.medium.com/">Medium</Link>. This site is built with velotype and velodesign.
 </Text>
 
 /** Mounts a page inside the site's header, footer, and fonts, replacing the #app element */
