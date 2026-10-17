@@ -1,7 +1,7 @@
 import { Router, Server } from "@velotype/veloserver"
 import { DevServer } from "@velotype/veloserver/dev"
 
-// Serves a Velotype app during development, and updates the page when its files change.
+// Serves a velotype app during development, and updates the page when its files change.
 // Run it with --allow-net --allow-read --allow-write --allow-run --allow-env: builds run
 // `deno bundle` and write temporary files.
 const dev = new DevServer({

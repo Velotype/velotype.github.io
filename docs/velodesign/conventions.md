@@ -4,7 +4,7 @@ What every component has in common, and the functions and objects around the com
 
 ## Attrs
 
-Every component's attrs type is named `<Name>AttrsType`, such as `ButtonAttrsType`, and exported. Each is built from shared pieces, which Velotype exports too:
+Every component's attrs type is named `<Name>AttrsType`, such as `ButtonAttrsType`, and exported. Each is built from shared pieces, which velotype exports too:
 
 * **`id`, `class`, and `style`** are accepted by components, and set on the element the component renders. `class` is added to the element's own classes rather than replacing them
 * **`children`** are accepted by the components that take content, such as `Button`, `Card`, and `Alert`

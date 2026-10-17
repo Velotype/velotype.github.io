@@ -40,9 +40,9 @@ const HomePage = () => <Stack direction="column" gap="lg">
             <Heading level={1}>The Velocity Project</Heading>
         </Stack>
         <Paragraph style={{fontSize: "1.2em"}}>A suite of components for building software platforms end to end: the UI in the browser, the servers behind it, and the wire format between them.</Paragraph>
-        <Paragraph><Text type="muted">Each piece stands on its own and is published separately. They are designed to fit together: <Link to="/projects/veloserver/">veloserver</Link> serves pages and APIs, <Link to="/projects/velossr/">velossr</Link> or <Link to="/projects/velotype/">Velotype</Link> renders them, and <Link to="/projects/velojson/">VSON</Link> carries data between the two. More pieces are on the way.</Text></Paragraph>
+        <Paragraph><Text type="muted">Each piece stands on its own and is published separately. They are designed to fit together: <Link to="/projects/veloserver/">veloserver</Link> serves pages and APIs, <Link to="/projects/velossr/">velossr</Link> or <Link to="/projects/velotype/">velotype</Link> renders them, and <Link to="/projects/velojson/">VSON</Link> carries data between the two. More pieces are on the way.</Text></Paragraph>
         <Stack>
-            <Button type="primary" onClick={goTo("/projects/velotype/")}>Start with Velotype</Button>
+            <Button type="primary" onClick={goTo("/projects/velotype/")}>Start with velotype</Button>
             <Button type="secondary" onClick={goTo("https://github.com/Velotype")}>GitHub</Button>
         </Stack>
     </Stack>

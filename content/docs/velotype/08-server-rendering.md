@@ -1,10 +1,10 @@
 # Server rendering
 
-Velotype renders in the browser. To send a page's HTML from the server, render it with [velossr](/docs/velossr/), the server-side version of Velotype. It has its own components built for rendering on the server: static parts are prepared once, and async parts are streamed.
+velotype renders in the browser. To send a page's HTML from the server, render it with [velossr](/docs/velossr/), the server-side version of velotype. It has its own components built for rendering on the server: static parts are prepared once, and async parts are streamed.
 
 ## No hydration step
 
-There is no hydration step that turns the server's HTML into live Velotype Components. Velotype creates elements as TSX runs, so the interactive parts of a page are rendered again in the browser, and each one replaces the server's HTML for it with `replaceElementWithRoot()`. Rendering again is fast, the swap happens in one step when the page's script runs, and the server's HTML is shown until then.
+There is no hydration step that turns the server's HTML into live velotype Components. velotype creates elements as TSX runs, so the interactive parts of a page are rendered again in the browser, and each one replaces the server's HTML for it with `replaceElementWithRoot()`. Rendering again is fast, the swap happens in one step when the page's script runs, and the server's HTML is shown until then.
 
 This is the island pattern:
 

@@ -19,6 +19,6 @@ const untrusted = `<script>alert("hi")</script> & "quotes"`
 await show(<p title={untrusted}>{untrusted}</p>)
 
 // Fragments group children without a wrapper element. false, null, and undefined render nothing,
-// so {condition && <li/>} works as it does in Velotype. true is written as text.
+// so {condition && <li/>} works as it does in velotype. true is written as text.
 const signedIn = false
 await show(<ul>{signedIn && <li>Account</li>}<><li>one</li><li>two</li></></ul>)

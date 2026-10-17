@@ -2,7 +2,7 @@
 
 velomicro is a strictly minimal TSX framework, about 1kb, that shows how TSX rendering works. It is small enough to read in one sitting: a `createElement` that returns real DOM elements, and function components. The [Medium article](https://argoday.medium.com/a-1kb-tsx-framework-to-demonstrate-how-tsx-works-velotype-tsx-micro-337c32ff0648) walks through its source line by line.
 
-It is a teaching tool and a starting point, not a framework for an app. It has no state management and no lifecycle. For an app, see [Velotype](/docs/velotype/), which keeps this model of TSX that returns real elements, and adds the rest. [velomini](/docs/velomini/) is the next step up.
+It is a teaching tool and a starting point, not a framework for an app. It has no state management and no lifecycle. For an app, see [velotype](/docs/velotype/), which keeps this model of TSX that returns real elements, and adds the rest. [velomini](/docs/velomini/) is the next step up.
 
 Every example in these docs is a file that is type-checked against the published package, and run in a browser.
 
@@ -50,7 +50,7 @@ A function component runs once. Its state is a variable, and updating the page i
 
 @example counter.tsx
 
-This is the limit of velomicro. When you need a value that updates the page for you, a lifecycle, or classes, move up to [velomini](/docs/velomini/) or [Velotype](/docs/velotype/).
+This is the limit of velomicro. When you need a value that updates the page for you, a lifecycle, or classes, move up to [velomini](/docs/velomini/) or [velotype](/docs/velotype/).
 
 ## The classic runtime
 

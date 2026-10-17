@@ -33,10 +33,10 @@ const jsr = (pkg: string): Link => ({label: "JSR", to: `https://jsr.io/@velotype
 
 export const projects: Project[] = [
     {
-        id: "velotype", name: "Velotype", tag: "framework", tagKind: "primary",
+        id: "velotype", name: "velotype", tag: "framework", tagKind: "primary",
         tagline: "A fast and small TSX framework that updates the DOM in place.",
         about: [
-            "Velotype creates real DOM elements as your TSX runs. There is no virtual DOM and no reconciler: a value that changes renders only the part of the page that depends on it, and a list that changes renders, moves, or removes only the rows that changed.",
+            "velotype creates real DOM elements as your TSX runs. There is no virtual DOM and no reconciler: a value that changes renders only the part of the page that depends on it, and a list that changes renders, moves, or removes only the rows that changed.",
             "Components are classes with fields and methods, and you write TSX the way you write HTML.",
         ],
         stats: [
@@ -44,12 +44,12 @@ export const projects: Project[] = [
             {title: "Gzipped", value: "7.7", suffix: "kb"},
             {title: "Virtual DOM", value: "None"},
         ],
-        statsNote: "Velotype 0.3.1, the jsx-runtime entry point, minified with deno bundle. Bundlers drop the parts an app does not import.",
+        statsNote: "velotype 0.3.1, the jsx-runtime entry point, minified with deno bundle. Bundlers drop the parts an app does not import.",
         features: [
             {title: "Real DOM elements", text: "TSX gives you actual HTMLElements. Write class and for the way you do in HTML, add listeners with addEventListener, and use every DOM API you already know."},
             {title: "Updates in place", text: "A RenderObject renders its value everywhere it appears and re-renders just those spots when it changes. Lists update only the rows that changed, and sort(), move(), and filter() move the rows already on the page."},
-            {title: "Components are classes", text: "Fields hold your state, methods change it, and Velotype calls mount(), render(), and unmount() at the right moments. It reads like the object-oriented code you already write."},
-            {title: "Small and tree-shakeable", text: "About 21kb minified and 7.7kb gzipped for the entire runtime (Velotype 0.3.1), and your bundler drops whatever your app does not import."},
+            {title: "Components are classes", text: "Fields hold your state, methods change it, and velotype calls mount(), render(), and unmount() at the right moments. It reads like the object-oriented code you already write."},
+            {title: "Small and tree-shakeable", text: "About 21kb minified and 7.7kb gzipped for the entire runtime (velotype 0.3.1), and your bundler drops whatever your app does not import."},
             {title: "Typed styles and events", text: "Style objects are checked against CSS: property names, keywords, units, and colors. on* attributes take a handler or {handler, options}, and on- listens for a custom event by its exact name."},
             {title: "Built for development", text: "Hot reloading keeps component state. ErrorBoundary contains a failing component, AsyncRenderObject shows only the latest request's result, and the DevTools extension shows your live component tree."},
         ],
@@ -101,7 +101,7 @@ class ServerList extends Component<EmptyAttrs> {
             },
         ],
         install: {
-            title: "Add Velotype to a Deno project", language: "plain",
+            title: "Add velotype to a Deno project", language: "plain",
             code: `deno add jsr:@velotype/velotype
 
 // deno.json
@@ -117,26 +117,26 @@ class ServerList extends Component<EmptyAttrs> {
         resources: [
             {
                 name: "Velotype DevTools", tag: "Chrome extension",
-                text: "Chrome DevTools panels for debugging Velotype apps: the live component tree with each component's fields, the event bus's registrations, and a decoder for VSON and VBIN payloads. It is built from source and loaded unpacked.",
+                text: "Chrome DevTools panels for debugging velotype apps: the live component tree with each component's fields, the event bus's registrations, and a decoder for VSON and VBIN payloads. It is built from source and loaded unpacked.",
                 links: [{label: "Docs", to: "/docs/velotype/devtools/"}, {label: "Learn more", to: "/projects/velodevtools/"}, gh("velodevtools")],
             },
             {
                 name: "velotype-perf-demo", tag: "benchmark",
-                text: "The same fleet dashboard written in Velotype, Solid, Svelte, Vue, React, Preact, Lit, and plain DOM code, with 10,000 rows by default. The page loads each one and times creating rows, live updates, typing a filter, sorting, and moving a row in your own browser.",
+                text: "The same fleet dashboard written in velotype, Solid, Svelte, Vue, React, Preact, Lit, and plain DOM code, with 10,000 rows by default. The page loads each one and times creating rows, live updates, typing a filter, sorting, and moving a row in your own browser.",
                 links: [gh("velotype-perf-demo"), {label: "Live demo", to: "https://velotype.github.io/velotype-perf-demo/"}],
             },
             {
                 name: "example-velotype-projects", tag: "examples",
-                text: "Example projects using the Velotype modules: hot reloading with the veloserver development server, a minimal velomicro app, the demo pages from React's 2018 hooks talk recreated in Velotype, and the custom-elements-everywhere tests that check Velotype works with Custom Elements.",
+                text: "Example projects using the velotype modules: hot reloading with the veloserver development server, a minimal velomicro app, the demo pages from React's 2018 hooks talk recreated in velotype, and the custom-elements-everywhere tests that check velotype works with Custom Elements.",
                 links: [gh("example-velotype-projects")],
             },
         ],
     },
     {
         id: "velodesign", name: "velodesign", tag: "UI components", tagKind: "primary",
-        tagline: "A themed component library for Velotype, built from native HTML elements.",
+        tagline: "A themed component library for velotype, built from native HTML elements.",
         about: [
-            "velodesign is a component library for Velotype apps. Where HTML has an element for the job (input, button, details, dialog), the component is that element, so keyboard support, form participation, and browser autofill come from the platform.",
+            "velodesign is a component library for velotype apps. Where HTML has an element for the job (input, button, details, dialog), the component is that element, so keyboard support, form participation, and browser autofill come from the platform.",
             "This site is built with it.",
         ],
         stats: [
@@ -182,8 +182,8 @@ replaceElementWithRoot(
         id: "velossr", name: "velossr", tag: "server rendering", tagKind: "primary",
         tagline: "TSX rendered to HTML on the server, with no virtual DOM and no client runtime.",
         about: [
-            "velossr is the server-side version of Velotype's TSX. Components run once per request and produce bytes, either all at once or streamed as async pieces resolve.",
-            "Pair it with Velotype for interactive parts of a page: the server renders the markup for each one, and Velotype replaces it in the browser with replaceElementWithRoot().",
+            "velossr is the server-side version of velotype's TSX. Components run once per request and produce bytes, either all at once or streamed as async pieces resolve.",
+            "Pair it with velotype for interactive parts of a page: the server renders the markup for each one, and velotype replaces it in the browser with replaceElementWithRoot().",
         ],
         stats: [
             {title: "Virtual DOM", value: "None"},
@@ -195,7 +195,7 @@ replaceElementWithRoot(
             {title: "Prepared once", text: "prepareHTMLVNodeForRendering() prepares a page when your module loads, so its static parts are built once and not on every request."},
             {title: "Escaped by default", text: "Text, attribute values, and attribute names are escaped where they are written. Inline style and script text is written as it is, with only the sequences that would end the element early changed."},
             {title: "Contained failures", text: "If a dynamic component throws, its onFail() renders in its place and the rest of the page goes out."},
-            {title: "Same TSX as Velotype", text: "HTML attributes, style objects, and fragments behave as they do in the browser, so markup moves between server and client unchanged."},
+            {title: "Same TSX as velotype", text: "HTML attributes, style objects, and fragments behave as they do in the browser, so markup moves between server and client unchanged."},
         ],
         samples: [
             {
@@ -235,10 +235,10 @@ new Server(router).serve("127.0.0.1", 3000)`,
     },
     {
         id: "velodevtools", name: "Velotype DevTools", tag: "Chrome extension", tagKind: "secondary",
-        tagline: "Chrome DevTools panels for debugging Velotype apps.",
+        tagline: "Chrome DevTools panels for debugging velotype apps.",
         about: [
-            "A Chrome extension with three DevTools panels, plus a toolbar popup that shows whether Velotype is present on the page.",
-            "It works with any Velotype build that installs the devtools hook, which every current Velotype entry point does.",
+            "A Chrome extension with three DevTools panels, plus a toolbar popup that shows whether velotype is present on the page.",
+            "It works with any velotype build that installs the devtools hook, which every current velotype entry point does.",
         ],
         stats: [
             {title: "Panels", value: "3"},
@@ -263,7 +263,7 @@ new Server(router).serve("127.0.0.1", 3000)`,
         id: "veloserver", name: "veloserver", tag: "web server", tagKind: "warning",
         tagline: "A web server framework for high-performance websites, on Deno.",
         about: [
-            "veloserver is a small server framework: a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates Velotype apps.",
+            "veloserver is a small server framework: a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates velotype apps.",
         ],
         stats: [],
         features: [
@@ -272,7 +272,7 @@ new Server(router).serve("127.0.0.1", 3000)`,
             {title: "Inspectors", text: "Run logging, timing, and auth before and after the handlers of a path. An inspector can answer a request itself, and it sees every response."},
             {title: "Static files", text: "mountFiles() and mountFile() serve a directory or a file from memory, with an ETag and a gzip copy for clients that accept it."},
             {title: "Clean shutdown", text: "SIGINT, SIGTERM, and SIGUSR1 stop the server cleanly, and server.close() does it from code."},
-            {title: "A development server", text: "@velotype/veloserver/dev serves your Velotype app and updates the page when files change, per module or by rebuilding the bundle."},
+            {title: "A development server", text: "@velotype/veloserver/dev serves your velotype app and updates the page when files change, per module or by rebuilding the bundle."},
         ],
         samples: [
             {
@@ -388,7 +388,7 @@ import { VSON } from "jsr:@velotype/velojson/browser"`,
         tagline: "A 2.5kb TSX framework that adds classes to velomicro.",
         about: [
             "velomini is velomicro plus a Component class with render, mount, unmount, and refresh. Its refresh() tears down a component's subtree and renders it again. The Medium article walks through the source.",
-            "Velotype is the next step: it keeps classes and replaces refresh() with values that update in place.",
+            "velotype is the next step: it keeps classes and replaces refresh() with values that update in place.",
         ],
         stats: [
             {title: "Size", value: "2.5", suffix: "kb"},

@@ -96,7 +96,7 @@ void Dashboard
 ```
 ## Keeping the page responsive
 
-An update renders only the RenderObject or rows whose value changed, so most updates are small and finish within a frame. Velotype has no scheduler to make them interruptible, so updates are slow in two cases: when frequent input, such as typing, starts expensive work each time, and when one update renders thousands of elements.
+An update renders only the RenderObject or rows whose value changed, so most updates are small and finish within a frame. velotype has no scheduler to make them interruptible, so updates are slow in two cases: when frequent input, such as typing, starts expensive work each time, and when one update renders thousands of elements.
 
 For frequent input, run the expensive work from a listener with `eventDispatchDelay`, so it runs at most once in that time instead of once per change. The listener runs after the delay, so it reads the latest `value`. Here a search runs at most every 250ms while typing, and the AsyncRenderObject shows only the latest search's results and aborts the earlier requests:
 

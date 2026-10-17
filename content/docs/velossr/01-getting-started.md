@@ -2,7 +2,7 @@
 
 velossr renders TSX to HTML on the server. There is no virtual DOM diffing and no client runtime: components run once per request and produce bytes, either all at once or streamed as async pieces resolve.
 
-It is the server-side version of [Velotype](/docs/velotype/)'s TSX. Use it to send a page's HTML from the server, and use Velotype for the parts of the page that are interactive. Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed.
+It is the server-side version of [velotype](/docs/velotype/)'s TSX. Use it to send a page's HTML from the server, and use velotype for the parts of the page that are interactive. Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed.
 
 ## Install
 
@@ -21,7 +21,7 @@ deno add jsr:@velotype/velossr
 }
 ```
 
-A project that has both a server and a browser app needs two JSX settings, because the browser's TSX is Velotype's (`"jsxImportSource": "@velotype/velotype"`). Keep them in separate directories with their own `deno.json`, or set it per file with a `/** @jsxImportSource @velotype/velossr */` comment.
+A project that has both a server and a browser app needs two JSX settings, because the browser's TSX is velotype's (`"jsxImportSource": "@velotype/velotype"`). Keep them in separate directories with their own `deno.json`, or set it per file with a `/** @jsxImportSource @velotype/velossr */` comment.
 
 ## A page and a server
 
@@ -43,7 +43,7 @@ velossr writes attributes as strings, so you write TSX the same as if you were w
 
 ### Conditional rendering
 
-`false`, `null`, and `undefined` children render nothing, so `{condition && <li/>}` works as it does in Velotype. `true` is written as text. Before velossr 0.0.10 a `false` child was written as the text `false`, so use `{condition ? <li/> : null}` if you are on an older version.
+`false`, `null`, and `undefined` children render nothing, so `{condition && <li/>}` works as it does in velotype. `true` is written as text. Before velossr 0.0.10 a `false` child was written as the text `false`, so use `{condition ? <li/> : null}` if you are on an older version.
 
 ### Fragments
 
