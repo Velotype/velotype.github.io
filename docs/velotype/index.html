@@ -29,7 +29,7 @@
 }
 </code></pre>
 <p><code>&quot;jsx&quot;: &quot;react-jsxdev&quot;</code> uses the development runtime instead, which supports <a href="/docs/velotype/development-tools/#hot-reloading">hot reloading</a>.</p>
-<p>velotype is about 21kb minified and 7.7kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with <code>deno bundle</code> or any bundler that supports Deno specifiers.</p>
+<p>velotype is about 21kb minified and 7.9kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with <code>deno bundle</code> or any bundler that supports Deno specifiers.</p>
 <h2 id="mounting-an-app">Mounting an app</h2>
 <p><code>replaceElementWithRoot(root, element)</code> replaces an element that is already in the page with the app&#39;s root element and mounts its Components. It accepts <code>null</code>, so the result of <code>document.getElementById()</code> can be passed directly. It returns the new root element.</p>
 <p><code>removeElementRoot(element)</code> is its counterpart: it unmounts and releases the Components and RenderObjects in <code>element</code>, then removes it. velotype only unmounts what it removes itself, so content that is removed with DOM methods is not unmounted.</p>

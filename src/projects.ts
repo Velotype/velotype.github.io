@@ -41,15 +41,15 @@ export const projects: Project[] = [
         ],
         stats: [
             {title: "Minified", value: "21", suffix: "kb"},
-            {title: "Gzipped", value: "7.7", suffix: "kb"},
+            {title: "Gzipped", value: "7.9", suffix: "kb"},
             {title: "Virtual DOM", value: "None"},
         ],
-        statsNote: "velotype 0.3.1, the jsx-runtime entry point, minified with deno bundle. Bundlers drop the parts an app does not import.",
+        statsNote: "velotype 0.3.2, the jsx-runtime entry point, minified with deno bundle. Bundlers drop the parts an app does not import.",
         features: [
             {title: "Real DOM elements", text: "TSX gives you actual HTMLElements. Write class and for the way you do in HTML, add listeners with addEventListener, and use every DOM API you already know."},
             {title: "Updates in place", text: "A RenderObject renders its value everywhere it appears and re-renders just those spots when it changes. Lists update only the rows that changed, and sort(), move(), and filter() move the rows already on the page."},
             {title: "Components are classes", text: "Fields hold your state, methods change it, and velotype calls mount(), render(), and unmount() at the right moments. It reads like the object-oriented code you already write."},
-            {title: "Small and tree-shakeable", text: "About 21kb minified and 7.7kb gzipped for the entire runtime (velotype 0.3.1), and your bundler drops whatever your app does not import."},
+            {title: "Small and tree-shakeable", text: "About 21kb minified and 7.9kb gzipped for the entire runtime (velotype 0.3.2), and your bundler drops whatever your app does not import."},
             {title: "Typed styles and events", text: "Style objects are checked against CSS: property names, keywords, units, and colors. on* attributes take a handler or {handler, options}, and on- listens for a custom event by its exact name."},
             {title: "Built for development", text: "Hot reloading keeps component state. ErrorBoundary contains a failing component, AsyncRenderObject shows only the latest request's result, and the DevTools extension shows your live component tree."},
         ],

@@ -16,6 +16,6 @@
         ]
     },
     "imports": {
-        "@velotype/velotype": "jsr:@velotype/velotype@0.3.1"
+        "@velotype/velotype": "jsr:@velotype/velotype@0.3.2"
     }
 }
