@@ -1,6 +1,6 @@
 # Getting started
 
-Velotype DevTools is a Chrome extension for debugging [Velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether Velotype is on the page.
+Velotype DevTools is a Chrome extension for debugging [velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether velotype is on the page.
 
 | Panel | Shows |
 |---|---|
@@ -24,19 +24,19 @@ deno task build
 2. Turn on **Developer mode**
 3. Choose **Load unpacked**, and select the `dist/` folder
 
-Open DevTools on a page that uses Velotype, and the panels are in the tabs.
+Open DevTools on a page that uses velotype, and the panels are in the tabs.
 
 While developing the extension, `deno task watch` rebuilds on change. After it rebuilds, reload the extension from `chrome://extensions`, and refresh the inspected page, since content scripts are only injected on navigation. `deno task typecheck` checks the source.
 
 ## It needs the devtools hook
 
-Velotype keeps the map from DOM elements to its live Component and RenderObject instances to itself. The extension reads it through a hook, `window.__VELOTYPE_DEVTOOLS_HOOK__`, which every current Velotype entry point installs. If a site uses Velotype and the tree is empty, its Velotype bundle predates the hook: update Velotype.
+velotype keeps the map from DOM elements to its live Component and RenderObject instances to itself. The extension reads it through a hook, `window.__VELOTYPE_DEVTOOLS_HOOK__`, which every current velotype entry point installs. If a site uses velotype and the tree is empty, its velotype bundle predates the hook: update velotype.
 
-Several Velotype instances can be on one page (micro-frontends, or different versions in different bundles). Each registers separately with its own version, and their components do not collide.
+Several velotype instances can be on one page (micro-frontends, or different versions in different bundles). Each registers separately with its own version, and their components do not collide.
 
 ## An app to try it on
 
-This is a small Velotype app with fields worth looking at: a Component with attrs, a `RenderBasic`, a `RenderObject` that holds an object, a `Map`, and an event bus listener.
+This is a small velotype app with fields worth looking at: a Component with attrs, a `RenderBasic`, a `RenderObject` that holds an object, a `Map`, and an event bus listener.
 
 @example demo-app.tsx
 

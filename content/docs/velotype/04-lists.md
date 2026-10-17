@@ -1,6 +1,6 @@
 # Lists
 
-Velotype has two list types. Both hold an Array of data points, and both render, move, and remove only the rows that changed. They have the same methods.
+velotype has two list types. Both hold an Array of data points, and both render, move, and remove only the rows that changed. They have the same methods.
 
 | | RenderObjectArray | RenderTemplateArray |
 |---|---|---|

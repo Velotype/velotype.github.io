@@ -2,7 +2,7 @@
 
 velomini is a mostly minimal TSX framework, about 2.5kb, that adds class components to [velomicro](/docs/velomicro/): a `Component` base class with `render()`, `mount()`, `unmount()`, and `refresh()`. Its way to update what is on screen is to tear down a component's subtree and render a new one, with no diffing and no patching. The [Medium article](https://argoday.medium.com/a-2-5kb-tsx-framework-that-adds-classes-velomini-6f65cd979d40) walks through its source.
 
-It is a teaching tool. [Velotype](/docs/velotype/) is the full framework: it keeps classes and the real-element model, and replaces `refresh()` with values that update in place.
+It is a teaching tool. [velotype](/docs/velotype/) is the full framework: it keeps classes and the real-element model, and replaces `refresh()` with values that update in place.
 
 Every example in these docs is a file that is type-checked against the published package, and run in a browser.
 
@@ -115,7 +115,7 @@ document.body.append(placeholder)
 const root = replaceElement(placeholder, <main><Clock/></main>)
 replaceElement(root, <main>Removed</main>)
 ```
-Because `refresh()` rebuilds everything inside the component, anything those children held (text typed into an input, focus, a nested component's state) is lost. This is the cost that Velotype's [RenderObjects](/docs/velotype/render-objects/) remove.
+Because `refresh()` rebuilds everything inside the component, anything those children held (text typed into an input, focus, a nested component's state) is lost. This is the cost that velotype's [RenderObjects](/docs/velotype/render-objects/) remove.
 
 ## Other functions
 

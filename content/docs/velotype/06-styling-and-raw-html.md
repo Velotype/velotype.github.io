@@ -16,7 +16,7 @@ The `style` attribute takes an object. See [style objects](/docs/velotype/#style
 
 ## Raw HTML, SVG, and MathML
 
-Velotype creates TSX tags as HTML elements, so SVG and MathML content is added with the `SVG` and `MATH` Components. They set a string of markup as the `innerHTML` of an `<svg>` or `<math>` element. `HTML` does the same on any HTML tag, which is a `<div>` unless you pass `tag`.
+velotype creates TSX tags as HTML elements, so SVG and MathML content is added with the `SVG` and `MATH` Components. They set a string of markup as the `innerHTML` of an `<svg>` or `<math>` element. `HTML` does the same on any HTML tag, which is a `<div>` unless you pass `tag`.
 
 The markup is not escaped, so only use content that is known to be safe.
 

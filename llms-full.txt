@@ -2,20 +2,20 @@
 
 > A suite of TypeScript libraries for building software platforms end to end: a browser UI framework that creates real DOM elements (no virtual DOM), a themed component library, server-side TSX rendering, a web server, and a compact binary JSON wire format. They are written for Deno, published to JSR under @velotype, and developed in the Velotype GitHub organization (https://github.com/Velotype).
 
-Each project stands on its own and they are designed to fit together: veloserver serves pages and APIs, velossr or Velotype renders them, velodesign supplies UI components for Velotype, and velojson (VSON) carries data between server and browser. The projects are pre-1.0, so APIs can change between versions: pin versions, and read each repository's release-notes.md.
+Each project stands on its own and they are designed to fit together: veloserver serves pages and APIs, velossr or velotype renders them, velodesign supplies UI components for velotype, and velojson (VSON) carries data between server and browser. The projects are pre-1.0, so APIs can change between versions: pin versions, and read each repository's release-notes.md.
 
 ## Read this before writing code with these libraries
 
-- **Velotype is not React.** It has no virtual DOM, no reconciler, and no hooks (there is no useState or useEffect). A TSX tag evaluates to a real DOM element: `<div/>` is an HTMLDivElement. Components are classes that extend `Component`, state lives in class fields, and a value that changes is rendered in place by a `RenderObject`, `RenderBasic`, `RenderObjectArray`, or `RenderTemplateArray`. Do not call `refresh()` for routine updates: it throws away and rebuilds the component's children.
-- **Attributes are HTML attributes.** Write `class`, not `className`. The `style` attribute takes an object only (a string has not type-checked since Velotype 0.0.25). Event attributes start with `on`: `onClick`.
-- **Mount with `replaceElementWithRoot(<App/>, document.getElementById("app"))`.** Components are mounted by Velotype only when inserted through Velotype, not with `appendChild()`.
+- **velotype is not React.** It has no virtual DOM, no reconciler, and no hooks (there is no useState or useEffect). A TSX tag evaluates to a real DOM element: `<div/>` is an HTMLDivElement. Components are classes that extend `Component`, state lives in class fields, and a value that changes is rendered in place by a `RenderObject`, `RenderBasic`, `RenderObjectArray`, or `RenderTemplateArray`. Do not call `refresh()` for routine updates: it throws away and rebuilds the component's children.
+- **Attributes are HTML attributes.** Write `class`, not `className`. The `style` attribute takes an object only (a string has not type-checked since velotype 0.0.25). Event attributes start with `on`: `onClick`.
+- **Mount with `replaceElementWithRoot(<App/>, document.getElementById("app"))`.** Components are mounted by velotype only when inserted through velotype, not with `appendChild()`.
 - **Server and browser TSX are different packages.** Browser code uses `"jsxImportSource": "@velotype/velotype"` and server code uses `"@velotype/velossr"`, so keep them in separate directories with their own deno.json.
-- **Do not mix Velotype versions in one app.** A velodesign release is built on one Velotype version, and the Versions section below says which.
-- **Conditionals:** `{condition && <li/>}` works in Velotype and in velossr 0.0.10 or later. In velomicro and velomini (and velossr before 0.0.10) a `false` child is written as the text "false", so use `{condition ? <li/> : null}`.
+- **Do not mix velotype versions in one app.** A velodesign release is built on one velotype version, and the Versions section below says which.
+- **Conditionals:** `{condition && <li/>}` works in velotype and in velossr 0.0.10 or later. In velomicro and velomini (and velossr before 0.0.10) a `false` child is written as the text "false", so use `{condition ? <li/> : null}`.
 - **velodesign:** call `Theme.injectStyles()` once before any component renders. The library has no built-in text, so ARIA labels and placeholders have no defaults: pass them in.
 - **veloserver:** `new Router<Metadata>({})`, add routes with `get`, `head`, and `post`, then `new Server(router).serve("127.0.0.1", 3000)`. Serving needs `--allow-net` and nothing else.
 - **velojson:** `VSON.encode(value)` and `VSON.decode(bytes)`. The Key Table format is the default for objects and arrays. All three formats are smaller than JSON text (VBIN, which needs agreed key IDs, is the smallest), but on current engines they run slower than native JSON.stringify() and JSON.parse(), so choose them for payload size. The `/browser` module supports Key Table only.
-- **velomicro and velomini** are small teaching frameworks (about 1kb and 2.5kb), not for applications. Use Velotype for an app.
+- **velomicro and velomini** are small teaching frameworks (about 1kb and 2.5kb), not for applications. Use velotype for an app.
 - **Velotype DevTools** is a Chrome extension that is built from source and loaded unpacked. It is not a library.
 
 ## How to use these docs
@@ -34,7 +34,7 @@ The docs and their examples were type-checked, and run, against these published 
 - @velotype/velossr 0.0.10: https://jsr.io/@velotype/velossr
 - @velotype/velotype 0.3.1: https://jsr.io/@velotype/velotype
 
-velodesign 0.1.3 is built on Velotype 0.3.1, so use that Velotype version with it.
+velodesign 0.1.3 is built on velotype 0.3.1, so use that velotype version with it.
 
 
 ---
@@ -43,7 +43,7 @@ Source: https://velotype.github.io/docs/velodesign/
 
 # Getting started
 
-velodesign is a themed component library for [Velotype](/docs/velotype/). Where HTML has an element for the job (`input`, `button`, `details`, `dialog`), the component is that element, so keyboard support, form participation, and browser autofill come from the platform. Colors come from a small set of CSS custom properties, so you can re-theme the whole library without touching a component.
+velodesign is a themed component library for [velotype](/docs/velotype/). Where HTML has an element for the job (`input`, `button`, `details`, `dialog`), the component is that element, so keyboard support, form participation, and browser autofill come from the platform. Colors come from a small set of CSS custom properties, so you can re-theme the whole library without touching a component.
 
 This guide covers what the components have in common, and the parts of the library that are not components. For each component's props and a live preview, see the [showcase](https://velotype.github.io/velodesign/). The [components](/docs/velodesign/components/) page lists all of them, grouped by category, with a link to each.
 
@@ -51,7 +51,7 @@ Every example in these docs is a file that is type-checked against the published
 
 ## Install
 
-velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on Velotype, and velodesign 0.1.3 uses Velotype 0.3.1, so add both and use that Velotype version. Mixing Velotype versions in one app is not supported.
+velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.1.3 uses velotype 0.3.1, so add both and use that velotype version. Mixing velotype versions in one app is not supported.
 
 ```sh
 deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.1.3
@@ -69,7 +69,7 @@ deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.1.3
 
 ## Use it
 
-`Theme.injectStyles()` runs once, before any component renders. It sets up the CSS custom properties every component reads, and a small CSS reset. Then use components as tags in a Velotype app:
+`Theme.injectStyles()` runs once, before any component renders. It sets up the CSS custom properties every component reads, and a small CSS reset. Then use components as tags in a velotype app:
 
 ```tsx
 import { Button, Checkbox, Stack, Theme } from "@velotype/velodesign"
@@ -375,7 +375,7 @@ What every component has in common, and the functions and objects around the com
 
 ## Attrs
 
-Every component's attrs type is named `<Name>AttrsType`, such as `ButtonAttrsType`, and exported. Each is built from shared pieces, which Velotype exports too:
+Every component's attrs type is named `<Name>AttrsType`, such as `ButtonAttrsType`, and exported. Each is built from shared pieces, which velotype exports too:
 
 * **`id`, `class`, and `style`** are accepted by components, and set on the element the component renders. `class` is added to the element's own classes rather than replacing them
 * **`children`** are accepted by the components that take content, such as `Button`, `Card`, and `Alert`
@@ -1191,7 +1191,7 @@ Source: https://velotype.github.io/docs/velomicro/
 
 velomicro is a strictly minimal TSX framework, about 1kb, that shows how TSX rendering works. It is small enough to read in one sitting: a `createElement` that returns real DOM elements, and function components. The [Medium article](https://argoday.medium.com/a-1kb-tsx-framework-to-demonstrate-how-tsx-works-velotype-tsx-micro-337c32ff0648) walks through its source line by line.
 
-It is a teaching tool and a starting point, not a framework for an app. It has no state management and no lifecycle. For an app, see [Velotype](/docs/velotype/), which keeps this model of TSX that returns real elements, and adds the rest. [velomini](/docs/velomini/) is the next step up.
+It is a teaching tool and a starting point, not a framework for an app. It has no state management and no lifecycle. For an app, see [velotype](/docs/velotype/), which keeps this model of TSX that returns real elements, and adds the rest. [velomini](/docs/velomini/) is the next step up.
 
 Every example in these docs is a file that is type-checked against the published package, and run in a browser.
 
@@ -1312,7 +1312,7 @@ const Counter: FunctionComponent<EmptyAttrs> = function(_attrs: EmptyAttrs): HTM
 // TSX returns real elements, so mounting is appending
 document.body.append(<Counter/>)
 ```
-This is the limit of velomicro. When you need a value that updates the page for you, a lifecycle, or classes, move up to [velomini](/docs/velomini/) or [Velotype](/docs/velotype/).
+This is the limit of velomicro. When you need a value that updates the page for you, a lifecycle, or classes, move up to [velomini](/docs/velomini/) or [velotype](/docs/velotype/).
 
 ## The classic runtime
 
@@ -1354,7 +1354,7 @@ Source: https://velotype.github.io/docs/velomini/
 
 velomini is a mostly minimal TSX framework, about 2.5kb, that adds class components to [velomicro](/docs/velomicro/): a `Component` base class with `render()`, `mount()`, `unmount()`, and `refresh()`. Its way to update what is on screen is to tear down a component's subtree and render a new one, with no diffing and no patching. The [Medium article](https://argoday.medium.com/a-2-5kb-tsx-framework-that-adds-classes-velomini-6f65cd979d40) walks through its source.
 
-It is a teaching tool. [Velotype](/docs/velotype/) is the full framework: it keeps classes and the real-element model, and replaces `refresh()` with values that update in place.
+It is a teaching tool. [velotype](/docs/velotype/) is the full framework: it keeps classes and the real-element model, and replaces `refresh()` with values that update in place.
 
 Every example in these docs is a file that is type-checked against the published package, and run in a browser.
 
@@ -1467,7 +1467,7 @@ document.body.append(placeholder)
 const root = replaceElement(placeholder, <main><Clock/></main>)
 replaceElement(root, <main>Removed</main>)
 ```
-Because `refresh()` rebuilds everything inside the component, anything those children held (text typed into an input, focus, a nested component's state) is lost. This is the cost that Velotype's [RenderObjects](/docs/velotype/render-objects/) remove.
+Because `refresh()` rebuilds everything inside the component, anything those children held (text typed into an input, focus, a nested component's state) is lost. This is the cost that velotype's [RenderObjects](/docs/velotype/render-objects/) remove.
 
 ## Other functions
 
@@ -1515,7 +1515,7 @@ Source: https://velotype.github.io/docs/veloserver/
 
 # Getting started
 
-veloserver is a web server framework for Deno. It has a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates Velotype apps.
+veloserver is a web server framework for Deno. It has a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates velotype apps.
 
 Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed. veloserver also logs its own messages when it starts, stops, and mounts files. Those are not shown.
 
@@ -1953,13 +1953,13 @@ callback: finished
 ```
 ## Development server
 
-`@velotype/veloserver/dev` exports `DevServer`, which serves a [Velotype](/docs/velotype/) app during development and updates the page when its files change.
+`@velotype/veloserver/dev` exports `DevServer`, which serves a [velotype](/docs/velotype/) app during development and updates the page when its files change.
 
 ```tsx
 import { Router, Server } from "@velotype/veloserver"
 import { DevServer } from "@velotype/veloserver/dev"
 
-// Serves a Velotype app during development, and updates the page when its files change.
+// Serves a velotype app during development, and updates the page when its files change.
 // Run it with --allow-net --allow-read --allow-write --allow-run --allow-env: builds run
 // `deno bundle` and write temporary files.
 const dev = new DevServer({
@@ -2035,18 +2035,18 @@ off
 | `root` | The project directory, which contains `deno.json` (default: the current directory) |
 | `config` | The project's config file, relative to `root` (default: `deno.json` or `deno.jsonc`) |
 | `watch` | Directories to watch, relative to `root` (default: the entry module's directory) |
-| `velotype` | The Velotype package specifier that the dev runtime is loaded from (default: `compilerOptions.jsxImportSource` from `deno.json`, or `@velotype/velotype`) |
+| `velotype` | The velotype package specifier that the dev runtime is loaded from (default: `compilerOptions.jsxImportSource` from `deno.json`, or `@velotype/velotype`) |
 | `production` | `{importMap?, scripts}`: the page scripts for mode `off` |
 
 ### How hot updates work
 
-Hot updates use the Velotype dev runtime (`@velotype/velotype/jsx-dev-runtime`), so builds use `"jsx": "react-jsxdev"` whatever `deno.json` sets. The project's own setting can stay `react-jsx` for production builds. Every Velotype import loads one shared copy of the dev runtime, served at `/__velo/velotype.js`.
+Hot updates use the velotype dev runtime (`@velotype/velotype/jsx-dev-runtime`), so builds use `"jsx": "react-jsxdev"` whatever `deno.json` sets. The project's own setting can stay `react-jsx` for production builds. Every velotype import loads one shared copy of the dev runtime, served at `/__velo/velotype.js`.
 
 In `module` mode a changed module is updated on its own when all of its exports are components, or when it calls `import.meta.hot.accept()`. Otherwise the modules that import it run again, and the page reloads when the change reaches the entry module. `import.meta.hot.dispose(callback)` runs `callback(import.meta.hot.data)` before a module runs again, to release what it set up.
 
 A build error is logged in the browser, and the page keeps running the last working code. When the server restarts, the page reloads.
 
-What Velotype does with a hot update is in [Development tools](/docs/velotype/development-tools/#hot-reloading). The [hot-reload-demo](https://github.com/Velotype/example-velotype-projects/tree/main/hot-reload-demo) is an app that runs in each mode.
+What velotype does with a hot update is in [Development tools](/docs/velotype/development-tools/#hot-reloading). The [hot-reload-demo](https://github.com/Velotype/example-velotype-projects/tree/main/hot-reload-demo) is an app that runs in each mode.
 
 ---
 
@@ -2140,7 +2140,7 @@ Source: https://velotype.github.io/docs/velossr/
 
 velossr renders TSX to HTML on the server. There is no virtual DOM diffing and no client runtime: components run once per request and produce bytes, either all at once or streamed as async pieces resolve.
 
-It is the server-side version of [Velotype](/docs/velotype/)'s TSX. Use it to send a page's HTML from the server, and use Velotype for the parts of the page that are interactive. Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed.
+It is the server-side version of [velotype](/docs/velotype/)'s TSX. Use it to send a page's HTML from the server, and use velotype for the parts of the page that are interactive. Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed.
 
 ## Install
 
@@ -2159,7 +2159,7 @@ deno add jsr:@velotype/velossr
 }
 ```
 
-A project that has both a server and a browser app needs two JSX settings, because the browser's TSX is Velotype's (`"jsxImportSource": "@velotype/velotype"`). Keep them in separate directories with their own `deno.json`, or set it per file with a `/** @jsxImportSource @velotype/velossr */` comment.
+A project that has both a server and a browser app needs two JSX settings, because the browser's TSX is velotype's (`"jsxImportSource": "@velotype/velotype"`). Keep them in separate directories with their own `deno.json`, or set it per file with a `/** @jsxImportSource @velotype/velossr */` comment.
 
 ## A page and a server
 
@@ -2206,7 +2206,7 @@ velossr writes attributes as strings, so you write TSX the same as if you were w
 
 ### Conditional rendering
 
-`false`, `null`, and `undefined` children render nothing, so `{condition && <li/>}` works as it does in Velotype. `true` is written as text. Before velossr 0.0.10 a `false` child was written as the text `false`, so use `{condition ? <li/> : null}` if you are on an older version.
+`false`, `null`, and `undefined` children render nothing, so `{condition && <li/>}` works as it does in velotype. `true` is written as text. Before velossr 0.0.10 a `false` child was written as the text `false`, so use `{condition ? <li/> : null}` if you are on an older version.
 
 ### Fragments
 
@@ -2234,7 +2234,7 @@ const untrusted = `<script>alert("hi")</script> & "quotes"`
 await show(<p title={untrusted}>{untrusted}</p>)
 
 // Fragments group children without a wrapper element. false, null, and undefined render nothing,
-// so {condition && <li/>} works as it does in Velotype. true is written as text.
+// so {condition && <li/>} works as it does in velotype. true is written as text.
 const signedIn = false
 await show(<ul>{signedIn && <li>Account</li>}<><li>one</li><li>two</li></></ul>)
 ```
@@ -2583,7 +2583,7 @@ Source: https://velotype.github.io/docs/velossr/islands/
 
 # Islands
 
-A page can be mostly static HTML from the server, with interactive parts, called islands, that Velotype takes over in the browser.
+A page can be mostly static HTML from the server, with interactive parts, called islands, that velotype takes over in the browser.
 
 There is no hydration step that turns the server's HTML into live components. The server renders the markup for each island, and the data its component is created with. The browser then creates the component from the data and swaps it in with `replaceElementWithRoot()`. The server's HTML is shown until the swap, which happens in one step when the page's script runs.
 
@@ -2627,7 +2627,7 @@ Output:
 ```
 ## The browser half
 
-The browser half is in the [Velotype docs](/docs/velotype/server-rendering/). It reads each island's data, creates the component, copies what the visitor typed into the server's form fields, and swaps the element in.
+The browser half is in the [velotype docs](/docs/velotype/server-rendering/). It reads each island's data, creates the component, copies what the visitor typed into the server's form fields, and swaps the element in.
 
 ---
 
@@ -2725,13 +2725,13 @@ Source: https://velotype.github.io/docs/velotype/
 
 # Getting started
 
-Velotype is a TSX framework that creates real DOM elements as your code runs. There is no virtual DOM and no reconciler, so the elements you create are the ones on the page, and a value that changes renders only the part of the page that depends on it.
+velotype is a TSX framework that creates real DOM elements as your code runs. There is no virtual DOM and no reconciler, so the elements you create are the ones on the page, and a value that changes renders only the part of the page that depends on it.
 
-This guide installs Velotype, mounts an app, and covers the basics of writing TSX with it. Every example in these docs is a file that is type-checked against the published package, and run in a browser, so what you see compiles and runs.
+This guide installs velotype, mounts an app, and covers the basics of writing TSX with it. Every example in these docs is a file that is type-checked against the published package, and run in a browser, so what you see compiles and runs.
 
 ## Install
 
-Velotype is a [JSR package](https://jsr.io/@velotype/velotype) for Deno, and its code is bundled for the browser. Add it to a Deno project, and point the TSX compiler at it in `deno.json`:
+velotype is a [JSR package](https://jsr.io/@velotype/velotype) for Deno, and its code is bundled for the browser. Add it to a Deno project, and point the TSX compiler at it in `deno.json`:
 
 ```sh
 deno add jsr:@velotype/velotype
@@ -2749,20 +2749,20 @@ deno add jsr:@velotype/velotype
 
 `"jsx": "react-jsxdev"` uses the development runtime instead, which supports [hot reloading](/docs/velotype/development-tools/#hot-reloading).
 
-Velotype is about 21kb minified and 7.7kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with `deno bundle` or any bundler that supports Deno specifiers.
+velotype is about 21kb minified and 7.7kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with `deno bundle` or any bundler that supports Deno specifiers.
 
 ## Mounting an app
 
 `replaceElementWithRoot(root, element)` replaces an element that is already in the page with the app's root element and mounts its Components. It accepts `null`, so the result of `document.getElementById()` can be passed directly. It returns the new root element.
 
-`removeElementRoot(element)` is its counterpart: it unmounts and releases the Components and RenderObjects in `element`, then removes it. Velotype only unmounts what it removes itself, so content that is removed with DOM methods is not unmounted.
+`removeElementRoot(element)` is its counterpart: it unmounts and releases the Components and RenderObjects in `element`, then removes it. velotype only unmounts what it removes itself, so content that is removed with DOM methods is not unmounted.
 
 ```tsx
 import { Component, type EmptyAttrs, removeElementRoot, replaceElementWithRoot } from "@velotype/velotype"
 
 class App extends Component<EmptyAttrs> {
     override render() {
-        return <h1>Hello Velotype</h1>
+        return <h1>Hello velotype</h1>
     }
 }
 
@@ -2770,22 +2770,22 @@ class App extends Component<EmptyAttrs> {
 // replaceElementWithRoot() accepts null, so getElementById() can be passed directly.
 const root = replaceElementWithRoot(<App/>, document.getElementById("app"))
 
-// A Dialog, widget, or any part of a page that other code manages can hold Velotype content too:
+// A Dialog, widget, or any part of a page that other code manages can hold velotype content too:
 // insert a placeholder there, then replace it.
 const placeholder = document.createElement("div")
 document.body.append(placeholder)
 const dialogContent = replaceElementWithRoot(<App/>, placeholder)
 
 // removeElementRoot() unmounts and releases the Components in an element, then removes it.
-// Use it before other code removes content that Velotype put on the page.
+// Use it before other code removes content that velotype put on the page.
 removeElementRoot(dialogContent)
 removeElementRoot(root)
 ```
-`replaceElementWithRoot()` is not limited to the app's root element. To add Velotype content to a part of the page that other code manages (such as a dialog or a third-party widget), insert a placeholder element there and replace it. Call `removeElementRoot()` before that code removes the content.
+`replaceElementWithRoot()` is not limited to the app's root element. To add velotype content to a part of the page that other code manages (such as a dialog or a third-party widget), insert a placeholder element there and replace it. Call `removeElementRoot()` before that code removes the content.
 
 ## Writing TSX
 
-TSX is a way to write element creation that looks like HTML. In Velotype each tag creates an element, so its value is an `HTMLElement` and you can use it like any other.
+TSX is a way to write element creation that looks like HTML. In velotype each tag creates an element, so its value is an `HTMLElement` and you can use it like any other.
 
 ```tsx
 // TSX creates real DOM elements, so every one of these is an HTMLElement.
@@ -2834,7 +2834,7 @@ A tag such as `<div>` evaluates to an `HTMLDivElement`. You can read its propert
 
 ### Attributes are HTML attributes
 
-Velotype sets attributes the way HTML does, so you write `class` rather than `className`, and `for` rather than `htmlFor`.
+velotype sets attributes the way HTML does, so you write `class` rather than `className`, and `for` rather than `htmlFor`.
 
 ### Style objects
 
@@ -2864,7 +2864,7 @@ Source: https://velotype.github.io/docs/velotype/components/
 
 # Components
 
-Components are the objects that you create as tags in TSX. Velotype has two kinds: function components for simple, stateless markup, and class components for anything with state, a lifecycle, or methods.
+Components are the objects that you create as tags in TSX. velotype has two kinds: function components for simple, stateless markup, and class components for anything with state, a lifecycle, or methods.
 
 ## Function components
 
@@ -2914,7 +2914,7 @@ replaceElementWithRoot(
 ```
 ## Class components
 
-A class component extends `Component<AttrsType>` and implements `render()`. Velotype calls its lifecycle methods for you.
+A class component extends `Component<AttrsType>` and implements `render()`. velotype calls its lifecycle methods for you.
 
 The attrs a Component is created with are `this.attrs`, and its children are `this.children`. They are also passed to `render()`.
 
@@ -3016,9 +3016,9 @@ replaceElementWithRoot(
 * `unmount()` runs just before the Component is removed, while it is still in the page
 * `refresh()` unmounts and mounts the Component's children, and the Component itself stays mounted. If `render()` throws, the current render is kept and the error is thrown to the caller of `refresh()`
 * Moving an element (such as `swap()`, or moving it with DOM methods) does not unmount or mount it
-* A Component mounts and unmounts once. Once Velotype removes it, it is released, and inserting its element again does not mount it (Velotype warns in the console). Create a new Component instead
-* Velotype mounts Components that are inserted through Velotype: `replaceElementWithRoot()`, a Component's child methods, and RenderObjects. An element inserted with DOM methods such as `appendChild()` is not mounted
-* Likewise Velotype unmounts Components that are removed through Velotype: `removeElementRoot()`, a Component's child methods, `refresh()`, and RenderObjects. An element removed with DOM methods is not unmounted
+* A Component mounts and unmounts once. Once velotype removes it, it is released, and inserting its element again does not mount it (velotype warns in the console). Create a new Component instead
+* velotype mounts Components that are inserted through velotype: `replaceElementWithRoot()`, a Component's child methods, and RenderObjects. An element inserted with DOM methods such as `appendChild()` is not mounted
+* Likewise velotype unmounts Components that are removed through velotype: `removeElementRoot()`, a Component's child methods, `refresh()`, and RenderObjects. An element removed with DOM methods is not unmounted
 * The RenderObjects in a Component's fields mount and unmount with it (calling their `registerOnMount()` callbacks), and the ones in public fields are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a `#private` field
 * Errors thrown by `mount()` and `unmount()` are reported with `reportError()`, and the other Components still run. See [Errors](/docs/velotype/events-and-errors/#when-code-throws)
 
@@ -3185,7 +3185,7 @@ Source: https://velotype.github.io/docs/velotype/render-objects/
 
 # RenderObjects
 
-A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how Velotype updates the page in place, without a virtual DOM.
+A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how velotype updates the page in place, without a virtual DOM.
 
 Create RenderObjects as fields of Component classes. Using them in any other way is advanced behavior.
 
@@ -3383,7 +3383,7 @@ Source: https://velotype.github.io/docs/velotype/lists/
 
 # Lists
 
-Velotype has two list types. Both hold an Array of data points, and both render, move, and remove only the rows that changed. They have the same methods.
+velotype has two list types. Both hold an Array of data points, and both render, move, and remove only the rows that changed. They have the same methods.
 
 | | RenderObjectArray | RenderTemplateArray |
 |---|---|---|
@@ -3791,7 +3791,7 @@ void Dashboard
 ```
 ## Keeping the page responsive
 
-An update renders only the RenderObject or rows whose value changed, so most updates are small and finish within a frame. Velotype has no scheduler to make them interruptible, so updates are slow in two cases: when frequent input, such as typing, starts expensive work each time, and when one update renders thousands of elements.
+An update renders only the RenderObject or rows whose value changed, so most updates are small and finish within a frame. velotype has no scheduler to make them interruptible, so updates are slow in two cases: when frequent input, such as typing, starts expensive work each time, and when one update renders thousands of elements.
 
 For frequent input, run the expensive work from a listener with `eventDispatchDelay`, so it runs at most once in that time instead of once per change. The listener runs after the delay, so it reads the latest `value`. Here a search runs at most every 250ms while typing, and the AsyncRenderObject shows only the latest search's results and aborts the earlier requests:
 
@@ -3863,7 +3863,7 @@ The `style` attribute takes an object. See [style objects](/docs/velotype/#style
 
 ## Raw HTML, SVG, and MathML
 
-Velotype creates TSX tags as HTML elements, so SVG and MathML content is added with the `SVG` and `MATH` Components. They set a string of markup as the `innerHTML` of an `<svg>` or `<math>` element. `HTML` does the same on any HTML tag, which is a `<div>` unless you pass `tag`.
+velotype creates TSX tags as HTML elements, so SVG and MathML content is added with the `SVG` and `MATH` Components. They set a string of markup as the `innerHTML` of an `<svg>` or `<math>` element. `HTML` does the same on any HTML tag, which is a `<div>` unless you pass `tag`.
 
 The markup is not escaped, so only use content that is known to be safe.
 
@@ -3946,7 +3946,7 @@ void Saver
 ```
 ## When code throws
 
-Velotype keeps its own state consistent whatever an app's code throws.
+velotype keeps its own state consistent whatever an app's code throws.
 
 * **Errors in rendering are thrown to the caller:** a Component's constructor or `render()`, a function component, and a RenderObject's render function or `handleUpdate`. What the failed render created is released. `refresh()` keeps the current render, a RenderObject keeps its current value, and RenderObjectArray and RenderTemplateArray keep their data and rows matching
 * **Errors in `mount()`, `unmount()`, `registerOnMount()` callbacks, and event bus listeners are reported** with `reportError()`, which logs them and dispatches an `error` event on the window. The other Components and listeners still run
@@ -3991,11 +3991,11 @@ Source: https://velotype.github.io/docs/velotype/server-rendering/
 
 # Server rendering
 
-Velotype renders in the browser. To send a page's HTML from the server, render it with [velossr](/docs/velossr/), the server-side version of Velotype. It has its own components built for rendering on the server: static parts are prepared once, and async parts are streamed.
+velotype renders in the browser. To send a page's HTML from the server, render it with [velossr](/docs/velossr/), the server-side version of velotype. It has its own components built for rendering on the server: static parts are prepared once, and async parts are streamed.
 
 ## No hydration step
 
-There is no hydration step that turns the server's HTML into live Velotype Components. Velotype creates elements as TSX runs, so the interactive parts of a page are rendered again in the browser, and each one replaces the server's HTML for it with `replaceElementWithRoot()`. Rendering again is fast, the swap happens in one step when the page's script runs, and the server's HTML is shown until then.
+There is no hydration step that turns the server's HTML into live velotype Components. velotype creates elements as TSX runs, so the interactive parts of a page are rendered again in the browser, and each one replaces the server's HTML for it with `replaceElementWithRoot()`. Rendering again is fast, the swap happens in one step when the page's script runs, and the server's HTML is shown until then.
 
 This is the island pattern:
 
@@ -4081,13 +4081,13 @@ The development server talks to the dev runtime through `globalThis.__VELOTYPE_H
 
 The [Velotype DevTools](/docs/velotype/devtools/) extension shows the live component tree, the event bus and a trace of its events, and VSON payloads.
 
-`@velotype/velotype/devtools` exports read-only access to Velotype's internal state (`__vtAppMetadata`) and the devtools hook (`getDevtoolsHook()`), for debugging and for the extension. Applications do not need to import it, because Velotype registers with the devtools hook from any entry point.
+`@velotype/velotype/devtools` exports read-only access to velotype's internal state (`__vtAppMetadata`) and the devtools hook (`getDevtoolsHook()`), for debugging and for the extension. Applications do not need to import it, because velotype registers with the devtools hook from any entry point.
 
-From Velotype 0.3.2, `__vtAppMetadata.setEventTracer(tracer)` calls `tracer(listeningKey, event)` once for each event that has listeners, just before the first listener receives it, and `setEventTracer(undefined)` stops. Tracing wraps the registered listeners, so emitting an event runs the same code whether or not anything is tracing. A tracer that throws does not affect the event or its listeners.
+From velotype 0.3.2, `__vtAppMetadata.setEventTracer(tracer)` calls `tracer(listeningKey, event)` once for each event that has listeners, just before the first listener receives it, and `setEventTracer(undefined)` stops. Tracing wraps the registered listeners, so emitting an event runs the same code whether or not anything is tracing. A tracer that throws does not affect the event or its listeners.
 
 ```tsx
-// Read-only access to Velotype's internal state, for debugging and for the Velotype DevTools
-// extension. Applications do not need it: Velotype registers with the devtools hook from any entry point.
+// Read-only access to velotype's internal state, for debugging and for the Velotype DevTools
+// extension. Applications do not need it: velotype registers with the devtools hook from any entry point.
 import { __vtAppMetadata, getDevtoolsHook } from "@velotype/velotype/devtools"
 
 console.log(__vtAppMetadata)
@@ -4305,7 +4305,7 @@ Source: https://velotype.github.io/docs/velotype/devtools/
 
 # Getting started
 
-Velotype DevTools is a Chrome extension for debugging [Velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether Velotype is on the page.
+Velotype DevTools is a Chrome extension for debugging [velotype](/docs/velotype/) apps. It adds three panels to Chrome DevTools, and a toolbar popup that shows whether velotype is on the page.
 
 | Panel | Shows |
 |---|---|
@@ -4329,19 +4329,19 @@ deno task build
 2. Turn on **Developer mode**
 3. Choose **Load unpacked**, and select the `dist/` folder
 
-Open DevTools on a page that uses Velotype, and the panels are in the tabs.
+Open DevTools on a page that uses velotype, and the panels are in the tabs.
 
 While developing the extension, `deno task watch` rebuilds on change. After it rebuilds, reload the extension from `chrome://extensions`, and refresh the inspected page, since content scripts are only injected on navigation. `deno task typecheck` checks the source.
 
 ## It needs the devtools hook
 
-Velotype keeps the map from DOM elements to its live Component and RenderObject instances to itself. The extension reads it through a hook, `window.__VELOTYPE_DEVTOOLS_HOOK__`, which every current Velotype entry point installs. If a site uses Velotype and the tree is empty, its Velotype bundle predates the hook: update Velotype.
+velotype keeps the map from DOM elements to its live Component and RenderObject instances to itself. The extension reads it through a hook, `window.__VELOTYPE_DEVTOOLS_HOOK__`, which every current velotype entry point installs. If a site uses velotype and the tree is empty, its velotype bundle predates the hook: update velotype.
 
-Several Velotype instances can be on one page (micro-frontends, or different versions in different bundles). Each registers separately with its own version, and their components do not collide.
+Several velotype instances can be on one page (micro-frontends, or different versions in different bundles). Each registers separately with its own version, and their components do not collide.
 
 ## An app to try it on
 
-This is a small Velotype app with fields worth looking at: a Component with attrs, a `RenderBasic`, a `RenderObject` that holds an object, a `Map`, and an event bus listener.
+This is a small velotype app with fields worth looking at: a Component with attrs, a `RenderBasic`, a `RenderObject` that holds an object, a `Map`, and an event bus listener.
 
 ```tsx
 import { Component, type EmptyAttrs, emitEvent, registerEventListener, RenderBasic, RenderObject, replaceElementWithRoot, VelotypeEvent } from "@velotype/velotype"
@@ -4399,17 +4399,17 @@ The live component tree for the page, like React DevTools. Each node shows its c
 * Click a node to inspect it, and the element is highlighted on the page
 * Fields are an expand and collapse tree. An object, Array, Map, or Set field expands to its live values at any depth, fetched fresh from the page each time you expand it, and kept live for branches that are already expanded
 
-A page with iframes shows each frame that has Velotype as its own root, labelled with its address.
+A page with iframes shows each frame that has velotype as its own root, labelled with its address.
 
 Try it on the [demo app](/docs/velotype/devtools/#an-app-to-try-it-on): `Profile` has a `settings` RenderObject whose value is an object holding a nested object and a `Set`, and a `history` `Map`.
 
 ## Velotype Events
 
-A snapshot of the event bus's current registrations: every listening key, how many listeners are on it, and, resolved against Velotype's registry, which live Components and RenderObjects they belong to.
+A snapshot of the event bus's current registrations: every listening key, how many listeners are on it, and, resolved against velotype's registry, which live Components and RenderObjects they belong to.
 
 It is useful for finding leaked listeners, and for checking that something is listening on a key at all. In the demo app, `profile-updated` has one listener for each `Profile`.
 
-**Trace.** Press Start trace to list events as they are emitted, newest first: the listening key, the event's name, what emitted it, a summary of its data, and who was listening. Hover a component to highlight it on the page. The trace starts when you press Start and keeps the last 1,000 events, and Stop ends it. It needs Velotype 0.3.2 or later, which calls the extension's tracer just before the first listener of each event runs.
+**Trace.** Press Start trace to list events as they are emitted, newest first: the listening key, the event's name, what emitted it, a summary of its data, and who was listening. Hover a component to highlight it on the page. The trace starts when you press Start and keeps the last 1,000 events, and Stop ends it. It needs velotype 0.3.2 or later, which calls the extension's tracer just before the first listener of each event runs.
 
 ## VeloJSON
 
@@ -4447,7 +4447,7 @@ new Server(router).serve("127.0.0.1", 3000)
 
 ## The popup
 
-The toolbar popup shows whether Velotype is present on the current page, without opening DevTools.
+The toolbar popup shows whether velotype is present on the current page, without opening DevTools.
 
 ---
 
@@ -4456,6 +4456,6 @@ Source: https://velotype.github.io/docs/velotype/devtools/limitations/
 # Known limitations
 
 * **Request bodies are decoded only when your page sent them.** The extension keeps the bytes of a VSON or VBIN body sent with `fetch`, `XMLHttpRequest`, or `navigator.sendBeacon` while the VeloJSON panel is open, so a request made before the panel opened, or by a worker or the browser itself, is listed but not decoded. Chrome's network API gives a request body only as UTF-8 text, which would show corrupted bytes for a binary body, so the panel does not use it. A form post cannot send VSON or VBIN as binary anyway. Use the manual decode tool for those bytes. Response bodies are always decoded, because Chrome says whether they are base64
-* **The event trace starts when you press Start,** and keeps the last 1,000 events. It needs Velotype 0.3.2 or later, and the registration table works with earlier versions
+* **The event trace starts when you press Start,** and keeps the last 1,000 events. It needs velotype 0.3.2 or later, and the registration table works with earlier versions
 * **VSON and VBIN detection on the network tab uses the Content-Type.** velojson has a content type for each format, so the extension trusts it: a body with another content type is never guessed at from its bytes, and a body with one of these content types always shows its real decoding error. Use the manual decode tool for a body with no content type, such as `application/octet-stream`
 * **VBIN is decoded in the debug format,** with KeyIDs as keys. The real field names come from a schema's mapper, which the extension cannot know for an arbitrary site. See [VeloJSON](/docs/velotype/devtools/panels/#velojson)

@@ -1,6 +1,6 @@
 # Getting started
 
-veloserver is a web server framework for Deno. It has a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates Velotype apps.
+veloserver is a web server framework for Deno. It has a typed router, per-request metadata, inspectors that run before and after handlers, static file serving, and a development server that hot-updates velotype apps.
 
 Every example in these docs is a file that is type-checked against the published package and run, and the output shown is what the example printed. veloserver also logs its own messages when it starts, stops, and mounts files. Those are not shown.
 

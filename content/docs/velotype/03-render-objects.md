@@ -1,6 +1,6 @@
 # RenderObjects
 
-A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how Velotype updates the page in place, without a virtual DOM.
+A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how velotype updates the page in place, without a virtual DOM.
 
 Create RenderObjects as fields of Component classes. Using them in any other way is advanced behavior.
 

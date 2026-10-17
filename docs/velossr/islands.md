@@ -1,6 +1,6 @@
 # Islands
 
-A page can be mostly static HTML from the server, with interactive parts, called islands, that Velotype takes over in the browser.
+A page can be mostly static HTML from the server, with interactive parts, called islands, that velotype takes over in the browser.
 
 There is no hydration step that turns the server's HTML into live components. The server renders the markup for each island, and the data its component is created with. The browser then creates the component from the data and swaps it in with `replaceElementWithRoot()`. The server's HTML is shown until the swap, which happens in one step when the page's script runs.
 
@@ -44,4 +44,4 @@ Output:
 ```
 ## The browser half
 
-The browser half is in the [Velotype docs](/docs/velotype/server-rendering/). It reads each island's data, creates the component, copies what the visitor typed into the server's form fields, and swaps the element in.
+The browser half is in the [velotype docs](/docs/velotype/server-rendering/). It reads each island's data, creates the component, copies what the visitor typed into the server's form fields, and swaps the element in.

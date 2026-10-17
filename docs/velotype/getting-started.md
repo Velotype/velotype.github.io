@@ -1,12 +1,12 @@
 # Getting started
 
-Velotype is a TSX framework that creates real DOM elements as your code runs. There is no virtual DOM and no reconciler, so the elements you create are the ones on the page, and a value that changes renders only the part of the page that depends on it.
+velotype is a TSX framework that creates real DOM elements as your code runs. There is no virtual DOM and no reconciler, so the elements you create are the ones on the page, and a value that changes renders only the part of the page that depends on it.
 
-This guide installs Velotype, mounts an app, and covers the basics of writing TSX with it. Every example in these docs is a file that is type-checked against the published package, and run in a browser, so what you see compiles and runs.
+This guide installs velotype, mounts an app, and covers the basics of writing TSX with it. Every example in these docs is a file that is type-checked against the published package, and run in a browser, so what you see compiles and runs.
 
 ## Install
 
-Velotype is a [JSR package](https://jsr.io/@velotype/velotype) for Deno, and its code is bundled for the browser. Add it to a Deno project, and point the TSX compiler at it in `deno.json`:
+velotype is a [JSR package](https://jsr.io/@velotype/velotype) for Deno, and its code is bundled for the browser. Add it to a Deno project, and point the TSX compiler at it in `deno.json`:
 
 ```sh
 deno add jsr:@velotype/velotype
@@ -24,20 +24,20 @@ deno add jsr:@velotype/velotype
 
 `"jsx": "react-jsxdev"` uses the development runtime instead, which supports [hot reloading](/docs/velotype/development-tools/#hot-reloading).
 
-Velotype is about 21kb minified and 7.7kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with `deno bundle` or any bundler that supports Deno specifiers.
+velotype is about 21kb minified and 7.7kb gzipped for the whole runtime, and bundlers drop the parts an app does not import. Bundle it with `deno bundle` or any bundler that supports Deno specifiers.
 
 ## Mounting an app
 
 `replaceElementWithRoot(root, element)` replaces an element that is already in the page with the app's root element and mounts its Components. It accepts `null`, so the result of `document.getElementById()` can be passed directly. It returns the new root element.
 
-`removeElementRoot(element)` is its counterpart: it unmounts and releases the Components and RenderObjects in `element`, then removes it. Velotype only unmounts what it removes itself, so content that is removed with DOM methods is not unmounted.
+`removeElementRoot(element)` is its counterpart: it unmounts and releases the Components and RenderObjects in `element`, then removes it. velotype only unmounts what it removes itself, so content that is removed with DOM methods is not unmounted.
 
 ```tsx
 import { Component, type EmptyAttrs, removeElementRoot, replaceElementWithRoot } from "@velotype/velotype"
 
 class App extends Component<EmptyAttrs> {
     override render() {
-        return <h1>Hello Velotype</h1>
+        return <h1>Hello velotype</h1>
     }
 }
 
@@ -45,22 +45,22 @@ class App extends Component<EmptyAttrs> {
 // replaceElementWithRoot() accepts null, so getElementById() can be passed directly.
 const root = replaceElementWithRoot(<App/>, document.getElementById("app"))
 
-// A Dialog, widget, or any part of a page that other code manages can hold Velotype content too:
+// A Dialog, widget, or any part of a page that other code manages can hold velotype content too:
 // insert a placeholder there, then replace it.
 const placeholder = document.createElement("div")
 document.body.append(placeholder)
 const dialogContent = replaceElementWithRoot(<App/>, placeholder)
 
 // removeElementRoot() unmounts and releases the Components in an element, then removes it.
-// Use it before other code removes content that Velotype put on the page.
+// Use it before other code removes content that velotype put on the page.
 removeElementRoot(dialogContent)
 removeElementRoot(root)
 ```
-`replaceElementWithRoot()` is not limited to the app's root element. To add Velotype content to a part of the page that other code manages (such as a dialog or a third-party widget), insert a placeholder element there and replace it. Call `removeElementRoot()` before that code removes the content.
+`replaceElementWithRoot()` is not limited to the app's root element. To add velotype content to a part of the page that other code manages (such as a dialog or a third-party widget), insert a placeholder element there and replace it. Call `removeElementRoot()` before that code removes the content.
 
 ## Writing TSX
 
-TSX is a way to write element creation that looks like HTML. In Velotype each tag creates an element, so its value is an `HTMLElement` and you can use it like any other.
+TSX is a way to write element creation that looks like HTML. In velotype each tag creates an element, so its value is an `HTMLElement` and you can use it like any other.
 
 ```tsx
 // TSX creates real DOM elements, so every one of these is an HTMLElement.
@@ -109,7 +109,7 @@ A tag such as `<div>` evaluates to an `HTMLDivElement`. You can read its propert
 
 ### Attributes are HTML attributes
 
-Velotype sets attributes the way HTML does, so you write `class` rather than `className`, and `for` rather than `htmlFor`.
+velotype sets attributes the way HTML does, so you write `class` rather than `className`, and `for` rather than `htmlFor`.
 
 ### Style objects
 
