@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charts - velochart docs</title>
+<meta name="description" content="Every velochart chart, by category. Each links to its page in the [showcase](https://velotype.github.io/velochart/), which has live examples, the props table, and the types it uses.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="apple-touch-icon" href="/assets/logo.png">
+<style>html{background:#fff;color:#050505}html[data-theme=dark]{background:#151515;color:#fafafa}#app{visibility:hidden;animation:vtp-show 0s 3s forwards}@keyframes vtp-show{to{visibility:visible}}</style>
+<noscript><style>#app{visibility:visible;animation:none}</style></noscript>
+<script>(function(){var t=null;try{t=localStorage.getItem("vtd-preferred-theme")}catch(e){}if(t!="light"&&t!="dark"){t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}document.documentElement.setAttribute("data-theme",t)})()</script>
+</head>
+<body data-doc="velochart">
+<div id="app"><article id="doc">
+<h1 id="charts">Charts</h1>
+<p>Every velochart chart, by category. Each links to its page in the <a href="https://velotype.github.io/velochart/">showcase</a>, which has live examples, the props table, and the types it uses.</p>
+<p>The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.1.0.</p>
+<h2 id="cartesian">Cartesian</h2>
+<p>Charts with x and y axes. They all run on one engine, so everything in <a href="/docs/velochart/exploring-and-updating/">exploring and updating</a> works on all of them.</p>
+<table>
+<thead>
+<tr>
+<th>Chart</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velochart/components/line-chart"><code>LineChart</code></a></td>
+<td>A line chart for trends, optionally filled and stacked. Hovering anywhere over the plot reads out every series at the nearest point.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/area-chart"><code>AreaChart</code></a></td>
+<td>A filled line chart. Stack it to show how parts add up to a total.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/bar-chart"><code>BarChart</code></a></td>
+<td>Comparing categories: vertical or horizontal, side by side or stacked. Negative values hang below the zero line.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/mixed-chart"><code>MixedChart</code></a></td>
+<td>Different kinds of series on one set of axes, with a second y axis for a measure in other units.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/scatter-chart"><code>ScatterChart</code></a></td>
+<td>Points placed by two values. A pointer reads the one point nearest it.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/bubble-chart"><code>BubbleChart</code></a></td>
+<td>A scatter chart with a third value as size. Area follows the value, since area is what the eye reads.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/histogram-chart"><code>HistogramChart</code></a></td>
+<td>Raw values counted into bins.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/waterfall-chart"><code>WaterfallChart</code></a></td>
+<td>How a start becomes an end, each step hanging from where the last finished.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/box-plot-chart"><code>BoxPlotChart</code></a></td>
+<td>How groups&#39; values are spread. Give it raw values or a summary.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/candlestick-chart"><code>CandlestickChart</code></a></td>
+<td>A price&#39;s range and its open and close for each period. Candle or OHLC.</td>
+</tr>
+</tbody></table>
+<p>A missing value is a gap: a line breaks at it, a bar is absent, and the tooltip skips it. <code>spanGaps</code> joins a line across one.</p>
+<pre><code class="language-tsx">import { AreaChart, BarChart } from &quot;@velotype/velochart&quot;
+import { Theme } from &quot;@velotype/velodesign&quot;
+import { replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+Theme.injectStyles()
+
+const data = [
+    {label: &quot;Q1&quot;, values: {web: 30, retail: 18}},
+    {label: &quot;Q2&quot;, values: {web: 34, retail: 21}},
+    {label: &quot;Q3&quot;, values: {web: 41, retail: 19}},
+]
+const series = [
+    {key: &quot;web&quot;, label: &quot;Web&quot;},
+    {key: &quot;retail&quot;, label: &quot;Retail&quot;},
+]
+
+replaceElementWithRoot(
+    &lt;div&gt;
+        {/* stacked adds each series to the ones before it. The tooltip still shows each series&#39; own value. */}
+        &lt;AreaChart title=&quot;Bookings&quot; data={data} series={series} stacked/&gt;
+        {/* horizontal gives each category a full line, which suits labels that are words. */}
+        &lt;BarChart title=&quot;Bookings by quarter&quot; data={data} series={series} horizontal/&gt;
+    &lt;/div&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+<h2 id="radial-matrix-hierarchy-and-flow">Radial, matrix, hierarchy, and flow</h2>
+<table>
+<thead>
+<tr>
+<th>Chart</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velochart/components/pie-chart"><code>PieChart</code></a></td>
+<td>A pie or donut for part-to-whole. Slices are drawn in the order given and never re-sorted.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/gauge"><code>Gauge</code></a></td>
+<td>One value against a range, with optional colored bands.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/radar-chart"><code>RadarChart</code></a></td>
+<td>Several measures around a circle, to compare things by their shape. The measures need comparable units.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/polar-area-chart"><code>PolarAreaChart</code></a></td>
+<td>Equal slices that differ in how far they reach, for values that aren&#39;t parts of one whole.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/heatmap"><code>Heatmap</code></a></td>
+<td>Values in a grid, read by color, with a scale. Can diverge around zero.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/calendar-heatmap"><code>CalendarHeatmap</code></a></td>
+<td>Daily values as a grid of weeks. Dates are read in UTC.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/treemap"><code>Treemap</code></a></td>
+<td>Nested parts of a whole, sized by area.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/sunburst-chart"><code>SunburstChart</code></a></td>
+<td>Nested parts of a whole as rings.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/funnel-chart"><code>FunnelChart</code></a></td>
+<td>How much of a group makes it through each stage.</td>
+</tr>
+<tr>
+<td><a href="https://velotype.github.io/velochart/components/sankey-chart"><code>SankeyChart</code></a></td>
+<td>Flows between stages. A link that would close a loop is left out.</td>
+</tr>
+</tbody></table>
+<pre><code class="language-tsx">import { Gauge, PieChart, Sparkline } from &quot;@velotype/velochart&quot;
+import { Theme } from &quot;@velotype/velodesign&quot;
+import { replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+Theme.injectStyles()
+
+const spend = [
+    {label: &quot;Platform&quot;, value: 24},
+    {label: &quot;Growth&quot;, value: 18},
+    {label: &quot;Infra&quot;, value: 12},
+]
+
+replaceElementWithRoot(
+    &lt;div&gt;
+        &lt;PieChart title=&quot;Spend by team&quot; data={spend} donut={0.6} centerLabel=&quot;54&quot; centerSubLabel=&quot;total&quot;/&gt;
+        &lt;Gauge
+            value={93}
+            subLabel=&quot;disk used&quot;
+            formatValue={(n) =&gt; `${n}%`}
+            ariaLabel=&quot;93 percent of disk used&quot;
+            bands={[
+                {from: 0, to: 70, color: &quot;var(--secondary)&quot;},
+                {from: 70, to: 90, color: &quot;var(--warning)&quot;},
+                {from: 90, to: 100, color: &quot;var(--accent)&quot;},
+            ]}/&gt;
+        &lt;p&gt;Signups this quarter &lt;Sparkline values={[4, 7, 5, 11, 9, 14]} ariaLabel=&quot;Rising weekly signups&quot;/&gt; 14&lt;/p&gt;
+    &lt;/div&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+<pre><code class="language-tsx">import { BubbleChart, CandlestickChart, Heatmap, MixedChart, RadarChart, SankeyChart, Treemap, WaterfallChart } from &quot;@velotype/velochart&quot;
+import { Theme } from &quot;@velotype/velodesign&quot;
+import { replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+Theme.injectStyles()
+
+const months = [
+    {label: &quot;Jan&quot;, values: {sales: 120, rate: 12}},
+    {label: &quot;Feb&quot;, values: {sales: 150, rate: 18}},
+    {label: &quot;Mar&quot;, values: {sales: 90, rate: 9}},
+]
+
+replaceElementWithRoot(
+    &lt;div&gt;
+        {/* A series&#39; type sets how it draws, and yAxis which axis it reads against. */}
+        &lt;MixedChart
+            data={months}
+            yAxisRight={{format: (n) =&gt; `${n}%`}}
+            series={[
+                {key: &quot;sales&quot;, label: &quot;Sales&quot;, type: &quot;bar&quot;},
+                {key: &quot;rate&quot;, label: &quot;Rate&quot;, type: &quot;line&quot;, yAxis: &quot;right&quot;, curve: &quot;smooth&quot;},
+            ]}/&gt;
+        {/* A bubble&#39;s area follows its size, since area is what the eye reads. */}
+        &lt;BubbleChart series={[{key: &quot;markets&quot;, points: [{x: 10, y: 40, size: 200, label: &quot;North&quot;}, {x: 40, y: 55, size: 320, label: &quot;South&quot;}]}]}/&gt;
+        &lt;RadarChart data={months} series={[{key: &quot;sales&quot;}, {key: &quot;rate&quot;}]}/&gt;
+        &lt;WaterfallChart data={[{label: &quot;Opening&quot;, value: 120}, {label: &quot;Costs&quot;, value: -60}, {label: &quot;Closing&quot;, value: 0, total: true}]}/&gt;
+        &lt;CandlestickChart data={[{x: new Date(Date.UTC(2026, 0, 5)), open: 100, high: 110, low: 95, close: 106}]}/&gt;
+        &lt;Heatmap columns={[&quot;Mon&quot;, &quot;Tue&quot;]} rows={[&quot;am&quot;, &quot;pm&quot;]} values={[[1, 2], [3, undefined]]}/&gt;
+        &lt;Treemap data={[{label: &quot;Engineering&quot;, children: [{label: &quot;Platform&quot;, value: 40}]}, {label: &quot;Support&quot;, value: 14}]}/&gt;
+        &lt;SankeyChart
+            nodes={[{id: &quot;web&quot;, label: &quot;Web&quot;}, {id: &quot;trial&quot;, label: &quot;Trial&quot;}, {id: &quot;paid&quot;, label: &quot;Paid&quot;}]}
+            links={[{source: &quot;web&quot;, target: &quot;trial&quot;, value: 50}, {source: &quot;trial&quot;, target: &quot;paid&quot;, value: 20}]}/&gt;
+    &lt;/div&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+<h2 id="inline">Inline</h2>
+<table>
+<thead>
+<tr>
+<th>Chart</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://velotype.github.io/velochart/components/sparkline"><code>Sparkline</code></a></td>
+<td>A tiny trend with no axes, sized to sit inside a table cell or beside a number. Line, area, or bar. It has a fixed size and no tooltip, and it takes none of the attrs or methods below.</td>
+</tr>
+</tbody></table>
+<h2 id="attrs-most-charts-share">Attrs most charts share</h2>
+<p>Every chart except <code>Sparkline</code> accepts these:</p>
+<table>
+<thead>
+<tr>
+<th>Attr</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>height</code></td>
+<td>Drawing height in px, not counting the legend. The default is 220.</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>A heading above the drawing. It is also the accessible name when <code>ariaLabel</code> is not set.</td>
+</tr>
+<tr>
+<td><code>ariaLabel</code></td>
+<td>The accessible name, when it should differ from the title.</td>
+</tr>
+<tr>
+<td><code>formatValue</code></td>
+<td>Formats a value for ticks, tooltips, and the screen reader table.</td>
+</tr>
+<tr>
+<td><code>emptyMessage</code></td>
+<td>Shown when there is nothing to draw.</td>
+</tr>
+<tr>
+<td><code>hideLegend</code></td>
+<td>Hides the legend, which otherwise shows when there are two or more series, and on every pie.</td>
+</tr>
+<tr>
+<td><code>legendToggle</code></td>
+<td>Whether a click on a legend entry hides it. On by default.</td>
+</tr>
+<tr>
+<td><code>animate</code></td>
+<td>Whether the chart animates in and between values. On by default, and always off for a reader who asked for reduced motion.</td>
+</tr>
+<tr>
+<td><code>onPointClick</code></td>
+<td>Called when a reader activates a point, slice, cell, or node, by click or with Enter.</td>
+</tr>
+<tr>
+<td><code>patterns</code></td>
+<td>Fills series with patterns as well as color.</td>
+</tr>
+<tr>
+<td><code>keyboard</code></td>
+<td>Whether the arrow keys walk the marks. On by default.</td>
+</tr>
+</tbody></table>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velochart","nav":[{"id":"velochart","name":"velochart","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velochart/"},{"slug":"charts","title":"Charts","url":"/docs/velochart/charts/"},{"slug":"exploring-and-updating","title":"Exploring and updating","url":"/docs/velochart/exploring-and-updating/"},{"slug":"theming-and-accessibility","title":"Theming and accessibility","url":"/docs/velochart/theming-and-accessibility/"}]},{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"},{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/devtools/","section":"Velotype DevTools"},{"slug":"panels","title":"Panels","url":"/docs/velotype/devtools/panels/","section":"Velotype DevTools"},{"slug":"limitations","title":"Known limitations","url":"/docs/velotype/devtools/limitations/","section":"Velotype DevTools"}]}],"current":"/docs/velochart/charts/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

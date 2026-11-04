@@ -139,6 +139,8 @@ The whole category: [Data Entry on the showcase](https://velotype.github.io/velo
 
 The whole category: [Charts on the showcase](https://velotype.github.io/velodesign/category/charts).
 
+These cover the most common needs. For more, see [velochart](/docs/velochart/).
+
 | Component | What it is |
 |---|---|
 | [`LineChart`](https://velotype.github.io/velodesign/components/line-chart) | A line chart for trends over time, optionally filled and optionally stacked. Hovering anywhere over the plot reads out every series at the nearest category. |

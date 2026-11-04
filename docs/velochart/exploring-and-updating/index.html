@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exploring and updating - velochart docs</title>
+<meta name="description" content="Everything here is on the charts with x and y axes, because they share one engine. update and export are on every chart except Sparkline.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="apple-touch-icon" href="/assets/logo.png">
+<style>html{background:#fff;color:#050505}html[data-theme=dark]{background:#151515;color:#fafafa}#app{visibility:hidden;animation:vtp-show 0s 3s forwards}@keyframes vtp-show{to{visibility:visible}}</style>
+<noscript><style>#app{visibility:visible;animation:none}</style></noscript>
+<script>(function(){var t=null;try{t=localStorage.getItem("vtd-preferred-theme")}catch(e){}if(t!="light"&&t!="dark"){t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}document.documentElement.setAttribute("data-theme",t)})()</script>
+</head>
+<body data-doc="velochart">
+<div id="app"><article id="doc">
+<h1 id="exploring-and-updating">Exploring and updating</h1>
+<p>Everything here is on the charts with x and y axes, because they share one engine. <code>update</code> and export are on every chart except <code>Sparkline</code>.</p>
+<pre><code class="language-tsx">import { LineChart } from &quot;@velotype/velochart&quot;
+import { Theme } from &quot;@velotype/velodesign&quot;
+import { getComponent, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+Theme.injectStyles()
+
+const days = Array.from({length: 120}, (_, i) =&gt; ({
+    x: new Date(Date.UTC(2026, 0, 1 + i)),
+    values: {visits: Math.round(400 + Math.sin(i / 8) * 150)},
+}))
+
+// A JSX tag evaluates to the element. getComponent gets the chart, which is how to reach its methods.
+const chart = getComponent&lt;LineChart&gt;(
+    &lt;LineChart
+        title=&quot;Visits&quot;
+        data={days}
+        series={[{key: &quot;visits&quot;, label: &quot;Visits&quot;, trendline: &quot;linear&quot;}]}
+        xAxis={{type: &quot;time&quot;, title: &quot;Date&quot;}}
+        zoom=&quot;x&quot;
+        rangeSlider
+        crosshair
+        annotations={[{type: &quot;line&quot;, value: 600, label: &quot;Target&quot;, dashed: true}]}
+        onZoom={(view) =&gt; console.log(&quot;now showing&quot;, view)}/&gt;,
+)
+
+replaceElementWithRoot(&lt;div&gt;{chart}&lt;/div&gt;, document.getElementById(&quot;app&quot;)!)
+
+// Later: new values, a live feed, or a file for the reader.
+chart.update({data: days.slice(30)})
+chart.appendData([{x: new Date(Date.UTC(2026, 4, 1)), values: {visits: 512}}], {maxPoints: 365})
+console.log(chart.toCsv())
+</code></pre>
+<p>A JSX tag evaluates to the element and not the chart, so reach a chart&#39;s methods through <code>getComponent</code>, as above.</p>
+<h2 id="axes">Axes</h2>
+<p><code>xAxis</code>, <code>yAxis</code>, and <code>yAxisRight</code> each take the same options:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>type</code></td>
+<td><code>&quot;category&quot;</code>, <code>&quot;linear&quot;</code>, <code>&quot;log&quot;</code>, or <code>&quot;time&quot;</code>. An x axis follows its points&#39; <code>x</code> when unset</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>A title along the axis</td>
+</tr>
+<tr>
+<td><code>min</code>, <code>max</code></td>
+<td>Fix an end, rather than following the data</td>
+</tr>
+<tr>
+<td><code>format</code></td>
+<td>Formats ticks and the tooltip values read against this axis</td>
+</tr>
+<tr>
+<td><code>tickCount</code></td>
+<td>About how many ticks</td>
+</tr>
+<tr>
+<td><code>reverse</code></td>
+<td>Runs the axis the other way</td>
+</tr>
+<tr>
+<td><code>hideGrid</code></td>
+<td>Leaves out the grid lines</td>
+</tr>
+<tr>
+<td><code>utc</code></td>
+<td>Reads a time axis in UTC</td>
+</tr>
+</tbody></table>
+<p>Give a point an <code>x</code>, a number or a <code>Date</code>, to place it by value. Points are sorted along the axis, whatever order they came in. A series with <code>yAxis: &quot;right&quot;</code> reads against <code>yAxisRight</code>, and a log axis leaves out anything at or below zero.</p>
+<h2 id="series">Series</h2>
+<p>A series takes <code>type</code> (<code>&quot;line&quot;</code>, <code>&quot;area&quot;</code>, <code>&quot;bar&quot;</code>, <code>&quot;scatter&quot;</code>, or <code>&quot;none&quot;</code>, which isn&#39;t drawn and still reads in the tooltip), <code>curve</code> (<code>&quot;linear&quot;</code>, <code>&quot;smooth&quot;</code>, <code>&quot;step&quot;</code>, <code>&quot;step-before&quot;</code>, <code>&quot;step-after&quot;</code>), <code>dashed</code>, <code>hidden</code>, and <code>trendline</code> (<code>&quot;linear&quot;</code>, or <code>{type: &quot;moving-average&quot;, window}</code>). <code>&quot;smooth&quot;</code> never overshoots a value.</p>
+<h2 id="marking-things-up">Marking things up</h2>
+<p><code>annotations</code> draws lines, shaded bands, and labelled points. An annotation&#39;s value widens the axis if it has to.</p>
+<p>A point&#39;s <code>errors</code> draws error bars: one number for either side, or <code>[below, above]</code>. <code>showValues</code> writes each value beside its mark, thinned when there isn&#39;t room. <code>crosshair</code> follows the pointer with lines to the axes.</p>
+<h2 id="zoom-pan-and-brush">Zoom, pan, and brush</h2>
+<p>With <code>zoom</code> set to <code>&quot;x&quot;</code>, <code>&quot;y&quot;</code>, or <code>&quot;xy&quot;</code>, a drag pans, ctrl or cmd and the wheel zooms, a pinch zooms, and a double click goes back to everything. A plain scroll stays the page&#39;s, because taking it would trap a reader scrolling past. <code>wheelZoom: &quot;always&quot;</code> takes it anyway, for a chart that fills the page.</p>
+<p><code>brush</code> makes a drag select a range, or a rectangle with <code>&quot;xy&quot;</code>, and <code>onBrush</code> gets the range and the points in it. With <code>zoom</code> set as well, the brush zooms to what it selected, and shift and drag pans. <code>rangeSlider</code> draws an overview under the plot, with a window to drag and resize.</p>
+<p><code>zoomTo</code>, <code>resetZoom</code>, and <code>getView</code> do the same from code, in axis units: milliseconds on a time axis, and the index on a category axis. Horizontal bars don&#39;t zoom or brush.</p>
+<p>Charts sharing a <code>syncGroup</code> name move their cursors together and zoom together.</p>
+<h2 id="updating-and-live-data">Updating and live data</h2>
+<p><code>update</code> changes any of a chart&#39;s attrs and redraws, keeping its element and what the reader has hidden. Values move to their new positions when the shape of the data is the same.</p>
+<p><code>appendData</code> adds points for a live feed, dropping older ones past <code>maxPoints</code>. A burst of calls costs one redraw, and a view at the live edge moves along with it. It doesn&#39;t change the array you passed in.</p>
+<h2 id="long-series">Long series</h2>
+<p>A line with more points in view than twice the plot&#39;s width is thinned to what its pixels can show. The tooltip still reads every point. <code>downsample</code> chooses how: <code>{algorithm: &quot;lttb&quot;}</code> keeps its shape and is the default, <code>{algorithm: &quot;min-max&quot;}</code> guarantees every spike survives, and <code>false</code> draws everything.</p>
+<p><code>renderer=&quot;canvas&quot;</code> paints the marks instead of making elements, which is what makes tens of thousands of points or bars practical. Axes, annotations, and hover stay as they are. A smooth line draws straight, and a mark can&#39;t be hovered on its own, so <code>hover: &quot;mark&quot;</code> reads as <code>&quot;index&quot;</code>.</p>
+<h2 id="export">Export</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it gives</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>toCsv()</code></td>
+<td>The values as CSV, every row. A cell that would run as a formula in a spreadsheet is defused</td>
+</tr>
+<tr>
+<td><code>toSvgString()</code></td>
+<td>A stand-alone copy of the drawing, with its title, legend, and resolved colors</td>
+</tr>
+<tr>
+<td><code>toPngBlob(scale?)</code></td>
+<td>A PNG, on the page&#39;s background color</td>
+</tr>
+<tr>
+<td><code>download(format, filename)</code></td>
+<td>Saves <code>&quot;csv&quot;</code>, <code>&quot;svg&quot;</code>, or <code>&quot;png&quot;</code> through the browser</td>
+</tr>
+</tbody></table>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velochart","nav":[{"id":"velochart","name":"velochart","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velochart/"},{"slug":"charts","title":"Charts","url":"/docs/velochart/charts/"},{"slug":"exploring-and-updating","title":"Exploring and updating","url":"/docs/velochart/exploring-and-updating/"},{"slug":"theming-and-accessibility","title":"Theming and accessibility","url":"/docs/velochart/theming-and-accessibility/"}]},{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"},{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/devtools/","section":"Velotype DevTools"},{"slug":"panels","title":"Panels","url":"/docs/velotype/devtools/panels/","section":"Velotype DevTools"},{"slug":"limitations","title":"Known limitations","url":"/docs/velotype/devtools/limitations/","section":"Velotype DevTools"}]}],"current":"/docs/velochart/exploring-and-updating/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 > A suite of TypeScript libraries for building software platforms end to end: a browser UI framework that creates real DOM elements (no virtual DOM), a themed component library, server-side TSX rendering, a web server, and a compact binary JSON wire format. They are written for Deno, published to JSR under @velotype, and developed in the Velotype GitHub organization (https://github.com/Velotype).
 
-Each project stands on its own and they are designed to fit together: veloserver serves pages and APIs, velossr or velotype renders them, velodesign supplies UI components for velotype, and velojson (VSON) carries data between server and browser. The projects are pre-1.0, so APIs can change between versions: pin versions, and read each repository's release-notes.md.
+Each project stands on its own and they are designed to fit together: veloserver serves pages and APIs, velossr or velotype renders them, velodesign supplies UI components for velotype, velochart supplies charts, and velojson (VSON) carries data between server and browser. The projects are pre-1.0, so APIs can change between versions: pin versions, and read each repository's release-notes.md.
 
 ## Read this before writing code with these libraries
 
@@ -13,6 +13,7 @@ Each project stands on its own and they are designed to fit together: veloserver
 - **Do not mix velotype versions in one app.** A velodesign release is built on one velotype version, and the Versions section below says which.
 - **Conditionals:** `{condition && <li/>}` works in velotype and in velossr 0.0.10 or later. In velomicro and velomini (and velossr before 0.0.10) a `false` child is written as the text "false", so use `{condition ? <li/> : null}`.
 - **velodesign:** call `Theme.injectStyles()` once before any component renders. The library has no built-in text, so ARIA labels and placeholders have no defaults: pass them in.
+- **velochart:** bundle it together with velodesign and your app, so they share one copy of velotype. A JSX tag evaluates to the element, so reach a chart's methods (`update`, `appendData`, `zoomTo`, `toCsv`) through `getComponent`. Its colors come from the CSS custom properties that velodesign's `Theme.injectStyles()` defines.
 - **veloserver:** `new Router<Metadata>({})`, add routes with `get`, `head`, and `post`, then `new Server(router).serve("127.0.0.1", 3000)`. Serving needs `--allow-net` and nothing else.
 - **velojson:** `VSON.encode(value)` and `VSON.decode(bytes)`. The Key Table format is the default for objects and arrays. All three formats are smaller than JSON text (VBIN, which needs agreed key IDs, is the smallest), but on current engines they run slower than native JSON.stringify() and JSON.parse(), so choose them for payload size. The `/browser` module supports Key Table only.
 - **velomicro and velomini** are small teaching frameworks (about 1kb and 2.5kb), not for applications. Use velotype for an app.
@@ -26,6 +27,7 @@ Every docs page is available as Markdown at the links below. Every code example 
 
 The docs and their examples were type-checked, and run, against these published versions:
 
+- @velotype/velochart 0.1.0: https://jsr.io/@velotype/velochart
 - @velotype/velodesign 0.2.0: https://jsr.io/@velotype/velodesign
 - @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
@@ -36,6 +38,437 @@ The docs and their examples were type-checked, and run, against these published 
 
 velodesign 0.2.0 is built on velotype 0.3.1, so use that velotype version with it.
 
+
+---
+
+Source: https://velotype.github.io/docs/velochart/
+
+# Getting started
+
+velochart is a chart library for [velotype](/docs/velotype/). Charts are drawn in SVG at the real pixel width of their container, so text stays the same size in a sidebar and on a dashboard, and a chart with tabular values gives screen readers those values as a table.
+
+[velodesign](/docs/velodesign/) has a few basic charts for the most common needs. velochart has those six and 15 more, with what they need beyond the basics: log and time axes, zoom and pan, annotations, downsampling for long series, keyboard navigation, and export. For each chart's props and a live preview, see the [showcase](https://velotype.github.io/velochart/).
+
+Every example in these docs is a file that is type-checked against the published package, and run in a browser.
+
+## Install
+
+velochart is a [JSR package](https://jsr.io/@velotype/velochart) for Deno, built on velotype. Add it with the same velotype as the rest of your app, because mixing velotype versions in one app is not supported. The example below also uses velodesign for its theme.
+
+```sh
+deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.2.0 jsr:@velotype/velochart@0.1.0
+```
+
+```json
+{
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "@velotype/velotype",
+        "lib": ["dom", "deno.ns", "esnext"]
+    }
+}
+```
+
+Bundle velochart and velodesign together with your app. Bundled together, both packages share one copy of velotype. Bundled separately, each keeps its own, and components then fail with "Class constructor cannot be invoked without 'new'".
+
+## Use it
+
+A chart takes `data`, with one entry per category, and `series`, which says what to plot. Each entry's `values` are keyed by the series' `key`:
+
+```tsx
+import { LineChart } from "@velotype/velochart"
+import { Theme } from "@velotype/velodesign"
+import { replaceElementWithRoot } from "@velotype/velotype"
+
+// velochart takes its colors from the CSS custom properties that velodesign's theme defines.
+Theme.injectStyles()
+
+const data = [
+    {label: "Jan", values: {revenue: 12, costs: 8}},
+    {label: "Feb", values: {revenue: 19, costs: 11}},
+    {label: "Mar", values: {revenue: 15, costs: 10}},
+    {label: "Apr", values: {revenue: 27, costs: 15}},
+]
+const series = [
+    {key: "revenue", label: "Revenue"},
+    {key: "costs", label: "Costs"},
+]
+
+replaceElementWithRoot(
+    <LineChart
+        title="Revenue and costs"
+        data={data}
+        series={series}
+        height={240}
+        formatValue={(n) => `$${n}k`}/>,
+    document.getElementById("app")!,
+)
+```
+A chart redraws itself when its container resizes. To show new data, call its `update` method, which [Exploring and updating](/docs/velochart/exploring-and-updating/) covers.
+
+## What is in the library
+
+| Category | Charts |
+|---|---|
+| Cartesian | `LineChart`, `AreaChart`, `BarChart`, `MixedChart`, `ScatterChart`, `BubbleChart`, `HistogramChart`, `WaterfallChart`, `BoxPlotChart`, `CandlestickChart` |
+| Radial | `PieChart`, `Gauge`, `RadarChart`, `PolarAreaChart` |
+| Matrix | `Heatmap`, `CalendarHeatmap` |
+| Hierarchy | `Treemap`, `SunburstChart` |
+| Flow | `FunnelChart`, `SankeyChart` |
+| Inline | `Sparkline` |
+
+## Next steps
+
+* [Charts](/docs/velochart/charts/): every chart, and what to reach for when
+* [Exploring and updating](/docs/velochart/exploring-and-updating/): axes, zoom, annotations, live data, and export
+* [Theming and accessibility](/docs/velochart/theming-and-accessibility/): colors, the keyboard, and what a screen reader gets
+
+---
+
+Source: https://velotype.github.io/docs/velochart/charts/
+
+# Charts
+
+Every velochart chart, by category. Each links to its page in the [showcase](https://velotype.github.io/velochart/), which has live examples, the props table, and the types it uses.
+
+The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.1.0.
+
+## Cartesian
+
+Charts with x and y axes. They all run on one engine, so everything in [exploring and updating](/docs/velochart/exploring-and-updating/) works on all of them.
+
+| Chart | What it is |
+|---|---|
+| [`LineChart`](https://velotype.github.io/velochart/components/line-chart) | A line chart for trends, optionally filled and stacked. Hovering anywhere over the plot reads out every series at the nearest point. |
+| [`AreaChart`](https://velotype.github.io/velochart/components/area-chart) | A filled line chart. Stack it to show how parts add up to a total. |
+| [`BarChart`](https://velotype.github.io/velochart/components/bar-chart) | Comparing categories: vertical or horizontal, side by side or stacked. Negative values hang below the zero line. |
+| [`MixedChart`](https://velotype.github.io/velochart/components/mixed-chart) | Different kinds of series on one set of axes, with a second y axis for a measure in other units. |
+| [`ScatterChart`](https://velotype.github.io/velochart/components/scatter-chart) | Points placed by two values. A pointer reads the one point nearest it. |
+| [`BubbleChart`](https://velotype.github.io/velochart/components/bubble-chart) | A scatter chart with a third value as size. Area follows the value, since area is what the eye reads. |
+| [`HistogramChart`](https://velotype.github.io/velochart/components/histogram-chart) | Raw values counted into bins. |
+| [`WaterfallChart`](https://velotype.github.io/velochart/components/waterfall-chart) | How a start becomes an end, each step hanging from where the last finished. |
+| [`BoxPlotChart`](https://velotype.github.io/velochart/components/box-plot-chart) | How groups' values are spread. Give it raw values or a summary. |
+| [`CandlestickChart`](https://velotype.github.io/velochart/components/candlestick-chart) | A price's range and its open and close for each period. Candle or OHLC. |
+
+A missing value is a gap: a line breaks at it, a bar is absent, and the tooltip skips it. `spanGaps` joins a line across one.
+
+```tsx
+import { AreaChart, BarChart } from "@velotype/velochart"
+import { Theme } from "@velotype/velodesign"
+import { replaceElementWithRoot } from "@velotype/velotype"
+
+Theme.injectStyles()
+
+const data = [
+    {label: "Q1", values: {web: 30, retail: 18}},
+    {label: "Q2", values: {web: 34, retail: 21}},
+    {label: "Q3", values: {web: 41, retail: 19}},
+]
+const series = [
+    {key: "web", label: "Web"},
+    {key: "retail", label: "Retail"},
+]
+
+replaceElementWithRoot(
+    <div>
+        {/* stacked adds each series to the ones before it. The tooltip still shows each series' own value. */}
+        <AreaChart title="Bookings" data={data} series={series} stacked/>
+        {/* horizontal gives each category a full line, which suits labels that are words. */}
+        <BarChart title="Bookings by quarter" data={data} series={series} horizontal/>
+    </div>,
+    document.getElementById("app")!,
+)
+```
+## Radial, matrix, hierarchy, and flow
+
+| Chart | What it is |
+|---|---|
+| [`PieChart`](https://velotype.github.io/velochart/components/pie-chart) | A pie or donut for part-to-whole. Slices are drawn in the order given and never re-sorted. |
+| [`Gauge`](https://velotype.github.io/velochart/components/gauge) | One value against a range, with optional colored bands. |
+| [`RadarChart`](https://velotype.github.io/velochart/components/radar-chart) | Several measures around a circle, to compare things by their shape. The measures need comparable units. |
+| [`PolarAreaChart`](https://velotype.github.io/velochart/components/polar-area-chart) | Equal slices that differ in how far they reach, for values that aren't parts of one whole. |
+| [`Heatmap`](https://velotype.github.io/velochart/components/heatmap) | Values in a grid, read by color, with a scale. Can diverge around zero. |
+| [`CalendarHeatmap`](https://velotype.github.io/velochart/components/calendar-heatmap) | Daily values as a grid of weeks. Dates are read in UTC. |
+| [`Treemap`](https://velotype.github.io/velochart/components/treemap) | Nested parts of a whole, sized by area. |
+| [`SunburstChart`](https://velotype.github.io/velochart/components/sunburst-chart) | Nested parts of a whole as rings. |
+| [`FunnelChart`](https://velotype.github.io/velochart/components/funnel-chart) | How much of a group makes it through each stage. |
+| [`SankeyChart`](https://velotype.github.io/velochart/components/sankey-chart) | Flows between stages. A link that would close a loop is left out. |
+
+```tsx
+import { Gauge, PieChart, Sparkline } from "@velotype/velochart"
+import { Theme } from "@velotype/velodesign"
+import { replaceElementWithRoot } from "@velotype/velotype"
+
+Theme.injectStyles()
+
+const spend = [
+    {label: "Platform", value: 24},
+    {label: "Growth", value: 18},
+    {label: "Infra", value: 12},
+]
+
+replaceElementWithRoot(
+    <div>
+        <PieChart title="Spend by team" data={spend} donut={0.6} centerLabel="54" centerSubLabel="total"/>
+        <Gauge
+            value={93}
+            subLabel="disk used"
+            formatValue={(n) => `${n}%`}
+            ariaLabel="93 percent of disk used"
+            bands={[
+                {from: 0, to: 70, color: "var(--secondary)"},
+                {from: 70, to: 90, color: "var(--warning)"},
+                {from: 90, to: 100, color: "var(--accent)"},
+            ]}/>
+        <p>Signups this quarter <Sparkline values={[4, 7, 5, 11, 9, 14]} ariaLabel="Rising weekly signups"/> 14</p>
+    </div>,
+    document.getElementById("app")!,
+)
+```
+```tsx
+import { BubbleChart, CandlestickChart, Heatmap, MixedChart, RadarChart, SankeyChart, Treemap, WaterfallChart } from "@velotype/velochart"
+import { Theme } from "@velotype/velodesign"
+import { replaceElementWithRoot } from "@velotype/velotype"
+
+Theme.injectStyles()
+
+const months = [
+    {label: "Jan", values: {sales: 120, rate: 12}},
+    {label: "Feb", values: {sales: 150, rate: 18}},
+    {label: "Mar", values: {sales: 90, rate: 9}},
+]
+
+replaceElementWithRoot(
+    <div>
+        {/* A series' type sets how it draws, and yAxis which axis it reads against. */}
+        <MixedChart
+            data={months}
+            yAxisRight={{format: (n) => `${n}%`}}
+            series={[
+                {key: "sales", label: "Sales", type: "bar"},
+                {key: "rate", label: "Rate", type: "line", yAxis: "right", curve: "smooth"},
+            ]}/>
+        {/* A bubble's area follows its size, since area is what the eye reads. */}
+        <BubbleChart series={[{key: "markets", points: [{x: 10, y: 40, size: 200, label: "North"}, {x: 40, y: 55, size: 320, label: "South"}]}]}/>
+        <RadarChart data={months} series={[{key: "sales"}, {key: "rate"}]}/>
+        <WaterfallChart data={[{label: "Opening", value: 120}, {label: "Costs", value: -60}, {label: "Closing", value: 0, total: true}]}/>
+        <CandlestickChart data={[{x: new Date(Date.UTC(2026, 0, 5)), open: 100, high: 110, low: 95, close: 106}]}/>
+        <Heatmap columns={["Mon", "Tue"]} rows={["am", "pm"]} values={[[1, 2], [3, undefined]]}/>
+        <Treemap data={[{label: "Engineering", children: [{label: "Platform", value: 40}]}, {label: "Support", value: 14}]}/>
+        <SankeyChart
+            nodes={[{id: "web", label: "Web"}, {id: "trial", label: "Trial"}, {id: "paid", label: "Paid"}]}
+            links={[{source: "web", target: "trial", value: 50}, {source: "trial", target: "paid", value: 20}]}/>
+    </div>,
+    document.getElementById("app")!,
+)
+```
+## Inline
+
+| Chart | What it is |
+|---|---|
+| [`Sparkline`](https://velotype.github.io/velochart/components/sparkline) | A tiny trend with no axes, sized to sit inside a table cell or beside a number. Line, area, or bar. It has a fixed size and no tooltip, and it takes none of the attrs or methods below. |
+
+## Attrs most charts share
+
+Every chart except `Sparkline` accepts these:
+
+| Attr | What it does |
+|---|---|
+| `height` | Drawing height in px, not counting the legend. The default is 220. |
+| `title` | A heading above the drawing. It is also the accessible name when `ariaLabel` is not set. |
+| `ariaLabel` | The accessible name, when it should differ from the title. |
+| `formatValue` | Formats a value for ticks, tooltips, and the screen reader table. |
+| `emptyMessage` | Shown when there is nothing to draw. |
+| `hideLegend` | Hides the legend, which otherwise shows when there are two or more series, and on every pie. |
+| `legendToggle` | Whether a click on a legend entry hides it. On by default. |
+| `animate` | Whether the chart animates in and between values. On by default, and always off for a reader who asked for reduced motion. |
+| `onPointClick` | Called when a reader activates a point, slice, cell, or node, by click or with Enter. |
+| `patterns` | Fills series with patterns as well as color. |
+| `keyboard` | Whether the arrow keys walk the marks. On by default. |
+
+---
+
+Source: https://velotype.github.io/docs/velochart/exploring-and-updating/
+
+# Exploring and updating
+
+Everything here is on the charts with x and y axes, because they share one engine. `update` and export are on every chart except `Sparkline`.
+
+```tsx
+import { LineChart } from "@velotype/velochart"
+import { Theme } from "@velotype/velodesign"
+import { getComponent, replaceElementWithRoot } from "@velotype/velotype"
+
+Theme.injectStyles()
+
+const days = Array.from({length: 120}, (_, i) => ({
+    x: new Date(Date.UTC(2026, 0, 1 + i)),
+    values: {visits: Math.round(400 + Math.sin(i / 8) * 150)},
+}))
+
+// A JSX tag evaluates to the element. getComponent gets the chart, which is how to reach its methods.
+const chart = getComponent<LineChart>(
+    <LineChart
+        title="Visits"
+        data={days}
+        series={[{key: "visits", label: "Visits", trendline: "linear"}]}
+        xAxis={{type: "time", title: "Date"}}
+        zoom="x"
+        rangeSlider
+        crosshair
+        annotations={[{type: "line", value: 600, label: "Target", dashed: true}]}
+        onZoom={(view) => console.log("now showing", view)}/>,
+)
+
+replaceElementWithRoot(<div>{chart}</div>, document.getElementById("app")!)
+
+// Later: new values, a live feed, or a file for the reader.
+chart.update({data: days.slice(30)})
+chart.appendData([{x: new Date(Date.UTC(2026, 4, 1)), values: {visits: 512}}], {maxPoints: 365})
+console.log(chart.toCsv())
+```
+A JSX tag evaluates to the element and not the chart, so reach a chart's methods through `getComponent`, as above.
+
+## Axes
+
+`xAxis`, `yAxis`, and `yAxisRight` each take the same options:
+
+| Option | What it does |
+|---|---|
+| `type` | `"category"`, `"linear"`, `"log"`, or `"time"`. An x axis follows its points' `x` when unset |
+| `title` | A title along the axis |
+| `min`, `max` | Fix an end, rather than following the data |
+| `format` | Formats ticks and the tooltip values read against this axis |
+| `tickCount` | About how many ticks |
+| `reverse` | Runs the axis the other way |
+| `hideGrid` | Leaves out the grid lines |
+| `utc` | Reads a time axis in UTC |
+
+Give a point an `x`, a number or a `Date`, to place it by value. Points are sorted along the axis, whatever order they came in. A series with `yAxis: "right"` reads against `yAxisRight`, and a log axis leaves out anything at or below zero.
+
+## Series
+
+A series takes `type` (`"line"`, `"area"`, `"bar"`, `"scatter"`, or `"none"`, which isn't drawn and still reads in the tooltip), `curve` (`"linear"`, `"smooth"`, `"step"`, `"step-before"`, `"step-after"`), `dashed`, `hidden`, and `trendline` (`"linear"`, or `{type: "moving-average", window}`). `"smooth"` never overshoots a value.
+
+## Marking things up
+
+`annotations` draws lines, shaded bands, and labelled points. An annotation's value widens the axis if it has to.
+
+A point's `errors` draws error bars: one number for either side, or `[below, above]`. `showValues` writes each value beside its mark, thinned when there isn't room. `crosshair` follows the pointer with lines to the axes.
+
+## Zoom, pan, and brush
+
+With `zoom` set to `"x"`, `"y"`, or `"xy"`, a drag pans, ctrl or cmd and the wheel zooms, a pinch zooms, and a double click goes back to everything. A plain scroll stays the page's, because taking it would trap a reader scrolling past. `wheelZoom: "always"` takes it anyway, for a chart that fills the page.
+
+`brush` makes a drag select a range, or a rectangle with `"xy"`, and `onBrush` gets the range and the points in it. With `zoom` set as well, the brush zooms to what it selected, and shift and drag pans. `rangeSlider` draws an overview under the plot, with a window to drag and resize.
+
+`zoomTo`, `resetZoom`, and `getView` do the same from code, in axis units: milliseconds on a time axis, and the index on a category axis. Horizontal bars don't zoom or brush.
+
+Charts sharing a `syncGroup` name move their cursors together and zoom together.
+
+## Updating and live data
+
+`update` changes any of a chart's attrs and redraws, keeping its element and what the reader has hidden. Values move to their new positions when the shape of the data is the same.
+
+`appendData` adds points for a live feed, dropping older ones past `maxPoints`. A burst of calls costs one redraw, and a view at the live edge moves along with it. It doesn't change the array you passed in.
+
+## Long series
+
+A line with more points in view than twice the plot's width is thinned to what its pixels can show. The tooltip still reads every point. `downsample` chooses how: `{algorithm: "lttb"}` keeps its shape and is the default, `{algorithm: "min-max"}` guarantees every spike survives, and `false` draws everything.
+
+`renderer="canvas"` paints the marks instead of making elements, which is what makes tens of thousands of points or bars practical. Axes, annotations, and hover stay as they are. A smooth line draws straight, and a mark can't be hovered on its own, so `hover: "mark"` reads as `"index"`.
+
+## Export
+
+| Method | What it gives |
+|---|---|
+| `toCsv()` | The values as CSV, every row. A cell that would run as a formula in a spreadsheet is defused |
+| `toSvgString()` | A stand-alone copy of the drawing, with its title, legend, and resolved colors |
+| `toPngBlob(scale?)` | A PNG, on the page's background color |
+| `download(format, filename)` | Saves `"csv"`, `"svg"`, or `"png"` through the browser |
+
+---
+
+Source: https://velotype.github.io/docs/velochart/theming-and-accessibility/
+
+# Theming and accessibility
+
+velochart draws with CSS custom properties, so charts follow the page's theme in light and in dark. It gives screen readers the numbers rather than a picture, and keyboard readers the same marks a pointer gets.
+
+## The theme
+
+velochart depends on velotype alone. Its colors come from these custom properties:
+
+| Property | Used for |
+|---|---|
+| `--text` | Titles, legend names, and center labels |
+| `--background`, `--background-1` to `--background-9` | Tooltips, grid lines, axes, ticks, and the gauge's track |
+| `--primary`, `--secondary`, `--accent`, `--warning`, and their `-7` steps | Series colors |
+
+[velodesign's](/docs/velodesign/theming/) `Theme.injectStyles()` defines all of them, so a page that uses velodesign needs nothing more. A page without velodesign has to define them itself, or the charts draw without their colors.
+
+Styles are in the `velochart.base` and `velochart.component` cascade layers. A rule of yours outside a layer always wins, whatever its specificity.
+
+## Series colors and the empty symbol
+
+`ChartThemeOptions.seriesColors` is the palette series take in order, and `emptySymbol` is what a chart with no data shows. A series or a slice can set its own `color`, and a chart can set its own `emptyMessage`.
+
+```tsx
+import { BarChart, ChartThemeOptions } from "@velotype/velochart"
+import { Theme } from "@velotype/velodesign"
+import { replaceElementWithRoot } from "@velotype/velotype"
+
+Theme.injectStyles()
+
+// Read when a chart draws, so set these while the app starts, before the first chart exists.
+// var() keeps the palette following the theme, in light and in dark.
+ChartThemeOptions.seriesColors = ["var(--secondary)", "var(--accent)", "var(--primary)"]
+ChartThemeOptions.emptySymbol = () => "No data yet"
+
+const data = [
+    {label: "Mon", values: {done: 4, open: 2}},
+    {label: "Tue", values: {done: 6, open: 1, late: 1}},
+]
+const series = [
+    {key: "done", label: "Done"},
+    {key: "open", label: "Open"},
+    // One series can still take its own color.
+    {key: "late", label: "Late", color: "var(--warning)"},
+]
+
+replaceElementWithRoot(
+    <BarChart title="Tasks" data={data} series={series} stacked/>,
+    document.getElementById("app")!,
+)
+```
+Use `var(...)` for colors. A hex value looks right in one theme and wrong in the other.
+
+## Patterns
+
+`patterns` fills series with one of six patterns over their color, dashes their lines, and marks the legend the same way, for readers who can't tell the hues apart and for printing in one ink. `ChartThemeOptions.patterns = true` turns it on for every chart. A chart with `renderer="canvas"` draws plain fills.
+
+## Accessibility
+
+A chart with tabular values renders them in a visually hidden table, and hides the drawing from assistive technology. The caption is `ariaLabel` or `title`, there is a row per category, and values go through `formatValue`, so what is read aloud matches the axis. Past `maxTableRows`, 1000 by default, the table samples evenly.
+
+The drawing is one focus stop. Inside it:
+
+| Key | What it does |
+|---|---|
+| Arrow keys | Move through the points, marks, or cells, showing each tooltip and saying it through a live region |
+| Home, End | Go to the first or last |
+| Enter, Space | Activate it, as `onPointClick` |
+| Escape | Clear it |
+| `+`, `-`, `0` | Zoom, and go back to everything, on a chart with `zoom` |
+| Shift and an arrow | Pan, on a chart with `zoom` |
+
+Tab always leaves. Legend entries are real buttons, focusable on their own.
+
+A `Gauge` has no table, because one number against a range is what a label already says. It is `role="img"` with `ariaLabel` or `title` as its name, so give it one that states the value.
+
+A `Sparkline` is `aria-hidden` unless you set `ariaLabel`. Next to the number it illustrates that is what you want, and when it stands alone, set the label.
+
+The library has no built-in text. Column headers of the hidden tables have no default: `PieChart` and `FunnelChart` take `valueLabel` and `shareLabel`, `PolarAreaChart` takes `valueLabel`, and `SankeyChart` takes `tableLabels`. Labels a sighted reader sees default to symbols, as with `CandlestickChart`'s O, H, L, C, and take a `labels` attr. Dates read in the browser's own language.
 
 ---
 
@@ -632,6 +1065,8 @@ The whole category: [Data Entry on the showcase](https://velotype.github.io/velo
 ## Charts
 
 The whole category: [Charts on the showcase](https://velotype.github.io/velodesign/category/charts).
+
+These cover the most common needs. For more, see [velochart](/docs/velochart/).
 
 | Component | What it is |
 |---|---|
