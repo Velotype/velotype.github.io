@@ -26,15 +26,15 @@ Every docs page is available as Markdown at the links below. Every code example 
 
 The docs and their examples were type-checked, and run, against these published versions:
 
-- @velotype/velodesign 0.1.3: https://jsr.io/@velotype/velodesign
-- @velotype/velojson 0.1.0: https://jsr.io/@velotype/velojson
+- @velotype/velodesign 0.2.0: https://jsr.io/@velotype/velodesign
+- @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
 - @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
 - @velotype/veloserver 0.3.1: https://jsr.io/@velotype/veloserver
 - @velotype/velossr 0.0.10: https://jsr.io/@velotype/velossr
 - @velotype/velotype 0.3.2: https://jsr.io/@velotype/velotype
 
-velodesign 0.1.3 is built on velotype 0.3.1, so use that velotype version with it.
+velodesign 0.2.0 is built on velotype 0.3.1, so use that velotype version with it.
 
 
 ---
@@ -51,10 +51,10 @@ Every example in these docs is a file that is type-checked against the published
 
 ## Install
 
-velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.1.3 uses velotype 0.3.1, so add both and use that velotype version. Mixing velotype versions in one app is not supported.
+velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.2.0 uses velotype 0.3.1, so add both and use that velotype version. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.1.3
+deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.2.0
 ```
 
 ```json
@@ -496,7 +496,7 @@ Source: https://velotype.github.io/docs/velodesign/components/
 
 Every velodesign component, by category. Each links to its page in the [showcase](https://velotype.github.io/velodesign/), which has a live preview, the props table, and the types it uses.
 
-The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.1.3. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
+The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.2.0. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
 
 ## Typography
 
@@ -536,6 +536,7 @@ The whole category: [Form on the showcase](https://velotype.github.io/velodesign
 | [`TextNonEditableField`](https://velotype.github.io/velodesign/components/text-non-editable-field) | A read-only label/value pair, styled consistently with the other form-field components. |
 | [`TextFormField`](https://velotype.github.io/velodesign/components/text-form-field) | A label paired with a TextBox, bound to a RenderBasic field value. |
 | [`TextEditableField`](https://velotype.github.io/velodesign/components/text-editable-field) | A label/value pair that swaps between a read view and an inline-editable TextBox with confirm/cancel. |
+| [`ChoiceCards`](https://velotype.github.io/velodesign/components/choice-cards) | One choice of a few, each a card with a title and a line saying what it means, for options that need explaining. Native radio inputs underneath. |
 
 ## Navigation
 
@@ -577,6 +578,7 @@ The whole category: [Overlays on the showcase](https://velotype.github.io/velode
 | [`Drawer`](https://velotype.github.io/velodesign/components/drawer) | A panel that slides in from a viewport edge over the page, for side/top/bottom-anchored content. |
 | [`Popover`](https://velotype.github.io/velodesign/components/popover) | A click-triggered bubble of rich content anchored to its trigger - can wrap a real Button, unlike Menu. |
 | [`Popconfirm`](https://velotype.github.io/velodesign/components/popconfirm) | An inline "are you sure?" bubble for confirming a destructive action without the weight of a full Modal. |
+| [`Lightbox`](https://velotype.github.io/velodesign/components/lightbox) | A picture looked at closely without leaving the page: a click on its thumbnail shows it as large as the screen allows, over a dark backdrop. |
 | [`ContextMenu`](https://velotype.github.io/velodesign/components/context-menu) | Opens a themed menu at the cursor position on right-click, in place of the browser's native context menu. |
 | [`Command`](https://velotype.github.io/velodesign/components/command) | A searchable command-palette overlay with keyboard navigation, built on a native <dialog>. |
 
@@ -607,6 +609,7 @@ The whole category: [Data Display on the showcase](https://velotype.github.io/ve
 | [`Carousel`](https://velotype.github.io/velodesign/components/carousel) | A single-slide-at-a-time carousel with prev/next arrows and optional dot indicators. |
 | [`Calendar`](https://velotype.github.io/velodesign/components/calendar) | A month-grid date picker with prev/next month navigation and a selectable day. |
 | [`CalendarRange`](https://velotype.github.io/velodesign/components/calendar-range) | A month-grid date-*range* picker: click a start day, then an end day, and the span between them highlights. |
+| [`EventCalendar`](https://velotype.github.io/velodesign/components/event-calendar) | A month of events, like a wall calendar: each day lists what falls on it, and a narrow calendar becomes a list of the days with something on. |
 | [`Tree`](https://velotype.github.io/velodesign/components/tree) | A hierarchical, expandable/collapsible list built on nested native details/summary pairs. Nodes open and close with the same animation as Collapse and Accordion. |
 
 ## Data Entry
@@ -894,10 +897,10 @@ Create a `VBINRootWriter`, start the root object, write each value under its Key
 | Writer | Writes |
 |---|---|
 | `VBINRootWriter` | The root: `startRootObject()`, `finalizeRootObject(object)`, and `toUint8ArrayAndRelease()` |
-| `VBINObjectWriter` | An object's fields: `encodePosIntValue`, `encodeDoubleValue`, `encodeNumberValue`, `encodeStringValue`, `encodeBooleanValue`, and the `finalize...` methods for nested values |
+| `VBINObjectWriter` | An object's fields: `encodePosIntValue`, `encodeDoubleValue`, `encodeNumberValue`, `encodeStringValue`, `encodeBytesValue`, `encodeBooleanValue`, and the `finalize...` methods for nested values |
 | `VBINArrayWriter` | An Array of mixed values |
 | `VBINNumberArrayWriter` | An Array of numbers, some integers and some doubles |
-| `VBINHomogenousStringArrayWriter` | An Array of only strings |
+| `VBINHomogenousStringArrayWriter` | An Array of only strings, or of only raw bytes |
 | `VBINHomogenousPosIntArrayWriter` | An Array of only non-negative integers |
 | `VBINHomogenousDoubleArrayWriter` | An Array of only doubles |
 | `VBINHomogenousObjectArrayWriter` | An Array of only objects |
@@ -915,6 +918,7 @@ The `encode...Value` methods of an object accept `undefined`, which writes nothi
 | `assignValue(object, keyID, value)` | Sets the field for `keyID` on the object being built |
 | `hasAllRequiredFields(object)` | Called at the end of an object. Return `false` to reject a message with a missing field. `decode()` then throws |
 | `fieldMapper(keyID)` | For a field that is itself an object, returns the mapper for its fields |
+| `fieldKind(keyID)` | How to read a field that can hold a string: `"value"`, `"bytes"`, or `"skip"`. See [Raw bytes](#raw-bytes) |
 
 ```tsx
 import {
@@ -968,6 +972,8 @@ const productMapper: VBINObjectMapper = {
     hasAllRequiredFields: (object) => object.id !== undefined && object.name !== undefined,
     // For a field that is itself an object, return the mapper for its KeyID
     fieldMapper: () => undefined,
+    // How to read a field that can hold a string: as text, as raw bytes, or not at all
+    fieldKind: () => "value",
 }
 
 const bytes = encodeProduct(product)
@@ -1002,9 +1008,23 @@ JSON bytes: 64
 {"1":7,"2":"Widget","3":true,"4":["tools","metal"]}
 rejected: velojson: missing required field
 ```
+## Raw bytes
+
+Both sides of a VBIN message know the schema, so a field can hold raw bytes, with no base64 and no UTF-8 check. They travel in the same wire slot as a string, so the reader relies on the mapper to tell them apart.
+
+To write them, pass a `Uint8Array` to `VBINObjectWriter.encodeBytesValue(keyID, value)`, or to `VBINHomogenousStringArrayWriter.encodeBytesValueInHomogenousArray(value)` for an Array. To read them, answer from `fieldKind(keyID)`:
+
+| Answer | The reader |
+|---|---|
+| `"value"` | Decodes a string, which must be valid UTF-8 |
+| `"bytes"` | Hands `assignValue` a `Uint8Array` of its own. For an Array field, this applies to each item |
+| `"skip"` | Moves past the field without checking it, and hands `assignValue` an empty string. Use this for a KeyID the mapper doesn't know, which may hold anything |
+
 ## Debugging
 
 `VSON.decode()` reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as `{"1": 7, "2": "Widget"}`. This is what the [VeloJSON panel](/docs/velotype/devtools/) of the DevTools extension shows for a VBIN payload.
+
+This format has no schema, so it reads every string slot as text. A message with raw bytes that aren't valid UTF-8 makes `VSON.decode()` throw.
 
 ## Generating the code
 
@@ -1143,7 +1163,8 @@ Source: https://velotype.github.io/docs/velojson/api-reference/
 | `EncodingFormat` | An enum: `Base` (0), `KeyTable` (1), `KeyID` (2) |
 | `WireType` | An enum: `Null`, `False`, `True`, `PosInt`, `Double`, `String`, `Object`, `Array` |
 | `JSONValue` | `null \| boolean \| number \| string \| JSONValue[] \| {[key: string]: JSONValue}` |
-| `VBINObjectMapper` | `{assignValue, hasAllRequiredFields, fieldMapper}` |
+| `VBINObjectMapper` | `{assignValue, hasAllRequiredFields, fieldMapper, fieldKind}` |
+| [`VBINFieldKind`](/docs/velojson/vbin/#raw-bytes) | `"value" \| "bytes" \| "skip"`, what `fieldKind` returns |
 | [VBIN writers](/docs/velojson/vbin/#writing) | `VBINRootWriter`, `VBINObjectWriter`, `VBINArrayWriter`, `VBINNumberArrayWriter`, `VBINHomogenousStringArrayWriter`, `VBINHomogenousPosIntArrayWriter`, `VBINHomogenousDoubleArrayWriter`, `VBINHomogenousObjectArrayWriter` |
 
 ### VBINRootWriter
@@ -1163,6 +1184,7 @@ Source: https://velotype.github.io/docs/velojson/api-reference/
 | `encodeDoubleValue(keyID, value)` | A double |
 | `encodeNumberValue(keyID, value)` | A number, as an integer or a double |
 | `encodeStringValue(keyID, value)` | A string |
+| `encodeBytesValue(keyID, value)` | Raw bytes, from a `Uint8Array` |
 | `finalizeObject(keyID, childWriter)` | A nested object |
 | `finalizeArray(keyID, childWriter)` | A mixed Array |
 | `finalizeNumberArray(keyID, childWriter)` | An Array of numbers |
@@ -4443,7 +4465,7 @@ new Server(router).serve("127.0.0.1", 3000)
 ```
 **Manual.** A decode tool turns bytes into JSON, and an encode tool turns JSON into bytes. Use it for a payload that has no content type, since it has no HTTP request to read one from.
 
-**VBIN.** A VBIN payload can only be decoded in the debug format, where an object's keys are its numeric KeyIDs, such as `{"1": "hello"}`. The real field names come from a schema's `VBINObjectMapper`, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such.
+**VBIN.** A VBIN payload can only be decoded in the debug format, where an object's keys are its numeric KeyIDs, such as `{"1": "hello"}`. The real field names come from a schema's `VBINObjectMapper`, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such. A VBIN field holding raw bytes that aren't valid UTF-8 can't be shown this way, and the decode fails, since only a schema says the field isn't text.
 
 ## The popup
 

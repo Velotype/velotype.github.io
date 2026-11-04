@@ -31,7 +31,7 @@
 </tr>
 <tr>
 <td><code>VBINObjectWriter</code></td>
-<td>An object&#39;s fields: <code>encodePosIntValue</code>, <code>encodeDoubleValue</code>, <code>encodeNumberValue</code>, <code>encodeStringValue</code>, <code>encodeBooleanValue</code>, and the <code>finalize...</code> methods for nested values</td>
+<td>An object&#39;s fields: <code>encodePosIntValue</code>, <code>encodeDoubleValue</code>, <code>encodeNumberValue</code>, <code>encodeStringValue</code>, <code>encodeBytesValue</code>, <code>encodeBooleanValue</code>, and the <code>finalize...</code> methods for nested values</td>
 </tr>
 <tr>
 <td><code>VBINArrayWriter</code></td>
@@ -43,7 +43,7 @@
 </tr>
 <tr>
 <td><code>VBINHomogenousStringArrayWriter</code></td>
-<td>An Array of only strings</td>
+<td>An Array of only strings, or of only raw bytes</td>
 </tr>
 <tr>
 <td><code>VBINHomogenousPosIntArrayWriter</code></td>
@@ -80,6 +80,10 @@
 <tr>
 <td><code>fieldMapper(keyID)</code></td>
 <td>For a field that is itself an object, returns the mapper for its fields</td>
+</tr>
+<tr>
+<td><code>fieldKind(keyID)</code></td>
+<td>How to read a field that can hold a string: <code>&quot;value&quot;</code>, <code>&quot;bytes&quot;</code>, or <code>&quot;skip&quot;</code>. See <a href="#raw-bytes">Raw bytes</a></td>
 </tr>
 </tbody></table>
 <pre><code class="language-tsx">import {
@@ -133,6 +137,8 @@ const productMapper: VBINObjectMapper = {
     hasAllRequiredFields: (object) =&gt; object.id !== undefined &amp;&amp; object.name !== undefined,
     // For a field that is itself an object, return the mapper for its KeyID
     fieldMapper: () =&gt; undefined,
+    // How to read a field that can hold a string: as text, as raw bytes, or not at all
+    fieldKind: () =&gt; &quot;value&quot;,
 }
 
 const bytes = encodeProduct(product)
@@ -165,8 +171,32 @@ JSON bytes: 64
 {&quot;1&quot;:7,&quot;2&quot;:&quot;Widget&quot;,&quot;3&quot;:true,&quot;4&quot;:[&quot;tools&quot;,&quot;metal&quot;]}
 rejected: velojson: missing required field
 </code></pre>
+<h2 id="raw-bytes">Raw bytes</h2>
+<p>Both sides of a VBIN message know the schema, so a field can hold raw bytes, with no base64 and no UTF-8 check. They travel in the same wire slot as a string, so the reader relies on the mapper to tell them apart.</p>
+<p>To write them, pass a <code>Uint8Array</code> to <code>VBINObjectWriter.encodeBytesValue(keyID, value)</code>, or to <code>VBINHomogenousStringArrayWriter.encodeBytesValueInHomogenousArray(value)</code> for an Array. To read them, answer from <code>fieldKind(keyID)</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Answer</th>
+<th>The reader</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&quot;value&quot;</code></td>
+<td>Decodes a string, which must be valid UTF-8</td>
+</tr>
+<tr>
+<td><code>&quot;bytes&quot;</code></td>
+<td>Hands <code>assignValue</code> a <code>Uint8Array</code> of its own. For an Array field, this applies to each item</td>
+</tr>
+<tr>
+<td><code>&quot;skip&quot;</code></td>
+<td>Moves past the field without checking it, and hands <code>assignValue</code> an empty string. Use this for a KeyID the mapper doesn&#39;t know, which may hold anything</td>
+</tr>
+</tbody></table>
 <h2 id="debugging">Debugging</h2>
 <p><code>VSON.decode()</code> reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as <code>{&quot;1&quot;: 7, &quot;2&quot;: &quot;Widget&quot;}</code>. This is what the <a href="/docs/velotype/devtools/">VeloJSON panel</a> of the DevTools extension shows for a VBIN payload.</p>
+<p>This format has no schema, so it reads every string slot as text. A message with raw bytes that aren&#39;t valid UTF-8 makes <code>VSON.decode()</code> throw.</p>
 <h2 id="generating-the-code">Generating the code</h2>
 <p>Writers and mappers are repetitive, and must agree with each other. Generate them from a schema rather than writing them by hand.</p>
 </article></div>

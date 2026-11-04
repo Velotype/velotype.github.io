@@ -2,7 +2,7 @@
 
 Every velodesign component, by category. Each links to its page in the [showcase](https://velotype.github.io/velodesign/), which has a live preview, the props table, and the types it uses.
 
-The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.1.3. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
+The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.2.0. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
 
 ## Typography
 
@@ -42,6 +42,7 @@ The whole category: [Form on the showcase](https://velotype.github.io/velodesign
 | [`TextNonEditableField`](https://velotype.github.io/velodesign/components/text-non-editable-field) | A read-only label/value pair, styled consistently with the other form-field components. |
 | [`TextFormField`](https://velotype.github.io/velodesign/components/text-form-field) | A label paired with a TextBox, bound to a RenderBasic field value. |
 | [`TextEditableField`](https://velotype.github.io/velodesign/components/text-editable-field) | A label/value pair that swaps between a read view and an inline-editable TextBox with confirm/cancel. |
+| [`ChoiceCards`](https://velotype.github.io/velodesign/components/choice-cards) | One choice of a few, each a card with a title and a line saying what it means, for options that need explaining. Native radio inputs underneath. |
 
 ## Navigation
 
@@ -83,6 +84,7 @@ The whole category: [Overlays on the showcase](https://velotype.github.io/velode
 | [`Drawer`](https://velotype.github.io/velodesign/components/drawer) | A panel that slides in from a viewport edge over the page, for side/top/bottom-anchored content. |
 | [`Popover`](https://velotype.github.io/velodesign/components/popover) | A click-triggered bubble of rich content anchored to its trigger - can wrap a real Button, unlike Menu. |
 | [`Popconfirm`](https://velotype.github.io/velodesign/components/popconfirm) | An inline "are you sure?" bubble for confirming a destructive action without the weight of a full Modal. |
+| [`Lightbox`](https://velotype.github.io/velodesign/components/lightbox) | A picture looked at closely without leaving the page: a click on its thumbnail shows it as large as the screen allows, over a dark backdrop. |
 | [`ContextMenu`](https://velotype.github.io/velodesign/components/context-menu) | Opens a themed menu at the cursor position on right-click, in place of the browser's native context menu. |
 | [`Command`](https://velotype.github.io/velodesign/components/command) | A searchable command-palette overlay with keyboard navigation, built on a native <dialog>. |
 
@@ -113,6 +115,7 @@ The whole category: [Data Display on the showcase](https://velotype.github.io/ve
 | [`Carousel`](https://velotype.github.io/velodesign/components/carousel) | A single-slide-at-a-time carousel with prev/next arrows and optional dot indicators. |
 | [`Calendar`](https://velotype.github.io/velodesign/components/calendar) | A month-grid date picker with prev/next month navigation and a selectable day. |
 | [`CalendarRange`](https://velotype.github.io/velodesign/components/calendar-range) | A month-grid date-*range* picker: click a start day, then an end day, and the span between them highlights. |
+| [`EventCalendar`](https://velotype.github.io/velodesign/components/event-calendar) | A month of events, like a wall calendar: each day lists what falls on it, and a narrow calendar becomes a list of the days with something on. |
 | [`Tree`](https://velotype.github.io/velodesign/components/tree) | A hierarchical, expandable/collapsible list built on nested native details/summary pairs. Nodes open and close with the same animation as Collapse and Accordion. |
 
 ## Data Entry

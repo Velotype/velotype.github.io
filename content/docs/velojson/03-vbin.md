@@ -11,10 +11,10 @@ Create a `VBINRootWriter`, start the root object, write each value under its Key
 | Writer | Writes |
 |---|---|
 | `VBINRootWriter` | The root: `startRootObject()`, `finalizeRootObject(object)`, and `toUint8ArrayAndRelease()` |
-| `VBINObjectWriter` | An object's fields: `encodePosIntValue`, `encodeDoubleValue`, `encodeNumberValue`, `encodeStringValue`, `encodeBooleanValue`, and the `finalize...` methods for nested values |
+| `VBINObjectWriter` | An object's fields: `encodePosIntValue`, `encodeDoubleValue`, `encodeNumberValue`, `encodeStringValue`, `encodeBytesValue`, `encodeBooleanValue`, and the `finalize...` methods for nested values |
 | `VBINArrayWriter` | An Array of mixed values |
 | `VBINNumberArrayWriter` | An Array of numbers, some integers and some doubles |
-| `VBINHomogenousStringArrayWriter` | An Array of only strings |
+| `VBINHomogenousStringArrayWriter` | An Array of only strings, or of only raw bytes |
 | `VBINHomogenousPosIntArrayWriter` | An Array of only non-negative integers |
 | `VBINHomogenousDoubleArrayWriter` | An Array of only doubles |
 | `VBINHomogenousObjectArrayWriter` | An Array of only objects |
@@ -32,6 +32,7 @@ The `encode...Value` methods of an object accept `undefined`, which writes nothi
 | `assignValue(object, keyID, value)` | Sets the field for `keyID` on the object being built |
 | `hasAllRequiredFields(object)` | Called at the end of an object. Return `false` to reject a message with a missing field. `decode()` then throws |
 | `fieldMapper(keyID)` | For a field that is itself an object, returns the mapper for its fields |
+| `fieldKind(keyID)` | How to read a field that can hold a string: `"value"`, `"bytes"`, or `"skip"`. See [Raw bytes](#raw-bytes) |
 
 @example vbin.ts
 
@@ -39,9 +40,23 @@ Output:
 
 @output vbin.ts
 
+## Raw bytes
+
+Both sides of a VBIN message know the schema, so a field can hold raw bytes, with no base64 and no UTF-8 check. They travel in the same wire slot as a string, so the reader relies on the mapper to tell them apart.
+
+To write them, pass a `Uint8Array` to `VBINObjectWriter.encodeBytesValue(keyID, value)`, or to `VBINHomogenousStringArrayWriter.encodeBytesValueInHomogenousArray(value)` for an Array. To read them, answer from `fieldKind(keyID)`:
+
+| Answer | The reader |
+|---|---|
+| `"value"` | Decodes a string, which must be valid UTF-8 |
+| `"bytes"` | Hands `assignValue` a `Uint8Array` of its own. For an Array field, this applies to each item |
+| `"skip"` | Moves past the field without checking it, and hands `assignValue` an empty string. Use this for a KeyID the mapper doesn't know, which may hold anything |
+
 ## Debugging
 
 `VSON.decode()` reads a VBIN message too, in a debug format: a plain object keyed by KeyID, such as `{"1": 7, "2": "Widget"}`. This is what the [VeloJSON panel](/docs/velotype/devtools/) of the DevTools extension shows for a VBIN payload.
+
+This format has no schema, so it reads every string slot as text. A message with raw bytes that aren't valid UTF-8 makes `VSON.decode()` throw.
 
 ## Generating the code
 

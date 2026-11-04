@@ -51,7 +51,7 @@ new Server(router).serve("127.0.0.1", 3000)
 ```
 **Manual.** A decode tool turns bytes into JSON, and an encode tool turns JSON into bytes. Use it for a payload that has no content type, since it has no HTTP request to read one from.
 
-**VBIN.** A VBIN payload can only be decoded in the debug format, where an object's keys are its numeric KeyIDs, such as `{"1": "hello"}`. The real field names come from a schema's `VBINObjectMapper`, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such.
+**VBIN.** A VBIN payload can only be decoded in the debug format, where an object's keys are its numeric KeyIDs, such as `{"1": "hello"}`. The real field names come from a schema's `VBINObjectMapper`, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such. A VBIN field holding raw bytes that aren't valid UTF-8 can't be shown this way, and the decode fails, since only a schema says the field isn't text.
 
 ## The popup
 

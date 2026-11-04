@@ -8,6 +8,6 @@
     "imports": {
         "@velotype/velotype": "jsr:@velotype/velotype@0.3.2",
         "@velotype/veloserver": "jsr:@velotype/veloserver@0.3.1",
-        "@velotype/velojson": "jsr:@velotype/velojson@0.1.0"
+        "@velotype/velojson": "jsr:@velotype/velojson@0.2.0"
     }
 }
