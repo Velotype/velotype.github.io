@@ -2,7 +2,7 @@
 
 > A suite of TypeScript libraries for building software platforms end to end: a browser UI framework that creates real DOM elements (no virtual DOM), a themed component library, server-side TSX rendering, a web server, and a compact binary JSON wire format. They are written for Deno, published to JSR under @velotype, and developed in the Velotype GitHub organization (https://github.com/Velotype).
 
-Each project stands on its own and they are designed to fit together: veloserver serves pages and APIs, velossr or velotype renders them, velodesign supplies UI components for velotype, and velojson (VSON) carries data between server and browser. The projects are pre-1.0, so APIs can change between versions: pin versions, and read each repository's release-notes.md.
+Each project stands on its own and they are designed to fit together: veloserver serves pages and APIs, velossr or velotype renders them, velodesign supplies UI components for velotype, velochart supplies charts, and velojson (VSON) carries data between server and browser. The projects are pre-1.0, so APIs can change between versions: pin versions, and read each repository's release-notes.md.
 
 ## Read this before writing code with these libraries
 
@@ -13,6 +13,7 @@ Each project stands on its own and they are designed to fit together: veloserver
 - **Do not mix velotype versions in one app.** A velodesign release is built on one velotype version, and the Versions section below says which.
 - **Conditionals:** `{condition && <li/>}` works in velotype and in velossr 0.0.10 or later. In velomicro and velomini (and velossr before 0.0.10) a `false` child is written as the text "false", so use `{condition ? <li/> : null}`.
 - **velodesign:** call `Theme.injectStyles()` once before any component renders. The library has no built-in text, so ARIA labels and placeholders have no defaults: pass them in.
+- **velochart:** bundle it together with velodesign and your app, so they share one copy of velotype. A chart reads `data` and `series` once, so render a new chart for new data. Its colors come from the CSS custom properties that velodesign's `Theme.injectStyles()` defines.
 - **veloserver:** `new Router<Metadata>({})`, add routes with `get`, `head`, and `post`, then `new Server(router).serve("127.0.0.1", 3000)`. Serving needs `--allow-net` and nothing else.
 - **velojson:** `VSON.encode(value)` and `VSON.decode(bytes)`. The Key Table format is the default for objects and arrays. All three formats are smaller than JSON text (VBIN, which needs agreed key IDs, is the smallest), but on current engines they run slower than native JSON.stringify() and JSON.parse(), so choose them for payload size. The `/browser` module supports Key Table only.
 - **velomicro and velomini** are small teaching frameworks (about 1kb and 2.5kb), not for applications. Use velotype for an app.
