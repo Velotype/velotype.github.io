@@ -182,12 +182,12 @@ replaceElementWithRoot(
         id: "velochart", name: "velochart", tag: "charts", tagKind: "primary",
         tagline: "A chart library for velotype, drawn in SVG at the container's real pixel width.",
         about: [
-            "velochart draws charts for velotype apps. velodesign has a few basic charts for the most common needs, and velochart starts with the same six and is where further chart types and features go.",
+            "velochart draws charts for velotype apps. velodesign has a few basic charts for the most common needs. velochart has those and 15 more, with log and time axes, zoom and pan, annotations, downsampling for long series, keyboard navigation, and export.",
             "It depends on velotype alone, and takes its colors from the same CSS variables as velodesign, so charts follow the page's theme.",
         ],
         stats: [
-            {title: "Charts", value: "6"},
-            {title: "Gzipped", value: "6.7", suffix: "kb"},
+            {title: "Charts", value: "21"},
+            {title: "Gzipped", value: "29", suffix: "kb"},
             {title: "Colors set by", value: "CSS variables"},
         ],
         statsNote: "velochart 0.1.0, every chart, minified with deno bundle and without velotype. Bundlers drop the charts an app does not import.",
@@ -195,6 +195,9 @@ replaceElementWithRoot(
             {title: "Sized to the container", text: "A chart redraws at its container's real pixel width instead of scaling one viewBox, so text stays the same size in a sidebar and on a dashboard."},
             {title: "Numbers for screen readers", text: "A chart with tabular values renders them in a visually hidden table, so a screen reader gets the values and not just the chart's name."},
             {title: "Light and dark", text: "Series, grid lines, and tooltips are drawn with CSS variables, so charts follow the theme. Override ChartThemeOptions.seriesColors to reskin all of them."},
+            {title: "Explore it", text: "Zoom, pan, brush, and a range slider, on log, time, and numeric axes, with annotations, error bars, trend lines, and cursors that move together across charts."},
+            {title: "Long series and live data", text: "A long line thins to what its pixels can show, while the tooltip reads every point. appendData takes a live feed, and a canvas renderer handles tens of thousands of marks."},
+            {title: "For every reader", text: "The arrow keys walk the marks with each one read aloud, and patterns tell series apart without color. Export to CSV, SVG, and PNG."},
             {title: "Hover that does no extra work", text: "One target covers the whole plot and tracks the nearest category, so a pointer need not land on a 2px line. A hover that changes nothing touches no DOM."},
         ],
         samples: [

@@ -13,7 +13,7 @@ Each project stands on its own and they are designed to fit together: veloserver
 - **Do not mix velotype versions in one app.** A velodesign release is built on one velotype version, and the Versions section below says which.
 - **Conditionals:** `{condition && <li/>}` works in velotype and in velossr 0.0.10 or later. In velomicro and velomini (and velossr before 0.0.10) a `false` child is written as the text "false", so use `{condition ? <li/> : null}`.
 - **velodesign:** call `Theme.injectStyles()` once before any component renders. The library has no built-in text, so ARIA labels and placeholders have no defaults: pass them in.
-- **velochart:** bundle it together with velodesign and your app, so they share one copy of velotype. A chart reads `data` and `series` once, so render a new chart for new data. Its colors come from the CSS custom properties that velodesign's `Theme.injectStyles()` defines.
+- **velochart:** bundle it together with velodesign and your app, so they share one copy of velotype. A JSX tag evaluates to the element, so reach a chart's methods (`update`, `appendData`, `zoomTo`, `toCsv`) through `getComponent`. Its colors come from the CSS custom properties that velodesign's `Theme.injectStyles()` defines.
 - **veloserver:** `new Router<Metadata>({})`, add routes with `get`, `head`, and `post`, then `new Server(router).serve("127.0.0.1", 3000)`. Serving needs `--allow-net` and nothing else.
 - **velojson:** `VSON.encode(value)` and `VSON.decode(bytes)`. The Key Table format is the default for objects and arrays. All three formats are smaller than JSON text (VBIN, which needs agreed key IDs, is the smallest), but on current engines they run slower than native JSON.stringify() and JSON.parse(), so choose them for payload size. The `/browser` module supports Key Table only.
 - **velomicro and velomini** are small teaching frameworks (about 1kb and 2.5kb), not for applications. Use velotype for an app.
@@ -54,7 +54,8 @@ velodesign 0.2.0 is built on velotype 0.3.1, so use that velotype version with i
 
 - [Getting started](https://velotype.github.io/docs/velochart/getting-started.md): velochart is a chart library for [velotype](/docs/velotype/). Charts are drawn in SVG at the real pixel width of their container, so text stays the same size in a sidebar and on a dashboard, and a chart with tabular values gives screen readers those values as a table.
 - [Charts](https://velotype.github.io/docs/velochart/charts.md): Every velochart chart, by category. Each links to its page in the [showcase](https://velotype.github.io/velochart/), which has live examples, the props table, and the types it uses.
-- [Theming and accessibility](https://velotype.github.io/docs/velochart/theming-and-accessibility.md): velochart draws with CSS custom properties, so charts follow the page's theme in light and in dark, and it gives screen readers the numbers rather than a picture.
+- [Exploring and updating](https://velotype.github.io/docs/velochart/exploring-and-updating.md): Everything here is on the charts with x and y axes, because they share one engine. update and export are on every chart except Sparkline.
+- [Theming and accessibility](https://velotype.github.io/docs/velochart/theming-and-accessibility.md): velochart draws with CSS custom properties, so charts follow the page's theme in light and in dark. It gives screen readers the numbers rather than a picture, and keyboard readers the same marks a pointer gets.
 
 ## velodesign docs
 

@@ -1,6 +1,6 @@
 # Theming and accessibility
 
-velochart draws with CSS custom properties, so charts follow the page's theme in light and in dark, and it gives screen readers the numbers rather than a picture.
+velochart draws with CSS custom properties, so charts follow the page's theme in light and in dark. It gives screen readers the numbers rather than a picture, and keyboard readers the same marks a pointer gets.
 
 ## The theme
 
@@ -50,12 +50,29 @@ replaceElementWithRoot(
 ```
 Use `var(...)` for colors. A hex value looks right in one theme and wrong in the other.
 
+## Patterns
+
+`patterns` fills series with one of six patterns over their color, dashes their lines, and marks the legend the same way, for readers who can't tell the hues apart and for printing in one ink. `ChartThemeOptions.patterns = true` turns it on for every chart. A chart with `renderer="canvas"` draws plain fills.
+
 ## Accessibility
 
-A chart with tabular values renders them in a visually hidden table, and hides the drawing from assistive technology. The caption is `ariaLabel` or `title`, there is a row per category, and values go through `formatValue`, so what is read aloud matches the axis.
+A chart with tabular values renders them in a visually hidden table, and hides the drawing from assistive technology. The caption is `ariaLabel` or `title`, there is a row per category, and values go through `formatValue`, so what is read aloud matches the axis. Past `maxTableRows`, 1000 by default, the table samples evenly.
+
+The drawing is one focus stop. Inside it:
+
+| Key | What it does |
+|---|---|
+| Arrow keys | Move through the points, marks, or cells, showing each tooltip and saying it through a live region |
+| Home, End | Go to the first or last |
+| Enter, Space | Activate it, as `onPointClick` |
+| Escape | Clear it |
+| `+`, `-`, `0` | Zoom, and go back to everything, on a chart with `zoom` |
+| Shift and an arrow | Pan, on a chart with `zoom` |
+
+Tab always leaves. Legend entries are real buttons, focusable on their own.
 
 A `Gauge` has no table, because one number against a range is what a label already says. It is `role="img"` with `ariaLabel` or `title` as its name, so give it one that states the value.
 
 A `Sparkline` is `aria-hidden` unless you set `ariaLabel`. Next to the number it illustrates that is what you want, and when it stands alone, set the label.
 
-The library has no built-in text for you to translate, with one exception today: the column headers of `PieChart`'s hidden table are "Value" and "Share".
+The library has no built-in text. Column headers of the hidden tables have no default: `PieChart` and `FunnelChart` take `valueLabel` and `shareLabel`, `PolarAreaChart` takes `valueLabel`, and `SankeyChart` takes `tableLabels`. Labels a sighted reader sees default to symbols, as with `CandlestickChart`'s O, H, L, C, and take a `labels` attr. Dates read in the browser's own language.

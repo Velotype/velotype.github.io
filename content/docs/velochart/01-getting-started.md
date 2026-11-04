@@ -2,7 +2,7 @@
 
 velochart is a chart library for [velotype](/docs/velotype/). Charts are drawn in SVG at the real pixel width of their container, so text stays the same size in a sidebar and on a dashboard, and a chart with tabular values gives screen readers those values as a table.
 
-[velodesign](/docs/velodesign/) has a few basic charts for the most common needs. velochart starts with the same six, and is where further chart types and features will go. For each chart's props and a live preview, see the [showcase](https://velotype.github.io/velochart/).
+[velodesign](/docs/velodesign/) has a few basic charts for the most common needs. velochart has those six and 15 more, with what they need beyond the basics: log and time axes, zoom and pan, annotations, downsampling for long series, keyboard navigation, and export. For each chart's props and a live preview, see the [showcase](https://velotype.github.io/velochart/).
 
 Every example in these docs is a file that is type-checked against the published package, and run in a browser.
 
@@ -32,17 +32,21 @@ A chart takes `data`, with one entry per category, and `series`, which says what
 
 @example getting-started.tsx
 
-A chart redraws itself when its container resizes. It reads `data` and `series` once, so to show new data, render a new chart.
+A chart redraws itself when its container resizes. To show new data, call its `update` method, which [Exploring and updating](/docs/velochart/exploring-and-updating/) covers.
 
 ## What is in the library
 
 | Category | Charts |
 |---|---|
-| Cartesian | `LineChart`, `AreaChart`, `BarChart` |
-| Radial | `PieChart`, `Gauge` |
+| Cartesian | `LineChart`, `AreaChart`, `BarChart`, `MixedChart`, `ScatterChart`, `BubbleChart`, `HistogramChart`, `WaterfallChart`, `BoxPlotChart`, `CandlestickChart` |
+| Radial | `PieChart`, `Gauge`, `RadarChart`, `PolarAreaChart` |
+| Matrix | `Heatmap`, `CalendarHeatmap` |
+| Hierarchy | `Treemap`, `SunburstChart` |
+| Flow | `FunnelChart`, `SankeyChart` |
 | Inline | `Sparkline` |
 
 ## Next steps
 
 * [Charts](/docs/velochart/charts/): every chart, and what to reach for when
-* [Theming and accessibility](/docs/velochart/theming-and-accessibility/): colors, and what a screen reader gets
+* [Exploring and updating](/docs/velochart/exploring-and-updating/): axes, zoom, annotations, live data, and export
+* [Theming and accessibility](/docs/velochart/theming-and-accessibility/): colors, the keyboard, and what a screen reader gets
