@@ -10,7 +10,8 @@
 | `EncodingFormat` | An enum: `Base` (0), `KeyTable` (1), `KeyID` (2) |
 | `WireType` | An enum: `Null`, `False`, `True`, `PosInt`, `Double`, `String`, `Object`, `Array` |
 | `JSONValue` | `null \| boolean \| number \| string \| JSONValue[] \| {[key: string]: JSONValue}` |
-| `VBINObjectMapper` | `{assignValue, hasAllRequiredFields, fieldMapper}` |
+| `VBINObjectMapper` | `{assignValue, hasAllRequiredFields, fieldMapper, fieldKind}` |
+| [`VBINFieldKind`](/docs/velojson/vbin/#raw-bytes) | `"value" \| "bytes" \| "skip"`, what `fieldKind` returns |
 | [VBIN writers](/docs/velojson/vbin/#writing) | `VBINRootWriter`, `VBINObjectWriter`, `VBINArrayWriter`, `VBINNumberArrayWriter`, `VBINHomogenousStringArrayWriter`, `VBINHomogenousPosIntArrayWriter`, `VBINHomogenousDoubleArrayWriter`, `VBINHomogenousObjectArrayWriter` |
 
 ### VBINRootWriter
@@ -30,6 +31,7 @@
 | `encodeDoubleValue(keyID, value)` | A double |
 | `encodeNumberValue(keyID, value)` | A number, as an integer or a double |
 | `encodeStringValue(keyID, value)` | A string |
+| `encodeBytesValue(keyID, value)` | Raw bytes, from a `Uint8Array` |
 | `finalizeObject(keyID, childWriter)` | A nested object |
 | `finalizeArray(keyID, childWriter)` | A mixed Array |
 | `finalizeNumberArray(keyID, childWriter)` | An Array of numbers |

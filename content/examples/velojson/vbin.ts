@@ -49,6 +49,8 @@ const productMapper: VBINObjectMapper = {
     hasAllRequiredFields: (object) => object.id !== undefined && object.name !== undefined,
     // For a field that is itself an object, return the mapper for its KeyID
     fieldMapper: () => undefined,
+    // How to read a field that can hold a string: as text, as raw bytes, or not at all
+    fieldKind: () => "value",
 }
 
 const bytes = encodeProduct(product)

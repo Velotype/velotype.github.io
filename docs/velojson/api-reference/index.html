@@ -48,7 +48,11 @@
 </tr>
 <tr>
 <td><code>VBINObjectMapper</code></td>
-<td><code>{assignValue, hasAllRequiredFields, fieldMapper}</code></td>
+<td><code>{assignValue, hasAllRequiredFields, fieldMapper, fieldKind}</code></td>
+</tr>
+<tr>
+<td><a href="/docs/velojson/vbin/#raw-bytes"><code>VBINFieldKind</code></a></td>
+<td><code>&quot;value&quot; | &quot;bytes&quot; | &quot;skip&quot;</code>, what <code>fieldKind</code> returns</td>
 </tr>
 <tr>
 <td><a href="/docs/velojson/vbin/#writing">VBIN writers</a></td>
@@ -103,6 +107,10 @@
 <tr>
 <td><code>encodeStringValue(keyID, value)</code></td>
 <td>A string</td>
+</tr>
+<tr>
+<td><code>encodeBytesValue(keyID, value)</code></td>
+<td>Raw bytes, from a <code>Uint8Array</code></td>
 </tr>
 <tr>
 <td><code>finalizeObject(keyID, childWriter)</code></td>

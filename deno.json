@@ -15,8 +15,8 @@
     "imports": {
         "@velotype/velotype": "jsr:@velotype/velotype@^0.3.2",
         "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.3.2",
-        "@velotype/velodesign": "jsr:@velotype/velodesign@^0.1.3",
-        "@velotype/velojson": "jsr:@velotype/velojson@^0.1.0"
+        "@velotype/velodesign": "jsr:@velotype/velodesign@^0.2.0",
+        "@velotype/velojson": "jsr:@velotype/velojson@^0.2.0"
     },
     "lint": {"rules": {"exclude": ["jsx-key"]}}
 }

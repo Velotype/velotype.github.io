@@ -51,7 +51,7 @@ router.post(&quot;/api/orders&quot;, async (request) =&gt; {
 new Server(router).serve(&quot;127.0.0.1&quot;, 3000)
 </code></pre>
 <p><strong>Manual.</strong> A decode tool turns bytes into JSON, and an encode tool turns JSON into bytes. Use it for a payload that has no content type, since it has no HTTP request to read one from.</p>
-<p><strong>VBIN.</strong> A VBIN payload can only be decoded in the debug format, where an object&#39;s keys are its numeric KeyIDs, such as <code>{&quot;1&quot;: &quot;hello&quot;}</code>. The real field names come from a schema&#39;s <code>VBINObjectMapper</code>, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such.</p>
+<p><strong>VBIN.</strong> A VBIN payload can only be decoded in the debug format, where an object&#39;s keys are its numeric KeyIDs, such as <code>{&quot;1&quot;: &quot;hello&quot;}</code>. The real field names come from a schema&#39;s <code>VBINObjectMapper</code>, which the extension cannot know for an arbitrary site. The panel labels VBIN output as such. A VBIN field holding raw bytes that aren&#39;t valid UTF-8 can&#39;t be shown this way, and the decode fails, since only a schema says the field isn&#39;t text.</p>
 <h2 id="the-popup">The popup</h2>
 <p>The toolbar popup shows whether velotype is present on the current page, without opening DevTools.</p>
 </article></div>
