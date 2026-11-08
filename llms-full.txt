@@ -28,7 +28,7 @@ Every docs page is available as Markdown at the links below. Every code example 
 The docs and their examples were type-checked, and run, against these published versions:
 
 - @velotype/velochart 0.0.1: https://jsr.io/@velotype/velochart
-- @velotype/velodesign 0.3.0: https://jsr.io/@velotype/velodesign
+- @velotype/velodesign 0.4.0: https://jsr.io/@velotype/velodesign
 - @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
 - @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
@@ -36,7 +36,7 @@ The docs and their examples were type-checked, and run, against these published 
 - @velotype/velossr 0.0.11: https://jsr.io/@velotype/velossr
 - @velotype/velotype 0.3.3: https://jsr.io/@velotype/velotype
 
-velodesign 0.3.0 is built on velotype 0.3.3, so use that velotype version with it.
+velodesign 0.4.0 is built on velotype 0.3.3, so use that velotype version with it.
 
 
 ---
@@ -615,10 +615,10 @@ Every example in these docs is a file that is type-checked against the published
 
 ## Install
 
-velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.2.0 uses velotype 0.3.1, so add both and use that velotype version. Mixing velotype versions in one app is not supported.
+velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.4.0 uses velotype 0.3, so add both and use the same velotype version everywhere in the app. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.3.0
+deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.0
 ```
 
 ```json
@@ -698,7 +698,7 @@ replaceElementWithRoot(
 
 | Category | Examples |
 |---|---|
-| Typography | `Heading`, `Text`, `Paragraph`, `Icon` |
+| Typography | `Heading`, `Text`, `Paragraph`, `Icon`, `Glyphs` |
 | Layout | `Stack`, `Grid` |
 | Form | `Button`, `Checkbox`, `Select`, `TextBox`, `Textarea`, `Toggle`, `RadioButton` |
 | Navigation | `Link`, `NavLink`, `Navbar`, `Sidebar`, `Breadcrumbs`, `Pagination`, `Menu`, `Steps` |
@@ -808,7 +808,7 @@ setThemeOnSelector(".brand-panel", {backgroundDarkColor: "#201030"}, true)
 ```
 ## Symbols
 
-A few small glyphs, such as a close control or a next arrow, are theme symbols. A symbol is a component with no attrs, so it can be an icon, an image, or text. The package's defaults are `✕` (close and cancel), `✓` (confirm), `∅` (empty), `…` (collapse), and `‹` and `›` (previous and next).
+A few small glyphs, such as a close control or a next arrow, are theme symbols. A symbol is a component with no attrs, so it can be an icon, an image, or text. The package's defaults are line glyphs from [`Glyphs`](/docs/velodesign/conventions/#toasts-and-icons), so they look the same in every font: a cross (close and cancel), a tick (confirm), an empty tray (empty), three dots (collapse), and chevrons (previous and next).
 
 `CommonThemeOptions` holds the symbols that more than one component uses:
 
@@ -839,7 +839,7 @@ CommonThemeOptions.prevSymbol = () => <span>back</span>
 ModalThemeOptions.closeSymbol = () => <b>close</b>
 console.log(typeof AlertThemeOptions.closeSymbol)
 
-// The package's defaults: ✕ ✓ ∅ … ‹ ›. resetThemeOptions() puts them back, all or by field.
+// The package's defaults are line glyphs from Glyphs. resetThemeOptions() puts them back, all or by field.
 resetThemeOptions(ModalThemeOptions)
 resetThemeOptions(CommonThemeOptions, "nextSymbol", "prevSymbol")
 
@@ -986,10 +986,14 @@ document.body.append(message)
 
 `showToast(message, options?)` is a function, not a component, because a toast has no place in your tree. Call it from a handler. It keeps one container at the bottom right of the page. The options are `type`, `duration` (milliseconds before it is dismissed, default `4000`, and `0` keeps it), and `dismissLabel`.
 
-An `Icon` is a width, a height, and an SVG path. `registerIcon(key, icon)` registers it, and `<I i={key}/>` renders it as an inline SVG, `1em` tall, in the current text color.
+An `Icon` is a width, a height, and an SVG path. Without a stroke width the path is filled; `new Icon(w, h, path, strokeWidth)` draws it as round-ended lines instead, and passing `true` after the stroke width fills the shape inside them too. `registerIcon(key, icon)` registers it, and `<I i={key}/>` renders it as an inline SVG, `1em` tall, in the current text color. `<I icon={icon}/>` renders an Icon without registering it.
+
+An icon is decoration, hidden from screen readers, unless you give it a `label`. Give one when the icon is the only thing saying what a control does.
+
+`Glyphs` holds the line glyphs the package draws its own marks with, in a 24-unit box, such as `Glyphs.tick`, `Glyphs.cross`, `Glyphs.chevronRight`, `Glyphs.arrowUp`, `Glyphs.pencil`, and `Glyphs.star`. Use them for the same marks in your own UI. The package uses a chevron when the reader stays put and what is shown changes, and an arrow when something moves.
 
 ```tsx
-import { Button, I, Icon, registerIcon, showToast } from "@velotype/velodesign"
+import { Button, Glyphs, I, Icon, registerIcon, showToast } from "@velotype/velodesign"
 
 // showToast() is a function, not a component: call it from a handler. It keeps one container at the
 // bottom right of the page, and removes each toast after its duration (4000ms by default, 0 keeps it).
@@ -1002,7 +1006,11 @@ const toastButton = <Button type="primary" onClick={() => {
 // It is drawn 1em tall in the current text color.
 registerIcon("check", new Icon(24, 24, "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"))
 
-document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>)
+// The package's own line glyphs can be drawn directly. Without a label an icon is decoration;
+// with one, screen readers announce it.
+const next = <Button type="secondary" onClick={() => {}}><I icon={Glyphs.chevronRight} label="Next page"/></Button>
+
+document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>, next)
 ```
 ## Routing
 
@@ -1059,7 +1067,7 @@ Source: https://velotype.github.io/docs/velodesign/components/
 
 Every velodesign component, by category. Each links to its page in the [showcase](https://velotype.github.io/velodesign/), which has a live preview, the props table, and the types it uses.
 
-The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.2.0. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
+The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.4.0. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
 
 ## Typography
 
@@ -1126,8 +1134,8 @@ The whole category: [Feedback on the showcase](https://velotype.github.io/velode
 | [`Alert`](https://velotype.github.io/velodesign/components/alert) | An inline message box that draws attention to important information, with an optional dismiss button. |
 | [`Toast`](https://velotype.github.io/velodesign/components/toast) | A transient, auto-dismissing notification message, shown via the imperative showToast() function rather than placed in your JSX tree. |
 | [`Tooltip`](https://velotype.github.io/velodesign/components/tooltip) | A CSS-only hover/focus bubble that shows a short hint next to its trigger content. |
-| [`Spinner`](https://velotype.github.io/velodesign/components/spinner) | A standalone animated loading indicator. |
-| [`Progress`](https://velotype.github.io/velodesign/components/progress) | A determinate progress bar, wrapping a native progress element. |
+| [`Spinner`](https://velotype.github.io/velodesign/components/spinner) | A standalone animated loading indicator: a ring while waiting, or `variant="dots"` while working. |
+| [`Progress`](https://velotype.github.io/velodesign/components/progress) | A determinate progress bar. It glides to each new value, `setValue()` moves it in place, and `working` shows a task in progress with a status, and marks the finish. |
 | [`Skeleton`](https://velotype.github.io/velodesign/components/skeleton) | An animated placeholder shown in place of content that hasn't loaded yet. |
 | [`Empty`](https://velotype.github.io/velodesign/components/empty) | A placeholder shown in place of a list/table/section that has no data. |
 
@@ -1163,7 +1171,7 @@ The whole category: [Data Display on the showcase](https://velotype.github.io/ve
 | [`Collapse`](https://velotype.github.io/velodesign/components/collapse) | A single collapsible section you place yourself and fill with children. Same widget Accordion renders - same border, chevron and animated open - but one section rather than a list. |
 | [`Statistic`](https://velotype.github.io/velodesign/components/statistic) | A labeled numeric stat tile, for dashboards and KPI summaries. |
 | [`List`](https://velotype.github.io/velodesign/components/list) | A styled list of items, each with optional leading/trailing slots. |
-| [`Timeline`](https://velotype.github.io/velodesign/components/timeline) | A vertical list of dated/ordered events, each with a dot marker on a connecting line. |
+| [`Timeline`](https://velotype.github.io/velodesign/components/timeline) | A vertical list of dated/ordered events, each with a dot marker on a connecting line, or an `icon` in a pale circle. |
 | [`AspectRatio`](https://velotype.github.io/velodesign/components/aspect-ratio) | Constrains its children to a fixed width:height ratio, via pure CSS. |
 | [`ScrollArea`](https://velotype.github.io/velodesign/components/scroll-area) | A scrollable container with a themed thin scrollbar. |
 | [`Table`](https://velotype.github.io/velodesign/components/table) | A themed data table wrapping a native <table>, generic over the row type. |
@@ -1239,9 +1247,10 @@ See [Theming](/docs/velodesign/theming/#symbols).
 
 | Export | Description |
 |---|---|
-| `Icon` | `new Icon(width, height, svgPath)` |
+| `Icon` | `new Icon(width, height, svgPath, strokeWidth?, filled?)` |
 | `registerIcon(key, icon)` | Registers an icon |
-| `I` | `<I i={key}/>` renders a registered icon |
+| `I` | `<I i={key}/>` renders a registered icon, and `<I icon={icon}/>` any Icon. `label` gives it an accessible name |
+| `Glyphs` | The package's line glyphs, such as `Glyphs.tick` and `Glyphs.chevronRight` |
 
 ## Routing and feedback
 

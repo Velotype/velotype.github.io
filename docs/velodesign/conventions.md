@@ -52,10 +52,14 @@ document.body.append(message)
 
 `showToast(message, options?)` is a function, not a component, because a toast has no place in your tree. Call it from a handler. It keeps one container at the bottom right of the page. The options are `type`, `duration` (milliseconds before it is dismissed, default `4000`, and `0` keeps it), and `dismissLabel`.
 
-An `Icon` is a width, a height, and an SVG path. `registerIcon(key, icon)` registers it, and `<I i={key}/>` renders it as an inline SVG, `1em` tall, in the current text color.
+An `Icon` is a width, a height, and an SVG path. Without a stroke width the path is filled; `new Icon(w, h, path, strokeWidth)` draws it as round-ended lines instead, and passing `true` after the stroke width fills the shape inside them too. `registerIcon(key, icon)` registers it, and `<I i={key}/>` renders it as an inline SVG, `1em` tall, in the current text color. `<I icon={icon}/>` renders an Icon without registering it.
+
+An icon is decoration, hidden from screen readers, unless you give it a `label`. Give one when the icon is the only thing saying what a control does.
+
+`Glyphs` holds the line glyphs the package draws its own marks with, in a 24-unit box, such as `Glyphs.tick`, `Glyphs.cross`, `Glyphs.chevronRight`, `Glyphs.arrowUp`, `Glyphs.pencil`, and `Glyphs.star`. Use them for the same marks in your own UI. The package uses a chevron when the reader stays put and what is shown changes, and an arrow when something moves.
 
 ```tsx
-import { Button, I, Icon, registerIcon, showToast } from "@velotype/velodesign"
+import { Button, Glyphs, I, Icon, registerIcon, showToast } from "@velotype/velodesign"
 
 // showToast() is a function, not a component: call it from a handler. It keeps one container at the
 // bottom right of the page, and removes each toast after its duration (4000ms by default, 0 keeps it).
@@ -68,7 +72,11 @@ const toastButton = <Button type="primary" onClick={() => {
 // It is drawn 1em tall in the current text color.
 registerIcon("check", new Icon(24, 24, "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"))
 
-document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>)
+// The package's own line glyphs can be drawn directly. Without a label an icon is decoration;
+// with one, screen readers announce it.
+const next = <Button type="secondary" onClick={() => {}}><I icon={Glyphs.chevronRight} label="Next page"/></Button>
+
+document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>, next)
 ```
 ## Routing
 
