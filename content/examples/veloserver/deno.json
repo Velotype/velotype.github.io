@@ -4,7 +4,7 @@
         "lib": ["dom", "deno.ns", "esnext"]
     },
     "imports": {
-        "@velotype/veloserver": "jsr:@velotype/veloserver@0.3.1",
-        "@velotype/veloserver/dev": "jsr:@velotype/veloserver@0.3.1/dev"
+        "@velotype/veloserver": "jsr:@velotype/veloserver@0.3.2",
+        "@velotype/veloserver/dev": "jsr:@velotype/veloserver@0.3.2/dev"
     }
 }
