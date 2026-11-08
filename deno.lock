@@ -12,10 +12,10 @@
     "jsr:@std/net@^1.0.7": "1.0.7",
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/streams@^1.2.0": "1.2.0",
-    "jsr:@velotype/velodesign@0.2": "0.2.0",
+    "jsr:@velotype/velodesign@0.3": "0.3.0",
     "jsr:@velotype/velojson@0.2": "0.2.0",
-    "jsr:@velotype/velotype@~0.3.1": "0.3.2",
-    "jsr:@velotype/velotype@~0.3.2": "0.3.2",
+    "jsr:@velotype/velotype@~0.3.1": "0.3.3",
+    "jsr:@velotype/velotype@~0.3.3": "0.3.3",
     "npm:marked@15.0.12": "15.0.12"
   },
   "jsr": {
@@ -66,18 +66,18 @@
     "@std/streams@1.2.0": {
       "integrity": "256b934254778f2bf45f5713b934209ff29e9b4b7fd4ec095219966813758c5f"
     },
-    "@velotype/velodesign@0.2.0": {
-      "integrity": "87194e39068745ad26ec6f4d0bb55068b1daf40ef3a15ae45b8bfa332ac817a4",
+    "@velotype/velodesign@0.3.0": {
+      "integrity": "6abfb38a7cfa99f7d11c03fec8551237932b376317f2dc3743fb68709c100534",
       "dependencies": [
         "jsr:@velotype/velotype@~0.3.1",
-        "jsr:@velotype/velotype@~0.3.2"
+        "jsr:@velotype/velotype@~0.3.3"
       ]
     },
     "@velotype/velojson@0.2.0": {
       "integrity": "a65b2cc002714446f5e5148f93b5b5246ab6152b41eef0f476d333c130234ba0"
     },
-    "@velotype/velotype@0.3.2": {
-      "integrity": "c181a7699e97747c9216e2a725fcc8d1e983376568cce106297aa7af9e013a08"
+    "@velotype/velotype@0.3.3": {
+      "integrity": "86b554962b03242d795172132d1f9be5b256cbdf3e840432e0ad641e61e60bdb"
     }
   },
   "npm": {
@@ -88,9 +88,9 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@velotype/velodesign@0.2",
+      "jsr:@velotype/velodesign@0.3",
       "jsr:@velotype/velojson@0.2",
-      "jsr:@velotype/velotype@~0.3.2",
+      "jsr:@velotype/velotype@~0.3.3",
       "npm:marked@15.0.12"
     ]
   }

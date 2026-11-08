@@ -11,7 +11,7 @@ Every example in these docs is a file that is type-checked against the published
 velochart is a [JSR package](https://jsr.io/@velotype/velochart) for Deno, built on velotype. Add it with the same velotype as the rest of your app, because mixing velotype versions in one app is not supported. The example below also uses velodesign for its theme.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.3.0 jsr:@velotype/velochart@0.0.1
+deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.3.0 jsr:@velotype/velochart@0.0.1
 ```
 
 ```json

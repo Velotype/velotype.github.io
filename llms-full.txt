@@ -32,11 +32,11 @@ The docs and their examples were type-checked, and run, against these published 
 - @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
 - @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
-- @velotype/veloserver 0.3.1: https://jsr.io/@velotype/veloserver
-- @velotype/velossr 0.0.10: https://jsr.io/@velotype/velossr
-- @velotype/velotype 0.3.2: https://jsr.io/@velotype/velotype
+- @velotype/veloserver 0.3.2: https://jsr.io/@velotype/veloserver
+- @velotype/velossr 0.0.11: https://jsr.io/@velotype/velossr
+- @velotype/velotype 0.3.3: https://jsr.io/@velotype/velotype
 
-velodesign 0.3.0 is built on velotype 0.3.1, so use that velotype version with it.
+velodesign 0.3.0 is built on velotype 0.3.3, so use that velotype version with it.
 
 
 ---
@@ -56,7 +56,7 @@ Every example in these docs is a file that is type-checked against the published
 velochart is a [JSR package](https://jsr.io/@velotype/velochart) for Deno, built on velotype. Add it with the same velotype as the rest of your app, because mixing velotype versions in one app is not supported. The example below also uses velodesign for its theme.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.3.0 jsr:@velotype/velochart@0.0.1
+deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.3.0 jsr:@velotype/velochart@0.0.1
 ```
 
 ```json
@@ -618,7 +618,7 @@ Every example in these docs is a file that is type-checked against the published
 velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.2.0 uses velotype 0.3.1, so add both and use that velotype version. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.3.0
+deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.3.0
 ```
 
 ```json
