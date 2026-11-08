@@ -2,7 +2,7 @@
 
 Every velodesign component, by category. Each links to its page in the [showcase](https://velotype.github.io/velodesign/), which has a live preview, the props table, and the types it uses.
 
-The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.2.0. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
+The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.4.0. What the components have in common is covered in [theming](/docs/velodesign/theming/), [layout and typography](/docs/velodesign/layout-and-typography/), and [conventions](/docs/velodesign/conventions/).
 
 ## Typography
 
@@ -69,8 +69,8 @@ The whole category: [Feedback on the showcase](https://velotype.github.io/velode
 | [`Alert`](https://velotype.github.io/velodesign/components/alert) | An inline message box that draws attention to important information, with an optional dismiss button. |
 | [`Toast`](https://velotype.github.io/velodesign/components/toast) | A transient, auto-dismissing notification message, shown via the imperative showToast() function rather than placed in your JSX tree. |
 | [`Tooltip`](https://velotype.github.io/velodesign/components/tooltip) | A CSS-only hover/focus bubble that shows a short hint next to its trigger content. |
-| [`Spinner`](https://velotype.github.io/velodesign/components/spinner) | A standalone animated loading indicator. |
-| [`Progress`](https://velotype.github.io/velodesign/components/progress) | A determinate progress bar, wrapping a native progress element. |
+| [`Spinner`](https://velotype.github.io/velodesign/components/spinner) | A standalone animated loading indicator: a ring while waiting, or `variant="dots"` while working. |
+| [`Progress`](https://velotype.github.io/velodesign/components/progress) | A determinate progress bar. It glides to each new value, `setValue()` moves it in place, and `working` shows a task in progress with a status, and marks the finish. |
 | [`Skeleton`](https://velotype.github.io/velodesign/components/skeleton) | An animated placeholder shown in place of content that hasn't loaded yet. |
 | [`Empty`](https://velotype.github.io/velodesign/components/empty) | A placeholder shown in place of a list/table/section that has no data. |
 
@@ -106,7 +106,7 @@ The whole category: [Data Display on the showcase](https://velotype.github.io/ve
 | [`Collapse`](https://velotype.github.io/velodesign/components/collapse) | A single collapsible section you place yourself and fill with children. Same widget Accordion renders - same border, chevron and animated open - but one section rather than a list. |
 | [`Statistic`](https://velotype.github.io/velodesign/components/statistic) | A labeled numeric stat tile, for dashboards and KPI summaries. |
 | [`List`](https://velotype.github.io/velodesign/components/list) | A styled list of items, each with optional leading/trailing slots. |
-| [`Timeline`](https://velotype.github.io/velodesign/components/timeline) | A vertical list of dated/ordered events, each with a dot marker on a connecting line. |
+| [`Timeline`](https://velotype.github.io/velodesign/components/timeline) | A vertical list of dated/ordered events, each with a dot marker on a connecting line, or an `icon` in a pale circle. |
 | [`AspectRatio`](https://velotype.github.io/velodesign/components/aspect-ratio) | Constrains its children to a fixed width:height ratio, via pure CSS. |
 | [`ScrollArea`](https://velotype.github.io/velodesign/components/scroll-area) | A scrollable container with a themed thin scrollbar. |
 | [`Table`](https://velotype.github.io/velodesign/components/table) | A themed data table wrapping a native <table>, generic over the row type. |
