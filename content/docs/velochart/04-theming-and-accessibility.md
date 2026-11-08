@@ -18,7 +18,7 @@ Styles are in the `velochart.base` and `velochart.component` cascade layers. A r
 
 ## Series colors and the empty symbol
 
-`ChartThemeOptions.seriesColors` is the palette series take in order, and `emptySymbol` is what a chart with no data shows. A series or a slice can set its own `color`, and a chart can set its own `emptyMessage`.
+`ChartThemeOptions.seriesColors` is the palette series take in order. A chart with no data shows velodesign's `Empty`, so `CommonThemeOptions.emptySymbol` is what it shows, along with velodesign's tables. A series or a slice can set its own `color`, and a chart can set its own `emptyMessage`.
 
 @example theme.tsx
 

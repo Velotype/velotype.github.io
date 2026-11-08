@@ -18,11 +18,11 @@ Styles are in the `velochart.base` and `velochart.component` cascade layers. A r
 
 ## Series colors and the empty symbol
 
-`ChartThemeOptions.seriesColors` is the palette series take in order, and `emptySymbol` is what a chart with no data shows. A series or a slice can set its own `color`, and a chart can set its own `emptyMessage`.
+`ChartThemeOptions.seriesColors` is the palette series take in order. A chart with no data shows velodesign's `Empty`, so `CommonThemeOptions.emptySymbol` is what it shows, along with velodesign's tables. A series or a slice can set its own `color`, and a chart can set its own `emptyMessage`.
 
 ```tsx
 import { BarChart, ChartThemeOptions } from "@velotype/velochart"
-import { Theme } from "@velotype/velodesign"
+import { CommonThemeOptions, Theme } from "@velotype/velodesign"
 import { replaceElementWithRoot } from "@velotype/velotype"
 
 Theme.injectStyles()
@@ -30,7 +30,7 @@ Theme.injectStyles()
 // Read when a chart draws, so set these while the app starts, before the first chart exists.
 // var() keeps the palette following the theme, in light and in dark.
 ChartThemeOptions.seriesColors = ["var(--secondary)", "var(--accent)", "var(--primary)"]
-ChartThemeOptions.emptySymbol = () => "No data yet"
+CommonThemeOptions.emptySymbol = () => "No data yet"
 
 const data = [
     {label: "Mon", values: {done: 4, open: 2}},

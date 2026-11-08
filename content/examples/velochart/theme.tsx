@@ -1,5 +1,5 @@
 import { BarChart, ChartThemeOptions } from "@velotype/velochart"
-import { Theme } from "@velotype/velodesign"
+import { CommonThemeOptions, Theme } from "@velotype/velodesign"
 import { replaceElementWithRoot } from "@velotype/velotype"
 
 Theme.injectStyles()
@@ -7,7 +7,7 @@ Theme.injectStyles()
 // Read when a chart draws, so set these while the app starts, before the first chart exists.
 // var() keeps the palette following the theme, in light and in dark.
 ChartThemeOptions.seriesColors = ["var(--secondary)", "var(--accent)", "var(--primary)"]
-ChartThemeOptions.emptySymbol = () => "No data yet"
+CommonThemeOptions.emptySymbol = () => "No data yet"
 
 const data = [
     {label: "Mon", values: {done: 4, open: 2}},

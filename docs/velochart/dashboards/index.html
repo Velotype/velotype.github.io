@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboards - velochart docs</title>
+<meta name="description" content="Give every chart on a page the same TimeWindow, and they all show the same range of time. One control, a drag on any chart, or a zoom on any chart moves them all, and their hover cursors are shared.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="apple-touch-icon" href="/assets/logo.png">
+<style>html{background:#fff;color:#050505}html[data-theme=dark]{background:#151515;color:#fafafa}#app{visibility:hidden;animation:vtp-show 0s 3s forwards}@keyframes vtp-show{to{visibility:visible}}</style>
+<noscript><style>#app{visibility:visible;animation:none}</style></noscript>
+<script>(function(){var t=null;try{t=localStorage.getItem("vtd-preferred-theme")}catch(e){}if(t!="light"&&t!="dark"){t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}document.documentElement.setAttribute("data-theme",t)})()</script>
+</head>
+<body data-doc="velochart">
+<div id="app"><article id="doc">
+<h1 id="dashboards">Dashboards</h1>
+<p>Give every chart on a page the same <code>TimeWindow</code>, and they all show the same range of time. One control, a drag on any chart, or a zoom on any chart moves them all, and their hover cursors are shared.</p>
+<pre><code class="language-tsx">import { BarChart, Gauge, LineChart, TimeWindow, TimeWindowControl } from &quot;@velotype/velochart&quot;
+import { Theme } from &quot;@velotype/velodesign&quot;
+import { getComponent, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+Theme.injectStyles()
+
+const MINUTE = 60_000
+const HOUR = 60 * MINUTE
+const now = Date.now()
+
+const points = Array.from({length: 24 * 12}, (_, i) =&gt; ({
+    x: now - (24 * 12 - i) * 5 * MINUTE,
+    values: {latency: 120 + 40 * Math.sin(i / 20), errors: 3 + (i * 7) % 5},
+}))
+
+// One window for the page. Every chart given it shows its range and sends a reader&#39;s zoom and drag to it.
+const timeWindow = new TimeWindow({span: 6 * HOUR, urlParam: &quot;time&quot;})
+
+// A panel with no time axis works out what is in view, once the range stops moving
+const worst = () =&gt; points.filter(point =&gt; timeWindow.contains(point.x)).reduce((most, point) =&gt; Math.max(most, point.values.latency), 0)
+const gauge = getComponent&lt;Gauge&gt;(&lt;Gauge title=&quot;Worst latency&quot; value={worst()} max={200}/&gt;)
+timeWindow.subscribeSettled(() =&gt; gauge.update({value: worst()}))
+
+replaceElementWithRoot(
+    &lt;div&gt;
+        &lt;TimeWindowControl
+            timeWindow={timeWindow}
+            style={{justifyContent: &quot;flex-end&quot;}}
+            labels={{previous: &quot;Earlier&quot;, next: &quot;Later&quot;, zoomOut: &quot;Zoom out&quot;, live: &quot;Live&quot;, range: &quot;Time range&quot;, filter: &quot;Type a range&quot;, copy: &quot;Copy this range&quot;, paste: &quot;Paste a range&quot;, from: &quot;From&quot;, to: &quot;To&quot;}}/&gt;
+        &lt;LineChart title=&quot;Latency&quot; timeWindow={timeWindow} data={points} series={[{key: &quot;latency&quot;}]} xAxis={{type: &quot;time&quot;}}/&gt;
+        &lt;BarChart title=&quot;Errors&quot; timeWindow={timeWindow} data={points} series={[{key: &quot;errors&quot;}]} xAxis={{type: &quot;time&quot;}}/&gt;
+        {gauge}
+    &lt;/div&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+<p>A chart on a window needs a time or numeric x axis. It shows the window&#39;s range whatever the data covers, so a stretch with no data is drawn empty rather than snapping back to the data.</p>
+<h2 id="the-window">The window</h2>
+<p><code>new TimeWindow(options)</code> starts on the last hour, unless told otherwise:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>span</code></td>
+<td>Starts on the last this many milliseconds</td>
+</tr>
+<tr>
+<td><code>range</code></td>
+<td>Starts on a fixed <code>{from, to}</code> instead</td>
+</tr>
+<tr>
+<td><code>live</code></td>
+<td>Starts following the clock</td>
+</tr>
+<tr>
+<td><code>refreshMs</code></td>
+<td>How often a live window moves. Defaults to 5000</td>
+</tr>
+<tr>
+<td><code>now</code></td>
+<td>The clock, for anything that needs another one</td>
+</tr>
+<tr>
+<td><code>urlParam</code></td>
+<td>Keeps the range in this query parameter, so the address can be shared. Off unless set, because the URL belongs to the page</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>getRange()</code>, <code>getSpan()</code>, <code>isLive()</code>, <code>now()</code></td>
+<td>Where the window is, and the time on its clock</td>
+</tr>
+<tr>
+<td><code>contains(time)</code></td>
+<td>Whether a moment is in the range</td>
+</tr>
+<tr>
+<td><code>toText()</code>, <code>setFromText(text)</code></td>
+<td>The range as text to copy or link to, and back</td>
+</tr>
+<tr>
+<td><code>isRelative()</code></td>
+<td>Whether the range is the latest so-long rather than two fixed times</td>
+</tr>
+<tr>
+<td><code>getRefreshMs()</code>, <code>getNextTick()</code></td>
+<td>How often a live window moves, and when it next will</td>
+</tr>
+<tr>
+<td><code>setRange(from, to)</code></td>
+<td>Looks at a fixed range, and stops following the clock</td>
+</tr>
+<tr>
+<td><code>setLast(span)</code></td>
+<td>Looks at the latest <code>span</code> milliseconds, still following the clock if it was</td>
+</tr>
+<tr>
+<td><code>shift(direction)</code></td>
+<td>Moves back (<code>-1</code>) or forward (<code>1</code>) by a whole span. Moving forward stops at now</td>
+</tr>
+<tr>
+<td><code>zoomOut(factor?)</code></td>
+<td>Widens the range around its middle, doubling it by default</td>
+</tr>
+<tr>
+<td><code>setLive(live)</code></td>
+<td>Starts or stops following the clock</td>
+</tr>
+<tr>
+<td><code>subscribe(listener)</code></td>
+<td>Calls <code>listener</code> on every change, for redrawing</td>
+</tr>
+<tr>
+<td><code>subscribeSettled(listener)</code></td>
+<td>Calls <code>listener</code> once the range has stopped changing, for fetching</td>
+</tr>
+</tbody></table>
+<p>Both ways to subscribe return the way to stop. The clock only runs while something is listening, so a chart that leaves the page leaves nothing running.</p>
+<h2 id="the-control">The control</h2>
+<p><code>&lt;TimeWindowControl timeWindow={timeWindow}/&gt;</code> shows the range in one line, between back and forward buttons, with zoom out and a button that follows the clock beside it. Clicking the range opens a list of ranges, a box to type one in, and the two ends as times.</p>
+<p>Its usual place is flush right at the top of the page, which readers of other dashboards will look for. It is as wide as what holds it, so <code>style={{justifyContent: &quot;flex-end&quot;}}</code> puts it there, and what opens from it then runs leftward, into the page.</p>
+<p>The box takes a number and a unit, as <code>13h</code> or <code>now-13h</code>: <code>ms</code>, <code>s</code>, <code>m</code> or <code>min</code>, <code>h</code> or <code>hr</code>, <code>d</code>, <code>w</code>, <code>M</code> or <code>mo</code>, and <code>y</code>. A month is 30 days and a year 365. Press Enter to apply it.</p>
+<p>The popover&#39;s copy button copies the range as text, and its paste button, or pasting into the box, takes one. Pasting into the box needs no permission from the browser. While following the clock, a ring around the Live button&#39;s dot fills up to the next move, and the interval is written beside it.</p>
+<h2 id="sharing-a-range">Sharing a range</h2>
+<p>The clipboard and the URL use one form of text:</p>
+<table>
+<thead>
+<tr>
+<th>Text</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>now-6h</code></td>
+<td>The latest 6 hours</td>
+</tr>
+<tr>
+<td><code>live-6h</code></td>
+<td>The latest 6 hours, following the clock</td>
+</tr>
+<tr>
+<td><code>2026-11-04T12:22:00.000Z/2026-11-04T15:56:00.000Z</code></td>
+<td>Those two times, in ISO 8601</td>
+</tr>
+</tbody></table>
+<p>A range stays as it was set: a reader sharing <code>now-6h</code> shows the other person their own latest 6 hours, and one who has dragged to an incident shares those exact times. <code>setFromText</code> and the paste box also take a whole URL holding one of these.</p>
+<p>With <code>urlParam: &quot;time&quot;</code>, the address holds the range once it stops moving, and the page opens on the range in its address. Other parts of the address are left alone.</p>
+<table>
+<thead>
+<tr>
+<th>Attr</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>presets</code></td>
+<td>The ranges to offer, as <code>{span, label?}</code>. An unset label is the span in the browser&#39;s language</td>
+</tr>
+<tr>
+<td><code>utc</code></td>
+<td>Reads and writes the times in UTC. Match the charts&#39; <code>xAxis.utc</code></td>
+</tr>
+<tr>
+<td><code>hideLive</code></td>
+<td>Leaves out the button that follows the clock</td>
+</tr>
+<tr>
+<td><code>precision</code></td>
+<td>How finely the two times read and can be typed: <code>&quot;minute&quot;</code>, <code>&quot;second&quot;</code>, <code>&quot;millisecond&quot;</code>, or <code>&quot;auto&quot;</code>, the default, which is milliseconds under a minute, seconds under an hour, and whole minutes above that</td>
+</tr>
+<tr>
+<td><code>opens</code></td>
+<td>Which way what opens from the range runs: <code>&quot;leftward&quot;</code>, <code>&quot;rightward&quot;</code>, or <code>&quot;auto&quot;</code>, the default, which runs into the page. Whichever this is, it stays on the page</td>
+</tr>
+<tr>
+<td><code>labels</code></td>
+<td>What assistive technology calls each part: <code>previous</code>, <code>next</code>, <code>zoomOut</code>, <code>live</code>, <code>range</code>, <code>filter</code>, <code>copy</code>, <code>paste</code>, <code>from</code>, <code>to</code>. None has a default, so set them for the language you use</td>
+</tr>
+</tbody></table>
+<h2 id="filling-a-dashboard">Filling a dashboard</h2>
+<p>There are three usual ways, and the <a href="https://velotype.github.io/velochart/">showcase</a> runs each one live:</p>
+<ul>
+<li><strong>The data is on the page.</strong> Give each chart all of it, and the window picks what is in view. Moving it costs a redraw and no request.</li>
+<li><strong>A feed.</strong> Follow the clock with <code>live: true</code>, and call <code>appendData</code> as data arrives. The two are separate, so stopping the window holds the view still while the feed carries on.</li>
+<li><strong>The data is on a server.</strong> Ask for each range from <code>subscribeSettled</code>, so that a drag across a chart costs one request rather than hundreds, and use only the newest answer:</li>
+</ul>
+<pre><code class="language-tsx">let latest = 0
+timeWindow.subscribeSettled(async (range) =&gt; {
+    const request = ++latest
+    const points = await fetchMetrics(range)
+    if (request === latest) {
+        latency.update({data: points})
+    }
+})
+</code></pre>
+<p>Panels with no time axis, such as <code>Gauge</code> or <code>PieChart</code>, follow the same way: subscribe, and <code>update</code> them from what is in range.</p>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velochart","nav":[{"id":"velochart","name":"velochart","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velochart/"},{"slug":"charts","title":"Charts","url":"/docs/velochart/charts/"},{"slug":"exploring-and-updating","title":"Exploring and updating","url":"/docs/velochart/exploring-and-updating/"},{"slug":"theming-and-accessibility","title":"Theming and accessibility","url":"/docs/velochart/theming-and-accessibility/"},{"slug":"dashboards","title":"Dashboards","url":"/docs/velochart/dashboards/"}]},{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"},{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/devtools/","section":"Velotype DevTools"},{"slug":"panels","title":"Panels","url":"/docs/velotype/devtools/panels/","section":"Velotype DevTools"},{"slug":"limitations","title":"Known limitations","url":"/docs/velotype/devtools/limitations/","section":"Velotype DevTools"}]}],"current":"/docs/velochart/dashboards/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

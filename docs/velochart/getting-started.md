@@ -2,7 +2,7 @@
 
 velochart is a chart library for [velotype](/docs/velotype/). Charts are drawn in SVG at the real pixel width of their container, so text stays the same size in a sidebar and on a dashboard, and a chart with tabular values gives screen readers those values as a table.
 
-[velodesign](/docs/velodesign/) has a few basic charts for the most common needs. velochart has those six and 15 more, with what they need beyond the basics: log and time axes, zoom and pan, annotations, downsampling for long series, keyboard navigation, and export. For each chart's props and a live preview, see the [showcase](https://velotype.github.io/velochart/).
+It is built on [velodesign](/docs/velodesign/), the general component library, so its legends, buttons and other controls are velodesign's.
 
 Every example in these docs is a file that is type-checked against the published package, and run in a browser.
 
@@ -11,7 +11,7 @@ Every example in these docs is a file that is type-checked against the published
 velochart is a [JSR package](https://jsr.io/@velotype/velochart) for Deno, built on velotype. Add it with the same velotype as the rest of your app, because mixing velotype versions in one app is not supported. The example below also uses velodesign for its theme.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.2.0 jsr:@velotype/velochart@0.1.0
+deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.3.0 jsr:@velotype/velochart@0.0.1
 ```
 
 ```json

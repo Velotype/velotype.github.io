@@ -27,8 +27,8 @@ Every docs page is available as Markdown at the links below. Every code example 
 
 The docs and their examples were type-checked, and run, against these published versions:
 
-- @velotype/velochart 0.1.0: https://jsr.io/@velotype/velochart
-- @velotype/velodesign 0.2.0: https://jsr.io/@velotype/velodesign
+- @velotype/velochart 0.0.1: https://jsr.io/@velotype/velochart
+- @velotype/velodesign 0.3.0: https://jsr.io/@velotype/velodesign
 - @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
 - @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
@@ -36,7 +36,7 @@ The docs and their examples were type-checked, and run, against these published 
 - @velotype/velossr 0.0.10: https://jsr.io/@velotype/velossr
 - @velotype/velotype 0.3.2: https://jsr.io/@velotype/velotype
 
-velodesign 0.2.0 is built on velotype 0.3.1, so use that velotype version with it.
+velodesign 0.3.0 is built on velotype 0.3.1, so use that velotype version with it.
 
 ## Projects
 
@@ -56,6 +56,7 @@ velodesign 0.2.0 is built on velotype 0.3.1, so use that velotype version with i
 - [Charts](https://velotype.github.io/docs/velochart/charts.md): Every velochart chart, by category. Each links to its page in the [showcase](https://velotype.github.io/velochart/), which has live examples, the props table, and the types it uses.
 - [Exploring and updating](https://velotype.github.io/docs/velochart/exploring-and-updating.md): Everything here is on the charts with x and y axes, because they share one engine. update and export are on every chart except Sparkline.
 - [Theming and accessibility](https://velotype.github.io/docs/velochart/theming-and-accessibility.md): velochart draws with CSS custom properties, so charts follow the page's theme in light and in dark. It gives screen readers the numbers rather than a picture, and keyboard readers the same marks a pointer gets.
+- [Dashboards](https://velotype.github.io/docs/velochart/dashboards.md): Give every chart on a page the same TimeWindow, and they all show the same range of time. One control, a drag on any chart, or a zoom on any chart moves them all, and their hover cursors are shared.
 
 ## velodesign docs
 

@@ -182,15 +182,15 @@ replaceElementWithRoot(
         id: "velochart", name: "velochart", tag: "charts", tagKind: "primary",
         tagline: "A chart library for velotype, drawn in SVG at the container's real pixel width.",
         about: [
-            "velochart draws charts for velotype apps. velodesign has a few basic charts for the most common needs. velochart has those and 15 more, with log and time axes, zoom and pan, annotations, downsampling for long series, keyboard navigation, and export.",
-            "It depends on velotype alone, and takes its colors from the same CSS variables as velodesign, so charts follow the page's theme.",
+            "velochart draws charts for velotype apps: 21 of them, with log and time axes, zoom and pan, annotations, downsampling for long series, keyboard navigation, and export.",
+            "It is built on velodesign, whose components make up its legends and controls, and takes its colors from the same CSS variables, so charts follow the page's theme.",
         ],
         stats: [
             {title: "Charts", value: "21"},
-            {title: "Gzipped", value: "29", suffix: "kb"},
+            {title: "Gzipped", value: "36", suffix: "kb"},
             {title: "Colors set by", value: "CSS variables"},
         ],
-        statsNote: "velochart 0.1.0, every chart, minified with deno bundle and without velotype. Bundlers drop the charts an app does not import.",
+        statsNote: "velochart 0.0.1, every chart, minified with deno bundle and without velotype. Bundlers drop the charts an app does not import.",
         features: [
             {title: "Sized to the container", text: "A chart redraws at its container's real pixel width instead of scaling one viewBox, so text stays the same size in a sidebar and on a dashboard."},
             {title: "Numbers for screen readers", text: "A chart with tabular values renders them in a visually hidden table, so a screen reader gets the values and not just the chart's name."},

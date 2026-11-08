@@ -137,15 +137,5 @@ The whole category: [Data Entry on the showcase](https://velotype.github.io/velo
 
 ## Charts
 
-The whole category: [Charts on the showcase](https://velotype.github.io/velodesign/category/charts).
+Charts are in [velochart](/docs/velochart/), which is built on velodesign.
 
-These cover the most common needs. For more, see [velochart](/docs/velochart/).
-
-| Component | What it is |
-|---|---|
-| [`LineChart`](https://velotype.github.io/velodesign/components/line-chart) | A line chart for trends over time, optionally filled and optionally stacked. Hovering anywhere over the plot reads out every series at the nearest category. |
-| [`AreaChart`](https://velotype.github.io/velodesign/components/area-chart) | A filled line chart - LineChart with area set. Stack it to show how parts add up to a total. |
-| [`BarChart`](https://velotype.github.io/velodesign/components/bar-chart) | A bar chart for comparing categories: vertical or horizontal, with series side by side or stacked. |
-| [`PieChart`](https://velotype.github.io/velodesign/components/pie-chart) | A pie or donut chart for part-to-whole. Slices are drawn in the order given, never re-sorted, so they stay aligned with a legend or table beside them. |
-| [`Gauge`](https://velotype.github.io/velodesign/components/gauge) | A radial gauge for one value against a range, with optional coloured bands for good/warning/critical zones. |
-| [`Sparkline`](https://velotype.github.io/velodesign/components/sparkline) | A tiny axis-less trend, sized to sit inside a table cell or beside a Statistic. Line, area or bar. |
