@@ -48,7 +48,7 @@ It adds its stylesheet once per selector. Calling it again for the same selector
 
 ## Symbols
 
-A few small glyphs, such as a close control or a next arrow, are theme symbols. A symbol is a component with no attrs, so it can be an icon, an image, or text. The package's defaults are `✕` (close and cancel), `✓` (confirm), `∅` (empty), `…` (collapse), and `‹` and `›` (previous and next).
+A few small glyphs, such as a close control or a next arrow, are theme symbols. A symbol is a component with no attrs, so it can be an icon, an image, or text. The package's defaults are line glyphs from [`Glyphs`](/docs/velodesign/conventions/#toasts-and-icons), so they look the same in every font: a cross (close and cancel), a tick (confirm), an empty tray (empty), three dots (collapse), and chevrons (previous and next).
 
 `CommonThemeOptions` holds the symbols that more than one component uses:
 

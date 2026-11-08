@@ -11,7 +11,7 @@ CommonThemeOptions.prevSymbol = () => <span>back</span>
 ModalThemeOptions.closeSymbol = () => <b>close</b>
 console.log(typeof AlertThemeOptions.closeSymbol)
 
-// The package's defaults: ✕ ✓ ∅ … ‹ ›. resetThemeOptions() puts them back, all or by field.
+// The package's defaults are line glyphs from Glyphs. resetThemeOptions() puts them back, all or by field.
 resetThemeOptions(ModalThemeOptions)
 resetThemeOptions(CommonThemeOptions, "nextSymbol", "prevSymbol")
 
