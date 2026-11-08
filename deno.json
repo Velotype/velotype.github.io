@@ -13,8 +13,8 @@
         "lib": ["dom", "deno.ns", "esnext"]
     },
     "imports": {
-        "@velotype/velotype": "jsr:@velotype/velotype@^0.3.2",
-        "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.3.2",
+        "@velotype/velotype": "jsr:@velotype/velotype@^0.3.3",
+        "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.3.3",
         "@velotype/velodesign": "jsr:@velotype/velodesign@^0.3.0",
         "@velotype/velojson": "jsr:@velotype/velojson@^0.2.0",
         "marked": "npm:marked@15.0.12"

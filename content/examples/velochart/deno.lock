@@ -4,34 +4,34 @@
     "jsr:@velotype/velochart@0.0.1": "0.0.1",
     "jsr:@velotype/velodesign@0.3": "0.3.0",
     "jsr:@velotype/velodesign@0.3.0": "0.3.0",
-    "jsr:@velotype/velotype@0.3.2": "0.3.2",
-    "jsr:@velotype/velotype@~0.3.1": "0.3.2"
+    "jsr:@velotype/velotype@0.3.3": "0.3.3",
+    "jsr:@velotype/velotype@~0.3.1": "0.3.3"
   },
   "jsr": {
     "@velotype/velochart@0.0.1": {
       "integrity": "57256757d99aa751ed782b73adf4db99a46dfc51167e15b73da4fc17cc46ebb6",
       "dependencies": [
         "jsr:@velotype/velodesign@0.3",
-        "jsr:@velotype/velotype@0.3.2",
+        "jsr:@velotype/velotype@0.3.3",
         "jsr:@velotype/velotype@~0.3.1"
       ]
     },
     "@velotype/velodesign@0.3.0": {
       "integrity": "6abfb38a7cfa99f7d11c03fec8551237932b376317f2dc3743fb68709c100534",
       "dependencies": [
-        "jsr:@velotype/velotype@0.3.2",
+        "jsr:@velotype/velotype@0.3.3",
         "jsr:@velotype/velotype@~0.3.1"
       ]
     },
-    "@velotype/velotype@0.3.2": {
-      "integrity": "c181a7699e97747c9216e2a725fcc8d1e983376568cce106297aa7af9e013a08"
+    "@velotype/velotype@0.3.3": {
+      "integrity": "86b554962b03242d795172132d1f9be5b256cbdf3e840432e0ad641e61e60bdb"
     }
   },
   "workspace": {
     "dependencies": [
       "jsr:@velotype/velochart@0.0.1",
       "jsr:@velotype/velodesign@0.3.0",
-      "jsr:@velotype/velotype@0.3.2"
+      "jsr:@velotype/velotype@0.3.3"
     ]
   }
 }

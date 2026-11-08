@@ -33,10 +33,10 @@ The docs and their examples were type-checked, and run, against these published 
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
 - @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
 - @velotype/veloserver 0.3.2: https://jsr.io/@velotype/veloserver
-- @velotype/velossr 0.0.10: https://jsr.io/@velotype/velossr
-- @velotype/velotype 0.3.2: https://jsr.io/@velotype/velotype
+- @velotype/velossr 0.0.11: https://jsr.io/@velotype/velossr
+- @velotype/velotype 0.3.3: https://jsr.io/@velotype/velotype
 
-velodesign 0.3.0 is built on velotype 0.3.2, so use that velotype version with it.
+velodesign 0.3.0 is built on velotype 0.3.3, so use that velotype version with it.
 
 ## Projects
 
