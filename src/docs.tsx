@@ -1,4 +1,4 @@
-import { Breadcrumbs, CodeBlock, Grid, Heading, Link, NavLink, Stack, TableOfContents, Text } from "@velotype/velodesign"
+import { Breadcrumbs, CodeBlock, Heading, Link, NavLink, Stack, TableOfContents, Text } from "@velotype/velodesign"
 import type { TableOfContentsItemType } from "@velotype/velodesign"
 import { setStylesheet } from "@velotype/velotype"
 import { groups, projectById } from "./projects.ts"

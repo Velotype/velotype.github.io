@@ -9,7 +9,7 @@
 //   file (`deno task run-examples <project>` checks that the .out files are current).
 // - The page's title is its first `# heading`, its description is its first paragraph.
 // - Each page is complete HTML, and the bundle then adds the navigation around it.
-import { marked } from "npm:marked@15.0.12"
+import { marked } from "marked"
 import { projectById, projects } from "../src/projects.ts"
 import { headPrelude } from "./head-prelude.ts"
 
