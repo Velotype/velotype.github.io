@@ -27,7 +27,7 @@ Every docs page is available as Markdown at the links below. Every code example 
 
 The docs and their examples were type-checked, and run, against these published versions:
 
-- @velotype/velochart 0.0.2: https://jsr.io/@velotype/velochart
+- @velotype/velochart 0.0.3: https://jsr.io/@velotype/velochart
 - @velotype/velodesign 0.4.1: https://jsr.io/@velotype/velodesign
 - @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
@@ -56,7 +56,7 @@ Every example in these docs is a file that is type-checked against the published
 velochart is a [JSR package](https://jsr.io/@velotype/velochart) for Deno, built on velotype. Add it with the same velotype as the rest of your app, because mixing velotype versions in one app is not supported. The example below also uses velodesign for its theme.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.0 jsr:@velotype/velochart@0.0.2
+deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.1 jsr:@velotype/velochart@0.0.3
 ```
 
 ```json
@@ -131,7 +131,7 @@ Source: https://velotype.github.io/docs/velochart/charts/
 
 Every velochart chart, by category. Each links to its page in the [showcase](https://velotype.github.io/velochart/), which has live examples, the props table, and the types it uses.
 
-The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.0.2.
+The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.0.3.
 
 ## Cartesian
 

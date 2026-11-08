@@ -27,7 +27,7 @@ Every docs page is available as Markdown at the links below. Every code example 
 
 The docs and their examples were type-checked, and run, against these published versions:
 
-- @velotype/velochart 0.0.2: https://jsr.io/@velotype/velochart
+- @velotype/velochart 0.0.3: https://jsr.io/@velotype/velochart
 - @velotype/velodesign 0.4.1: https://jsr.io/@velotype/velodesign
 - @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
