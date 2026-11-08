@@ -42,6 +42,6 @@ deno task run-examples <project> --update   # write the .out files after a chang
 deno task smoke <project>             # run the browser examples in headless Chrome, and report runtime errors
 ```
 
-`run-examples` is for velossr, veloserver, and velojson, which print their results. `smoke` is for velotype, velodesign, velomicro, velomini, and velodevtools, which build a page, and needs Chrome (set `CHROME` if it is not at the macOS default). Files whose names start with `_` are type-checked and shown in the docs, but not run.
+`run-examples` is for velossr, veloserver, and velojson, which print their results. `smoke` is for velotype, velodesign, velochart, velomicro, velomini, and velodevtools, which build a page, and needs Chrome (set `CHROME` if it is not at the macOS default). Files whose names start with `_` are type-checked and shown in the docs, but not run.
 
 When a package is published, change the version in `content/examples/<project>/deno.json`, run the checks, and update the docs where they fail.

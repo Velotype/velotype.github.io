@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started - velochart docs</title>
+<meta name="description" content="velochart is a chart library for [velotype](/docs/velotype/). Charts are drawn in SVG at the real pixel width of their container, so text stays the same size in a sidebar and on a dashboard, and a chart with tabular values gives screen readers those values as a table.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="apple-touch-icon" href="/assets/logo.png">
+<style>html{background:#fff;color:#050505}html[data-theme=dark]{background:#151515;color:#fafafa}#app{visibility:hidden;animation:vtp-show 0s 3s forwards}@keyframes vtp-show{to{visibility:visible}}</style>
+<noscript><style>#app{visibility:visible;animation:none}</style></noscript>
+<script>(function(){var t=null;try{t=localStorage.getItem("vtd-preferred-theme")}catch(e){}if(t!="light"&&t!="dark"){t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}document.documentElement.setAttribute("data-theme",t)})()</script>
+</head>
+<body data-doc="velochart">
+<div id="app"><article id="doc">
+<h1 id="getting-started">Getting started</h1>
+<p>velochart is a chart library for <a href="/docs/velotype/">velotype</a>. Charts are drawn in SVG at the real pixel width of their container, so text stays the same size in a sidebar and on a dashboard, and a chart with tabular values gives screen readers those values as a table.</p>
+<p>It is built on <a href="/docs/velodesign/">velodesign</a>, the general component library, so its legends, buttons and other controls are velodesign&#39;s.</p>
+<p>Every example in these docs is a file that is type-checked against the published package, and run in a browser.</p>
+<h2 id="install">Install</h2>
+<p>velochart is a <a href="https://jsr.io/@velotype/velochart">JSR package</a> for Deno, built on velotype. Add it with the same velotype as the rest of your app, because mixing velotype versions in one app is not supported. The example below also uses velodesign for its theme.</p>
+<pre><code class="language-sh">deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.3.0 jsr:@velotype/velochart@0.0.1
+</code></pre>
+<pre><code class="language-json">{
+    &quot;compilerOptions&quot;: {
+        &quot;jsx&quot;: &quot;react-jsx&quot;,
+        &quot;jsxImportSource&quot;: &quot;@velotype/velotype&quot;,
+        &quot;lib&quot;: [&quot;dom&quot;, &quot;deno.ns&quot;, &quot;esnext&quot;]
+    }
+}
+</code></pre>
+<p>Bundle velochart and velodesign together with your app. Bundled together, both packages share one copy of velotype. Bundled separately, each keeps its own, and components then fail with &quot;Class constructor cannot be invoked without &#39;new&#39;&quot;.</p>
+<h2 id="use-it">Use it</h2>
+<p>A chart takes <code>data</code>, with one entry per category, and <code>series</code>, which says what to plot. Each entry&#39;s <code>values</code> are keyed by the series&#39; <code>key</code>:</p>
+<pre><code class="language-tsx">import { LineChart } from &quot;@velotype/velochart&quot;
+import { Theme } from &quot;@velotype/velodesign&quot;
+import { replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+// velochart takes its colors from the CSS custom properties that velodesign&#39;s theme defines.
+Theme.injectStyles()
+
+const data = [
+    {label: &quot;Jan&quot;, values: {revenue: 12, costs: 8}},
+    {label: &quot;Feb&quot;, values: {revenue: 19, costs: 11}},
+    {label: &quot;Mar&quot;, values: {revenue: 15, costs: 10}},
+    {label: &quot;Apr&quot;, values: {revenue: 27, costs: 15}},
+]
+const series = [
+    {key: &quot;revenue&quot;, label: &quot;Revenue&quot;},
+    {key: &quot;costs&quot;, label: &quot;Costs&quot;},
+]
+
+replaceElementWithRoot(
+    &lt;LineChart
+        title=&quot;Revenue and costs&quot;
+        data={data}
+        series={series}
+        height={240}
+        formatValue={(n) =&gt; `$${n}k`}/&gt;,
+    document.getElementById(&quot;app&quot;)!,
+)
+</code></pre>
+<p>A chart redraws itself when its container resizes. To show new data, call its <code>update</code> method, which <a href="/docs/velochart/exploring-and-updating/">Exploring and updating</a> covers.</p>
+<h2 id="what-is-in-the-library">What is in the library</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Charts</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cartesian</td>
+<td><code>LineChart</code>, <code>AreaChart</code>, <code>BarChart</code>, <code>MixedChart</code>, <code>ScatterChart</code>, <code>BubbleChart</code>, <code>HistogramChart</code>, <code>WaterfallChart</code>, <code>BoxPlotChart</code>, <code>CandlestickChart</code></td>
+</tr>
+<tr>
+<td>Radial</td>
+<td><code>PieChart</code>, <code>Gauge</code>, <code>RadarChart</code>, <code>PolarAreaChart</code></td>
+</tr>
+<tr>
+<td>Matrix</td>
+<td><code>Heatmap</code>, <code>CalendarHeatmap</code></td>
+</tr>
+<tr>
+<td>Hierarchy</td>
+<td><code>Treemap</code>, <code>SunburstChart</code></td>
+</tr>
+<tr>
+<td>Flow</td>
+<td><code>FunnelChart</code>, <code>SankeyChart</code></td>
+</tr>
+<tr>
+<td>Inline</td>
+<td><code>Sparkline</code></td>
+</tr>
+</tbody></table>
+<h2 id="next-steps">Next steps</h2>
+<ul>
+<li><a href="/docs/velochart/charts/">Charts</a>: every chart, and what to reach for when</li>
+<li><a href="/docs/velochart/exploring-and-updating/">Exploring and updating</a>: axes, zoom, annotations, live data, and export</li>
+<li><a href="/docs/velochart/theming-and-accessibility/">Theming and accessibility</a>: colors, the keyboard, and what a screen reader gets</li>
+</ul>
+</article></div>
+<script type="application/json" id="docs-nav">{"project":"velochart","nav":[{"id":"velochart","name":"velochart","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velochart/"},{"slug":"charts","title":"Charts","url":"/docs/velochart/charts/"},{"slug":"exploring-and-updating","title":"Exploring and updating","url":"/docs/velochart/exploring-and-updating/"},{"slug":"theming-and-accessibility","title":"Theming and accessibility","url":"/docs/velochart/theming-and-accessibility/"},{"slug":"dashboards","title":"Dashboards","url":"/docs/velochart/dashboards/"}]},{"id":"velodesign","name":"velodesign","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velodesign/"},{"slug":"theming","title":"Theming","url":"/docs/velodesign/theming/"},{"slug":"layout-and-typography","title":"Layout and typography","url":"/docs/velodesign/layout-and-typography/"},{"slug":"conventions","title":"Conventions","url":"/docs/velodesign/conventions/"},{"slug":"components","title":"Components","url":"/docs/velodesign/components/"},{"slug":"api-reference","title":"API reference","url":"/docs/velodesign/api-reference/"}]},{"id":"velojson","name":"velojson (VSON)","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velojson/"},{"slug":"formats","title":"Formats","url":"/docs/velojson/formats/"},{"slug":"vbin","title":"VBIN","url":"/docs/velojson/vbin/"},{"slug":"browser","title":"Browser module","url":"/docs/velojson/browser/"},{"slug":"wire-format","title":"Wire format","url":"/docs/velojson/wire-format/"},{"slug":"api-reference","title":"API reference","url":"/docs/velojson/api-reference/"}]},{"id":"velomicro","name":"velomicro","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomicro/"}]},{"id":"velomini","name":"velomini","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velomini/"}]},{"id":"veloserver","name":"veloserver","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/veloserver/"},{"slug":"routes","title":"Routes","url":"/docs/veloserver/routes/"},{"slug":"request-metadata","title":"Request metadata","url":"/docs/veloserver/request-metadata/"},{"slug":"inspectors","title":"Inspectors","url":"/docs/veloserver/inspectors/"},{"slug":"static-files","title":"Static files","url":"/docs/veloserver/static-files/"},{"slug":"running-the-server","title":"Running the server","url":"/docs/veloserver/running-the-server/"},{"slug":"api-reference","title":"API reference","url":"/docs/veloserver/api-reference/"}]},{"id":"velossr","name":"velossr","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velossr/"},{"slug":"components","title":"Components","url":"/docs/velossr/components/"},{"slug":"rendering","title":"Rendering","url":"/docs/velossr/rendering/"},{"slug":"escaping-and-embedding","title":"Escaping and embedding","url":"/docs/velossr/escaping-and-embedding/"},{"slug":"islands","title":"Islands","url":"/docs/velossr/islands/"},{"slug":"api-reference","title":"API reference","url":"/docs/velossr/api-reference/"}]},{"id":"velotype","name":"velotype","pages":[{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/"},{"slug":"components","title":"Components","url":"/docs/velotype/components/"},{"slug":"render-objects","title":"RenderObjects","url":"/docs/velotype/render-objects/"},{"slug":"lists","title":"Lists","url":"/docs/velotype/lists/"},{"slug":"async-data","title":"Async data","url":"/docs/velotype/async-data/"},{"slug":"styling-and-raw-html","title":"Styling and raw HTML","url":"/docs/velotype/styling-and-raw-html/"},{"slug":"events-and-errors","title":"Events and errors","url":"/docs/velotype/events-and-errors/"},{"slug":"server-rendering","title":"Server rendering","url":"/docs/velotype/server-rendering/"},{"slug":"development-tools","title":"Development tools","url":"/docs/velotype/development-tools/"},{"slug":"api-reference","title":"API reference","url":"/docs/velotype/api-reference/"},{"slug":"getting-started","title":"Getting started","url":"/docs/velotype/devtools/","section":"Velotype DevTools"},{"slug":"panels","title":"Panels","url":"/docs/velotype/devtools/panels/","section":"Velotype DevTools"},{"slug":"limitations","title":"Known limitations","url":"/docs/velotype/devtools/limitations/","section":"Velotype DevTools"}]}],"current":"/docs/velochart/"}</script>
+<script src="/build/main.js" type="module"></script>
+</body>
+</html>

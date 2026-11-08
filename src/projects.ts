@@ -179,6 +179,59 @@ replaceElementWithRoot(
         links: [gh("velodesign"), jsr("velodesign"), {label: "Component showcase", to: "https://velotype.github.io/velodesign/"}],
     },
     {
+        id: "velochart", name: "velochart", tag: "charts", tagKind: "primary",
+        tagline: "A chart library for velotype, drawn in SVG at the container's real pixel width.",
+        about: [
+            "velochart draws charts for velotype apps: 21 of them, with log and time axes, zoom and pan, annotations, downsampling for long series, keyboard navigation, and export.",
+            "It is built on velodesign, whose components make up its legends and controls, and takes its colors from the same CSS variables, so charts follow the page's theme.",
+        ],
+        stats: [
+            {title: "Charts", value: "21"},
+            {title: "Gzipped", value: "36", suffix: "kb"},
+            {title: "Colors set by", value: "CSS variables"},
+        ],
+        statsNote: "velochart 0.0.1, every chart, minified with deno bundle and without velotype. Bundlers drop the charts an app does not import.",
+        features: [
+            {title: "Sized to the container", text: "A chart redraws at its container's real pixel width instead of scaling one viewBox, so text stays the same size in a sidebar and on a dashboard."},
+            {title: "Numbers for screen readers", text: "A chart with tabular values renders them in a visually hidden table, so a screen reader gets the values and not just the chart's name."},
+            {title: "Light and dark", text: "Series, grid lines, and tooltips are drawn with CSS variables, so charts follow the theme. Override ChartThemeOptions.seriesColors to reskin all of them."},
+            {title: "Explore it", text: "Zoom, pan, brush, and a range slider, on log, time, and numeric axes, with annotations, error bars, trend lines, and cursors that move together across charts."},
+            {title: "Long series and live data", text: "A long line thins to what its pixels can show, while the tooltip reads every point. appendData takes a live feed, and a canvas renderer handles tens of thousands of marks."},
+            {title: "For every reader", text: "The arrow keys walk the marks with each one read aloud, and patterns tell series apart without color. Export to CSV, SVG, and PNG."},
+            {title: "Hover that does no extra work", text: "One target covers the whole plot and tracks the nearest category, so a pointer need not land on a 2px line. A hover that changes nothing touches no DOM."},
+        ],
+        samples: [
+            {
+                title: "Draw a line chart",
+                language: "tsx",
+                code: `import { LineChart } from "@velotype/velochart"
+import { Theme } from "@velotype/velodesign"
+import { replaceElementWithRoot } from "@velotype/velotype"
+
+Theme.injectStyles()
+
+replaceElementWithRoot(
+    <LineChart
+        title="Revenue"
+        data={[
+            {label: "Jan", values: {revenue: 12}},
+            {label: "Feb", values: {revenue: 19}},
+        ]}
+        series={[{key: "revenue", label: "Revenue"}]}/>,
+    document.getElementById("app"),
+)`,
+            },
+        ],
+        install: {
+            title: "Add velochart to a Deno project", language: "plain",
+            code: `deno add jsr:@velotype/velochart
+
+// velochart reads the CSS custom properties that velodesign's
+// Theme.injectStyles() defines.`,
+        },
+        links: [gh("velochart"), jsr("velochart"), {label: "Chart showcase", to: "https://velotype.github.io/velochart/"}],
+    },
+    {
         id: "velossr", name: "velossr", tag: "server rendering", tagKind: "primary",
         tagline: "TSX rendered to HTML on the server, with no virtual DOM and no client runtime.",
         about: [
@@ -418,7 +471,7 @@ return <div><ComplexComponent foo="Component!"></ComplexComponent></div>`,
 ]
 
 export const groups: Group[] = [
-    {title: "Front end", note: "TSX that creates real DOM elements, with no virtual DOM.", ids: ["velotype", "velodesign"], inDocsNav: true},
+    {title: "Front end", note: "TSX that creates real DOM elements, with no virtual DOM.", ids: ["velotype", "velodesign", "velochart"], inDocsNav: true},
     {title: "Server", note: "Serve pages and APIs, render HTML, and carry the data between server and browser.", ids: ["velossr", "veloserver", "velojson"], inDocsNav: true},
     {title: "Learn", note: "The smallest versions of the idea, written to be read.", ids: ["velomicro", "velomini"], inDocsNav: false},
 ]

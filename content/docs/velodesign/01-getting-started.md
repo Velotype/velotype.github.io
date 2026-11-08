@@ -11,7 +11,7 @@ Every example in these docs is a file that is type-checked against the published
 velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.2.0 uses velotype 0.3.1, so add both and use that velotype version. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.2.0
+deno add jsr:@velotype/velotype@0.3.1 jsr:@velotype/velodesign@0.3.0
 ```
 
 ```json
@@ -48,7 +48,6 @@ A few components from different categories, to show how they fit together. Form 
 | Overlays | `Modal`, `Drawer`, `Popover`, `Popconfirm`, `ContextMenu`, `Command` |
 | Data display | `Card`, `Table`, `DataTable`, `Tabs`, `Tree`, `Calendar`, `CodeBlock`, `Badge`, `Tag` |
 | Data entry | `DatePicker`, `Slider`, `Combobox`, `Upload`, `Rate`, `Form` |
-| Charts | `LineChart`, `AreaChart`, `BarChart`, `PieChart`, `Gauge`, `Sparkline` |
 
 ## Next steps
 

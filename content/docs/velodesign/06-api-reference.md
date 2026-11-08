@@ -19,7 +19,7 @@ What `@velotype/velodesign` exports besides the [components](/docs/velodesign/co
 | Export | Description |
 |---|---|
 | `CommonThemeOptions` | The symbols several components share: `closeSymbol`, `cancelSymbol`, `confirmSymbol`, `emptySymbol`, `collapseSymbol`, `prevSymbol`, `nextSymbol` |
-| `AlertThemeOptions`, `BreadcrumbsThemeOptions`, `ButtonThemeOptions`, `ChartThemeOptions`, `DataTableThemeOptions`, `DrawerThemeOptions`, `EmptyThemeOptions`, `ModalThemeOptions`, `PaginationThemeOptions`, `PopconfirmThemeOptions`, `TagThemeOptions`, `TextFormFieldThemeOptions`, `ToastThemeOptions` | Each component's own options |
+| `AlertThemeOptions`, `BreadcrumbsThemeOptions`, `ButtonThemeOptions`, `DataTableThemeOptions`, `DrawerThemeOptions`, `EmptyThemeOptions`, `ModalThemeOptions`, `PaginationThemeOptions`, `PopconfirmThemeOptions`, `TagThemeOptions`, `TextFormFieldThemeOptions`, `ToastThemeOptions` | Each component's own options |
 | `resetThemeOptions(options, ...fields)` | Puts the package's defaults back |
 | `ThemeSymbol` | The type of a symbol: a component with no attrs |
 
