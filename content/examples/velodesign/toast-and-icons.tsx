@@ -13,6 +13,9 @@ registerIcon("check", new Icon(24, 24, "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1
 
 // The package's own line glyphs can be drawn directly. Without a label an icon is decoration;
 // with one, screen readers announce it.
+// An Icon can draw in layers, each with its own line width: a lens, and a thinner glint inside it
+const search = new Icon(24, 24, "M16.7 10.5a6.2 6.2 0 1 1-12.4 0 6.2 6.2 0 1 1 12.4 0zM15.2 15.2l4.3 4.3", 2, false, [{d: "M7.6 9.4a3.2 3.2 0 0 1 1.9-1.9", strokeWidth: 1.2}])
+
 const next = <Button type="secondary" onClick={() => {}}><I icon={Glyphs.chevronRight} label="Next page"/></Button>
 
-document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>, next)
+document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>, next, <I icon={search} style={{height: "2em"}}/>)

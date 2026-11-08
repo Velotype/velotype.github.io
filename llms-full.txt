@@ -28,7 +28,7 @@ Every docs page is available as Markdown at the links below. Every code example 
 The docs and their examples were type-checked, and run, against these published versions:
 
 - @velotype/velochart 0.0.2: https://jsr.io/@velotype/velochart
-- @velotype/velodesign 0.4.0: https://jsr.io/@velotype/velodesign
+- @velotype/velodesign 0.4.1: https://jsr.io/@velotype/velodesign
 - @velotype/velojson 0.2.0: https://jsr.io/@velotype/velojson
 - @velotype/velomicro 0.0.4: https://jsr.io/@velotype/velomicro
 - @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
@@ -36,7 +36,7 @@ The docs and their examples were type-checked, and run, against these published 
 - @velotype/velossr 0.0.11: https://jsr.io/@velotype/velossr
 - @velotype/velotype 0.3.3: https://jsr.io/@velotype/velotype
 
-velodesign 0.4.0 is built on velotype 0.3.3, so use that velotype version with it.
+velodesign 0.4.1 is built on velotype 0.3.3, so use that velotype version with it.
 
 
 ---
@@ -615,10 +615,10 @@ Every example in these docs is a file that is type-checked against the published
 
 ## Install
 
-velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.4.0 uses velotype 0.3, so add both and use the same velotype version everywhere in the app. Mixing velotype versions in one app is not supported.
+velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.4.1 uses velotype 0.3, so add both and use the same velotype version everywhere in the app. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.0
+deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.1
 ```
 
 ```json
@@ -986,7 +986,7 @@ document.body.append(message)
 
 `showToast(message, options?)` is a function, not a component, because a toast has no place in your tree. Call it from a handler. It keeps one container at the bottom right of the page. The options are `type`, `duration` (milliseconds before it is dismissed, default `4000`, and `0` keeps it), and `dismissLabel`.
 
-An `Icon` is a width, a height, and an SVG path. Without a stroke width the path is filled; `new Icon(w, h, path, strokeWidth)` draws it as round-ended lines instead, and passing `true` after the stroke width fills the shape inside them too. `registerIcon(key, icon)` registers it, and `<I i={key}/>` renders it as an inline SVG, `1em` tall, in the current text color. `<I icon={icon}/>` renders an Icon without registering it.
+An `Icon` is a width, a height, and an SVG path. Without a stroke width the path is filled; `new Icon(w, h, path, strokeWidth)` draws it as round-ended lines instead, and passing `true` after the stroke width fills the shape inside them too. A mark that needs a second line width, such as a magnifier whose glint is thinner than its lens, passes `layers` last: more paths drawn over the first, each with its own `strokeWidth` and `filled`. `registerIcon(key, icon)` registers it, and `<I i={key}/>` renders it as an inline SVG, `1em` tall, in the current text color. `<I icon={icon}/>` renders an Icon without registering it.
 
 An icon is decoration, hidden from screen readers, unless you give it a `label`. Give one when the icon is the only thing saying what a control does.
 
@@ -1008,9 +1008,12 @@ registerIcon("check", new Icon(24, 24, "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1
 
 // The package's own line glyphs can be drawn directly. Without a label an icon is decoration;
 // with one, screen readers announce it.
+// An Icon can draw in layers, each with its own line width: a lens, and a thinner glint inside it
+const search = new Icon(24, 24, "M16.7 10.5a6.2 6.2 0 1 1-12.4 0 6.2 6.2 0 1 1 12.4 0zM15.2 15.2l4.3 4.3", 2, false, [{d: "M7.6 9.4a3.2 3.2 0 0 1 1.9-1.9", strokeWidth: 1.2}])
+
 const next = <Button type="secondary" onClick={() => {}}><I icon={Glyphs.chevronRight} label="Next page"/></Button>
 
-document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>, next)
+document.body.append(toastButton, <p>Done <I i="check"/></p>, <I i="check" style={{height: "2em"}}/>, next, <I icon={search} style={{height: "2em"}}/>)
 ```
 ## Routing
 
@@ -1247,7 +1250,8 @@ See [Theming](/docs/velodesign/theming/#symbols).
 
 | Export | Description |
 |---|---|
-| `Icon` | `new Icon(width, height, svgPath, strokeWidth?, filled?)` |
+| `Icon` | `new Icon(width, height, svgPath, strokeWidth?, filled?, layers?)` |
+| `IconLayer` | One more path in an `Icon`: `{d, strokeWidth?, filled?}`, drawn over the paths before it |
 | `registerIcon(key, icon)` | Registers an icon |
 | `I` | `<I i={key}/>` renders a registered icon, and `<I icon={icon}/>` any Icon. `label` gives it an accessible name |
 | `Glyphs` | The package's line glyphs, such as `Glyphs.tick` and `Glyphs.chevronRight` |
