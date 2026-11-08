@@ -1,13 +1,13 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@velotype/velodesign@0.4.0": "0.4.0",
+    "jsr:@velotype/velodesign@0.4.1": "0.4.1",
     "jsr:@velotype/velotype@0.3.3": "0.3.3",
     "jsr:@velotype/velotype@~0.3.1": "0.3.3"
   },
   "jsr": {
-    "@velotype/velodesign@0.4.0": {
-      "integrity": "ba16a784f62f20c89ff690be60005fdf3d5c601de4f652850f357a7714e385b4",
+    "@velotype/velodesign@0.4.1": {
+      "integrity": "4474728f90af69c6e81b9b4ec1cb3d27b185a7b08b8b8a20d3e1cb4fdcd76df2",
       "dependencies": [
         "jsr:@velotype/velotype@0.3.3",
         "jsr:@velotype/velotype@~0.3.1"
@@ -19,7 +19,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@velotype/velodesign@0.4.0",
+      "jsr:@velotype/velodesign@0.4.1",
       "jsr:@velotype/velotype@0.3.3"
     ]
   }

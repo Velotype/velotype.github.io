@@ -72,7 +72,7 @@ document.body.append(message)
 </tbody></table>
 <h2 id="toasts-and-icons">Toasts and icons</h2>
 <p><code>showToast(message, options?)</code> is a function, not a component, because a toast has no place in your tree. Call it from a handler. It keeps one container at the bottom right of the page. The options are <code>type</code>, <code>duration</code> (milliseconds before it is dismissed, default <code>4000</code>, and <code>0</code> keeps it), and <code>dismissLabel</code>.</p>
-<p>An <code>Icon</code> is a width, a height, and an SVG path. Without a stroke width the path is filled; <code>new Icon(w, h, path, strokeWidth)</code> draws it as round-ended lines instead, and passing <code>true</code> after the stroke width fills the shape inside them too. <code>registerIcon(key, icon)</code> registers it, and <code>&lt;I i={key}/&gt;</code> renders it as an inline SVG, <code>1em</code> tall, in the current text color. <code>&lt;I icon={icon}/&gt;</code> renders an Icon without registering it.</p>
+<p>An <code>Icon</code> is a width, a height, and an SVG path. Without a stroke width the path is filled; <code>new Icon(w, h, path, strokeWidth)</code> draws it as round-ended lines instead, and passing <code>true</code> after the stroke width fills the shape inside them too. A mark that needs a second line width, such as a magnifier whose glint is thinner than its lens, passes <code>layers</code> last: more paths drawn over the first, each with its own <code>strokeWidth</code> and <code>filled</code>. <code>registerIcon(key, icon)</code> registers it, and <code>&lt;I i={key}/&gt;</code> renders it as an inline SVG, <code>1em</code> tall, in the current text color. <code>&lt;I icon={icon}/&gt;</code> renders an Icon without registering it.</p>
 <p>An icon is decoration, hidden from screen readers, unless you give it a <code>label</code>. Give one when the icon is the only thing saying what a control does.</p>
 <p><code>Glyphs</code> holds the line glyphs the package draws its own marks with, in a 24-unit box, such as <code>Glyphs.tick</code>, <code>Glyphs.cross</code>, <code>Glyphs.chevronRight</code>, <code>Glyphs.arrowUp</code>, <code>Glyphs.pencil</code>, and <code>Glyphs.star</code>. Use them for the same marks in your own UI. The package uses a chevron when the reader stays put and what is shown changes, and an arrow when something moves.</p>
 <pre><code class="language-tsx">import { Button, Glyphs, I, Icon, registerIcon, showToast } from &quot;@velotype/velodesign&quot;
@@ -90,9 +90,12 @@ registerIcon(&quot;check&quot;, new Icon(24, 24, &quot;M9 16.2 4.8 12l-1.4 1.4L9
 
 // The package&#39;s own line glyphs can be drawn directly. Without a label an icon is decoration;
 // with one, screen readers announce it.
+// An Icon can draw in layers, each with its own line width: a lens, and a thinner glint inside it
+const search = new Icon(24, 24, &quot;M16.7 10.5a6.2 6.2 0 1 1-12.4 0 6.2 6.2 0 1 1 12.4 0zM15.2 15.2l4.3 4.3&quot;, 2, false, [{d: &quot;M7.6 9.4a3.2 3.2 0 0 1 1.9-1.9&quot;, strokeWidth: 1.2}])
+
 const next = &lt;Button type=&quot;secondary&quot; onClick={() =&gt; {}}&gt;&lt;I icon={Glyphs.chevronRight} label=&quot;Next page&quot;/&gt;&lt;/Button&gt;
 
-document.body.append(toastButton, &lt;p&gt;Done &lt;I i=&quot;check&quot;/&gt;&lt;/p&gt;, &lt;I i=&quot;check&quot; style={{height: &quot;2em&quot;}}/&gt;, next)
+document.body.append(toastButton, &lt;p&gt;Done &lt;I i=&quot;check&quot;/&gt;&lt;/p&gt;, &lt;I i=&quot;check&quot; style={{height: &quot;2em&quot;}}/&gt;, next, &lt;I icon={search} style={{height: &quot;2em&quot;}}/&gt;)
 </code></pre>
 <h2 id="routing">Routing</h2>
 <p><code>Link</code> is a plain anchor, so open in a new tab, copy link address, and drag to a bookmark all work. Add <code>spa</code> and a click changes the location with <code>history.pushState()</code> instead of loading a page.</p>

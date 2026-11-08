@@ -37,7 +37,8 @@ See [Theming](/docs/velodesign/theming/#symbols).
 
 | Export | Description |
 |---|---|
-| `Icon` | `new Icon(width, height, svgPath, strokeWidth?, filled?)` |
+| `Icon` | `new Icon(width, height, svgPath, strokeWidth?, filled?, layers?)` |
+| `IconLayer` | One more path in an `Icon`: `{d, strokeWidth?, filled?}`, drawn over the paths before it |
 | `registerIcon(key, icon)` | Registers an icon |
 | `I` | `<I i={key}/>` renders a registered icon, and `<I icon={icon}/>` any Icon. `label` gives it an accessible name |
 | `Glyphs` | The package's line glyphs, such as `Glyphs.tick` and `Glyphs.chevronRight` |
