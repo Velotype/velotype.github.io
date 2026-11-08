@@ -2,7 +2,7 @@
 
 Every velochart chart, by category. Each links to its page in the [showcase](https://velotype.github.io/velochart/), which has live examples, the props table, and the types it uses.
 
-The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.0.2.
+The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.0.3.
 
 ## Cartesian
 
