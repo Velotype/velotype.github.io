@@ -16,7 +16,8 @@
         "@velotype/velotype": "jsr:@velotype/velotype@^0.3.2",
         "@velotype/velotype/jsx-runtime": "jsr:@velotype/velotype@^0.3.2",
         "@velotype/velodesign": "jsr:@velotype/velodesign@^0.2.0",
-        "@velotype/velojson": "jsr:@velotype/velojson@^0.2.0"
+        "@velotype/velojson": "jsr:@velotype/velojson@^0.2.0",
+        "marked": "npm:marked@15.0.12"
     },
-    "lint": {"rules": {"exclude": ["jsx-key"]}}
+    "lint": {"exclude": ["build/", "docs/", "content/examples/"], "rules": {"exclude": ["jsx-key"]}}
 }

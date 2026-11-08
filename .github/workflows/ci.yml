@@ -1,0 +1,55 @@
+name: CI
+
+# Runs on every pull request into main and every push to main. A person merges once these pass.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, examples and build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # The runner ships a Chrome; pointing Astral at it avoids a per-run download of its own copy.
+      - name: Record the browser Astral should drive
+        run: echo "CHROME_PATH=$(which google-chrome || which chromium-browser || which chromium)" >> "$GITHUB_ENV"
+
+      # build/ and the pages are generated; the examples are type checked below
+      - name: Lint
+        run: deno lint
+
+      # Every example against the published packages it pins
+      - name: Typecheck the examples
+        run: deno task check
+
+      # The server-side examples, compared with their .out files
+      - name: Run the server-side examples
+        run: |
+          for project in velojson veloserver velossr; do
+            deno task run-examples "$project"
+          done
+
+      # The browser examples in headless Chrome, failing on any runtime error
+      - name: Smoke-test the browser examples
+        run: |
+          for project in velodesign velochart velodevtools velojson velomicro velomini velotype; do
+            if [ -d "content/examples/$project" ]; then
+              deno task smoke "$project"
+            fi
+          done
+
+      # Also fails on a link to a docs page or an anchor that doesn't exist
+      - name: Build the site
+        run: deno task build

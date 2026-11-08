@@ -90,7 +90,8 @@
     "dependencies": [
       "jsr:@velotype/velodesign@0.2",
       "jsr:@velotype/velojson@0.2",
-      "jsr:@velotype/velotype@~0.3.2"
+      "jsr:@velotype/velotype@~0.3.2",
+      "npm:marked@15.0.12"
     ]
   }
 }
