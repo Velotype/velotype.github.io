@@ -15,7 +15,7 @@
 <div id="app"><article id="doc">
 <h1 id="components">Components</h1>
 <p>Every velodesign component, by category. Each links to its page in the <a href="https://velotype.github.io/velodesign/">showcase</a>, which has a live preview, the props table, and the types it uses.</p>
-<p>The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.2.0. What the components have in common is covered in <a href="/docs/velodesign/theming/">theming</a>, <a href="/docs/velodesign/layout-and-typography/">layout and typography</a>, and <a href="/docs/velodesign/conventions/">conventions</a>.</p>
+<p>The showcase is built from the latest source, which can be ahead of the published package, and this guide targets the published 0.4.0. What the components have in common is covered in <a href="/docs/velodesign/theming/">theming</a>, <a href="/docs/velodesign/layout-and-typography/">layout and typography</a>, and <a href="/docs/velodesign/conventions/">conventions</a>.</p>
 <h2 id="typography">Typography</h2>
 <p>The whole category: <a href="https://velotype.github.io/velodesign/category/typography">Typography on the showcase</a>.</p>
 <table>
@@ -191,11 +191,11 @@
 </tr>
 <tr>
 <td><a href="https://velotype.github.io/velodesign/components/spinner"><code>Spinner</code></a></td>
-<td>A standalone animated loading indicator.</td>
+<td>A standalone animated loading indicator: a ring while waiting, or <code>variant=&quot;dots&quot;</code> while working.</td>
 </tr>
 <tr>
 <td><a href="https://velotype.github.io/velodesign/components/progress"><code>Progress</code></a></td>
-<td>A determinate progress bar, wrapping a native progress element.</td>
+<td>A determinate progress bar. It glides to each new value, <code>setValue()</code> moves it in place, and <code>working</code> shows a task in progress with a status, and marks the finish.</td>
 </tr>
 <tr>
 <td><a href="https://velotype.github.io/velodesign/components/skeleton"><code>Skeleton</code></a></td>
@@ -303,7 +303,7 @@
 </tr>
 <tr>
 <td><a href="https://velotype.github.io/velodesign/components/timeline"><code>Timeline</code></a></td>
-<td>A vertical list of dated/ordered events, each with a dot marker on a connecting line.</td>
+<td>A vertical list of dated/ordered events, each with a dot marker on a connecting line, or an <code>icon</code> in a pale circle.</td>
 </tr>
 <tr>
 <td><a href="https://velotype.github.io/velodesign/components/aspect-ratio"><code>AspectRatio</code></a></td>

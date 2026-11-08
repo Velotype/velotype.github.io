@@ -109,7 +109,7 @@
 </thead>
 <tbody><tr>
 <td><code>Icon</code></td>
-<td><code>new Icon(width, height, svgPath)</code></td>
+<td><code>new Icon(width, height, svgPath, strokeWidth?, filled?)</code></td>
 </tr>
 <tr>
 <td><code>registerIcon(key, icon)</code></td>
@@ -117,7 +117,11 @@
 </tr>
 <tr>
 <td><code>I</code></td>
-<td><code>&lt;I i={key}/&gt;</code> renders a registered icon</td>
+<td><code>&lt;I i={key}/&gt;</code> renders a registered icon, and <code>&lt;I icon={icon}/&gt;</code> any Icon. <code>label</code> gives it an accessible name</td>
+</tr>
+<tr>
+<td><code>Glyphs</code></td>
+<td>The package&#39;s line glyphs, such as <code>Glyphs.tick</code> and <code>Glyphs.chevronRight</code></td>
 </tr>
 </tbody></table>
 <h2 id="routing-and-feedback">Routing and feedback</h2>

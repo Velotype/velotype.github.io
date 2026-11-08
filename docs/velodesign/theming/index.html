@@ -144,7 +144,7 @@ setThemeOnSelector(&quot;.brand-panel&quot;, {backgroundDarkColor: &quot;#10202f
 setThemeOnSelector(&quot;.brand-panel&quot;, {backgroundDarkColor: &quot;#201030&quot;}, true)
 </code></pre>
 <h2 id="symbols">Symbols</h2>
-<p>A few small glyphs, such as a close control or a next arrow, are theme symbols. A symbol is a component with no attrs, so it can be an icon, an image, or text. The package&#39;s defaults are <code>✕</code> (close and cancel), <code>✓</code> (confirm), <code>∅</code> (empty), <code>…</code> (collapse), and <code>‹</code> and <code>›</code> (previous and next).</p>
+<p>A few small glyphs, such as a close control or a next arrow, are theme symbols. A symbol is a component with no attrs, so it can be an icon, an image, or text. The package&#39;s defaults are line glyphs from <a href="/docs/velodesign/conventions/#toasts-and-icons"><code>Glyphs</code></a>, so they look the same in every font: a cross (close and cancel), a tick (confirm), an empty tray (empty), three dots (collapse), and chevrons (previous and next).</p>
 <p><code>CommonThemeOptions</code> holds the symbols that more than one component uses:</p>
 <table>
 <thead>
@@ -193,7 +193,7 @@ CommonThemeOptions.prevSymbol = () =&gt; &lt;span&gt;back&lt;/span&gt;
 ModalThemeOptions.closeSymbol = () =&gt; &lt;b&gt;close&lt;/b&gt;
 console.log(typeof AlertThemeOptions.closeSymbol)
 
-// The package&#39;s defaults: ✕ ✓ ∅ … ‹ ›. resetThemeOptions() puts them back, all or by field.
+// The package&#39;s defaults are line glyphs from Glyphs. resetThemeOptions() puts them back, all or by field.
 resetThemeOptions(ModalThemeOptions)
 resetThemeOptions(CommonThemeOptions, &quot;nextSymbol&quot;, &quot;prevSymbol&quot;)
 

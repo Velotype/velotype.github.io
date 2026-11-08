@@ -8,10 +8,10 @@ Every example in these docs is a file that is type-checked against the published
 
 ## Install
 
-velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.2.0 uses velotype 0.3.1, so add both and use that velotype version. Mixing velotype versions in one app is not supported.
+velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.4.0 uses velotype 0.3, so add both and use the same velotype version everywhere in the app. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.3.0
+deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.0
 ```
 
 ```json
@@ -91,7 +91,7 @@ replaceElementWithRoot(
 
 | Category | Examples |
 |---|---|
-| Typography | `Heading`, `Text`, `Paragraph`, `Icon` |
+| Typography | `Heading`, `Text`, `Paragraph`, `Icon`, `Glyphs` |
 | Layout | `Stack`, `Grid` |
 | Form | `Button`, `Checkbox`, `Select`, `TextBox`, `Textarea`, `Toggle`, `RadioButton` |
 | Navigation | `Link`, `NavLink`, `Navbar`, `Sidebar`, `Breadcrumbs`, `Pagination`, `Menu`, `Steps` |
