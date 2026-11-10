@@ -34,6 +34,10 @@ jobs:
       - name: Lint
         run: deno lint
 
+      # Only Baseline widely available web features in the code a browser runs (jsr:@velotype/velobaseline)
+      - name: Browser support
+        run: deno task check-baseline
+
       # Every example against the published packages it pins
       - name: Typecheck the examples
         run: deno task check

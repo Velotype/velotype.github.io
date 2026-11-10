@@ -1,6 +1,7 @@
 {
     "minimumDependencyAge": {"age": "P1D", "exclude": ["jsr:@velotype/*"]},
     "tasks": {
+        "check-baseline": "deno run --no-lock --allow-read jsr:@velotype/velobaseline@0.1.1 src/ content/examples/",
         "check": "deno run -A ./scripts/check-examples.ts",
         "run-examples": "deno run -A ./scripts/run-examples.ts",
         "smoke": "deno run -A ./scripts/smoke-examples.ts",
