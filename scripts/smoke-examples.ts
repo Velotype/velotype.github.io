@@ -14,6 +14,15 @@ const chrome = Deno.env.get("CHROME") ?? "/Applications/Google Chrome.app/Conten
 const source = new URL(`../content/examples/${project}/`, import.meta.url)
 const out = await Deno.makeTempDir({prefix: "smoke-"})
 
+// What velotype still holds after the page has run (smoke-leaks.ts), bundled once for every example
+const leaksBuilt = await new Deno.Command("deno", {
+    args: ["bundle", "--platform", "browser", new URL("smoke-leaks.ts", import.meta.url).pathname, "--output", `${out}/leaks.js`],
+    stdout: "null", stderr: "piped",
+}).output()
+if (!leaksBuilt.success) {
+    console.error(`smoke-leaks.ts did not bundle:\n${new TextDecoder().decode(leaksBuilt.stderr)}`)
+    Deno.exit(1)
+}
 const files = [...Deno.readDirSync(source)].filter(entry => entry.name.endsWith(".tsx") && entry.name.startsWith(Deno.args[1] ?? "")).map(entry => entry.name).sort()
 let failed = 0
 for (const file of files) {
@@ -33,8 +42,12 @@ for (const file of files) {
 window.__errors = []
 addEventListener("error", e => window.__errors.push(String(e.message)))
 addEventListener("unhandledrejection", e => window.__errors.push(String(e.reason)))
-addEventListener("load", () => setTimeout(() => document.body.setAttribute("data-errors", JSON.stringify(window.__errors)), 500))
+addEventListener("load", () => setTimeout(() => {
+    document.body.setAttribute("data-leaks", JSON.stringify(window.__leaks ? window.__leaks() : null))
+    document.body.setAttribute("data-errors", JSON.stringify(window.__errors))
+}, 500))
 </script>
+<script type="module" src="leaks.js"></script>
 <script type="module" src="${name}.js"></script></body></html>`)
     const run = await new Deno.Command(chrome, {
         args: ["--headless=new", "--disable-gpu", "--allow-file-access-from-files", "--virtual-time-budget=3000", "--dump-dom", `file://${out}/${name}.html`],
@@ -43,9 +56,15 @@ addEventListener("load", () => setTimeout(() => document.body.setAttribute("data
     const dom = new TextDecoder().decode(run.stdout)
     const errors = JSON.parse((dom.match(/data-errors="([^"]*)"/)?.[1] ?? "[]").replaceAll("&quot;", '"').replaceAll("&amp;", "&")) as string[]
     const real = errors.filter(error => !/Failed to fetch|NetworkError|Unexpected token|is not valid JSON|404|Load failed/.test(error))
+    // An example may leave nothing held that it no longer shows: it is code people copy
+    const leaks = JSON.parse((dom.match(/data-leaks="([^"]*)"/)?.[1] ?? "null").replaceAll("&quot;", '"').replaceAll("&amp;", "&")) as {mountedOffPage: string[], neverPlaced: string[], heldOffPage: number} | null
+    const leaked = leaks && (leaks.mountedOffPage.length + leaks.neverPlaced.length + leaks.heldOffPage > 0)
     if (real.length > 0 || !dom.includes("data-errors")) {
         failed++
         console.log(`FAIL ${file}: ${real.length > 0 ? real.join("; ") : "the page did not finish loading"}`)
+    } else if (leaked) {
+        failed++
+        console.log(`FAIL ${file}: velotype holds what the page no longer shows ${JSON.stringify(leaks)}`)
     } else {
         console.log(`ok   ${file}`)
     }
