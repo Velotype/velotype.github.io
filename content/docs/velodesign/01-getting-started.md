@@ -11,7 +11,7 @@ Every example in these docs is a file that is type-checked against the published
 velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.4.1 uses velotype 0.3, so add both and use the same velotype version everywhere in the app. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.5 jsr:@velotype/velodesign@0.4.1
+deno add jsr:@velotype/velotype@0.3.6 jsr:@velotype/velodesign@0.4.1
 ```
 
 ```json

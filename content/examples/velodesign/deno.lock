@@ -2,25 +2,25 @@
   "version": "5",
   "specifiers": {
     "jsr:@velotype/velodesign@0.4.1": "0.4.1",
-    "jsr:@velotype/velotype@0.3.5": "0.3.5",
-    "jsr:@velotype/velotype@~0.3.1": "0.3.5"
+    "jsr:@velotype/velotype@0.3.6": "0.3.6",
+    "jsr:@velotype/velotype@~0.3.1": "0.3.6"
   },
   "jsr": {
     "@velotype/velodesign@0.4.1": {
       "integrity": "4474728f90af69c6e81b9b4ec1cb3d27b185a7b08b8b8a20d3e1cb4fdcd76df2",
       "dependencies": [
-        "jsr:@velotype/velotype@0.3.5",
+        "jsr:@velotype/velotype@0.3.6",
         "jsr:@velotype/velotype@~0.3.1"
       ]
     },
-    "@velotype/velotype@0.3.5": {
-      "integrity": "f862e21bd9e62d277c4ca48559db2df77192279b510acd4321368ff22559a3fd"
+    "@velotype/velotype@0.3.6": {
+      "integrity": "2e599025818d6a7f4da774a7e1ffd0ec9d95c38741a012c684752513ca632e30"
     }
   },
   "workspace": {
     "dependencies": [
       "jsr:@velotype/velodesign@0.4.1",
-      "jsr:@velotype/velotype@0.3.5"
+      "jsr:@velotype/velotype@0.3.6"
     ]
   }
 }

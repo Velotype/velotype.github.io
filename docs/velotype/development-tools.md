@@ -35,3 +35,21 @@ import { __vtAppMetadata, getDevtoolsHook } from "@velotype/velotype/devtools"
 console.log(__vtAppMetadata)
 console.log(getDevtoolsHook())
 ```
+## Finding leaks
+
+From velotype 0.3.6, `findLeaks()` from `@velotype/velotype/devtools` lists what every velotype instance on the page still holds that the page no longer shows. Run it in tests, or while developing, once the page has settled:
+
+* `mountedOffPage`: Components still mounted while their element is off the page. They were taken out with a DOM call rather than through velotype, so what their `mount()` started keeps running
+* `neverPlaced`: Components created and never placed
+* `heldOffPage`: RenderObjects held while nothing drawn from them is on the page, such as one in a `#private` field that its Component didn't [release](/docs/velotype/render-objects/#releasing-a-renderobject)
+
+Each stays in memory for as long as the page is open, so each is a leak, except one kept on purpose to be placed later. A view that holds data before drawing it lists it too, so in an app, look for what grows each time a view is visited. Rows that `filter()` hid are kept mounted on purpose and aren't listed.
+
+```tsx
+import {findLeaks} from "@velotype/velotype/devtools"
+
+const leaks = findLeaks()
+if (leaks.mountedOffPage.length + leaks.neverPlaced.length + leaks.heldOffPage.length > 0) {
+    console.error("leaks", leaks)
+}
+```

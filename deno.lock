@@ -14,8 +14,8 @@
     "jsr:@std/streams@^1.2.0": "1.2.0",
     "jsr:@velotype/velodesign@~0.4.1": "0.4.2",
     "jsr:@velotype/velojson@0.2": "0.2.0",
-    "jsr:@velotype/velotype@~0.3.1": "0.3.5",
-    "jsr:@velotype/velotype@~0.3.5": "0.3.5",
+    "jsr:@velotype/velotype@~0.3.1": "0.3.6",
+    "jsr:@velotype/velotype@~0.3.6": "0.3.6",
     "npm:marked@15.0.12": "15.0.12"
   },
   "jsr": {
@@ -70,14 +70,14 @@
       "integrity": "8351b5f662db25b1005a4ab05dd294ce3e27e9aa70998e9c32f2d76de607bb0e",
       "dependencies": [
         "jsr:@velotype/velotype@~0.3.1",
-        "jsr:@velotype/velotype@~0.3.5"
+        "jsr:@velotype/velotype@~0.3.6"
       ]
     },
     "@velotype/velojson@0.2.0": {
       "integrity": "a65b2cc002714446f5e5148f93b5b5246ab6152b41eef0f476d333c130234ba0"
     },
-    "@velotype/velotype@0.3.5": {
-      "integrity": "f862e21bd9e62d277c4ca48559db2df77192279b510acd4321368ff22559a3fd"
+    "@velotype/velotype@0.3.6": {
+      "integrity": "2e599025818d6a7f4da774a7e1ffd0ec9d95c38741a012c684752513ca632e30"
     }
   },
   "npm": {
@@ -90,7 +90,7 @@
     "dependencies": [
       "jsr:@velotype/velodesign@~0.4.1",
       "jsr:@velotype/velojson@0.2",
-      "jsr:@velotype/velotype@~0.3.5",
+      "jsr:@velotype/velotype@~0.3.6",
       "npm:marked@15.0.12"
     ]
   }
