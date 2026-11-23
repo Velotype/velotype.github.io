@@ -91,6 +91,10 @@
 <td>Adds to the start of an element</td>
 </tr>
 <tr>
+<td><code>get insertBeforeChild(): (child, newChild) =&gt; boolean</code></td>
+<td>Puts a new element just before an element (from 0.3.4)</td>
+</tr>
+<tr>
 <td><code>get replaceChildrenOfChild(): (child, newChildren) =&gt; boolean</code></td>
 <td>Replaces all of an element&#39;s children</td>
 </tr>
@@ -201,6 +205,10 @@
 <tr>
 <td><code>removeAll(): void</code></td>
 <td>Removes every rendered element</td>
+</tr>
+<tr>
+<td><code>release(): void</code></td>
+<td>Releases this RenderObject and the listeners it owns, for one in a <code>#private</code> field, a Map, or a variable (from 0.3.5)</td>
 </tr>
 <tr>
 <td><code>readonly vtKey: number</code></td>
@@ -430,6 +438,7 @@ type RenderTemplateArrayOptions&lt;DataType, UpdateRefsType = any, RowElementTyp
 <td>The attrs of <code>HTML</code>, <code>SVG</code>, and <code>MATH</code></td>
 </tr>
 </tbody></table>
+<p>Every HTML element in TSX also takes <code>vtwith?: RenderObject&lt;any&gt;[]</code>: RenderObjects that mount, unmount, and are released with that element. See <a href="/docs/velotype/render-objects/#releasing-a-renderobject">Releasing a RenderObject</a>.</p>
 <p>The package also exports the DOM and JSX types (<code>HTMLAttributes</code>, event handler types, ARIA types, and CSS value types) that type-check TSX.</p>
 <h2 id="entry-points">Entry points</h2>
 <table>

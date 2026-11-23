@@ -156,7 +156,9 @@ replaceElementWithRoot(
 <li>A Component mounts and unmounts once. Once velotype removes it, it is released, and inserting its element again does not mount it (velotype warns in the console). Create a new Component instead</li>
 <li>velotype mounts Components that are inserted through velotype: <code>replaceElementWithRoot()</code>, a Component&#39;s child methods, and RenderObjects. An element inserted with DOM methods such as <code>appendChild()</code> is not mounted</li>
 <li>Likewise velotype unmounts Components that are removed through velotype: <code>removeElementRoot()</code>, a Component&#39;s child methods, <code>refresh()</code>, and RenderObjects. An element removed with DOM methods is not unmounted</li>
-<li>The RenderObjects in a Component&#39;s fields mount and unmount with it (calling their <code>registerOnMount()</code> callbacks), and the ones in public fields are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a <code>#private</code> field</li>
+<li>The RenderObjects in a Component&#39;s public fields mount and unmount with it (calling their <code>registerOnMount()</code> callbacks), and are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a <code>#private</code> field. velotype can&#39;t see a <code>#private</code> one, so see <a href="/docs/velotype/render-objects/#releasing-a-renderobject">Releasing a RenderObject</a></li>
+<li>A Component kept in a public field of another is shown only inside that Component&#39;s render, and is unmounted and released with it. One shown somewhere else is unmounted there too, and stops working, so velotype warns (&quot;Field Component shown outside its holder&quot;). To share a Component, pass it in attrs or keep it in a <code>#private</code> field</li>
+<li>velotype holds each Component from when it is created until it is released: when velotype takes it off the page, or with the Component that holds it in a public field. So create a Component only to place it, since one that is never placed is never released</li>
 <li>Errors thrown by <code>mount()</code> and <code>unmount()</code> are reported with <code>reportError()</code>, and the other Components still run. See <a href="/docs/velotype/events-and-errors/#when-code-throws">Errors</a></li>
 </ul>
 <h3 id="prefer-renderobjects-to-refresh">Prefer RenderObjects to refresh()</h3>
@@ -220,6 +222,10 @@ export class Greeting extends Component&lt;EmptyAttrs&gt; {
 <td>Adds <code>newChild</code> to the start of <code>child</code></td>
 </tr>
 <tr>
+<td><code>insertBeforeChild(child, newChild)</code></td>
+<td>Puts <code>newChild</code> just before <code>child</code> (from 0.3.4)</td>
+</tr>
+<tr>
 <td><code>replaceChildrenOfChild(child, newChildren)</code></td>
 <td>Replaces all of <code>child</code>&#39;s children</td>
 </tr>
@@ -228,7 +234,8 @@ export class Greeting extends Component&lt;EmptyAttrs&gt; {
 <td>Removes <code>child</code></td>
 </tr>
 </tbody></table>
-<p>The methods return <code>false</code> (or <code>child</code>, for <code>replaceChild()</code>) and change nothing when <code>child</code> is not part of this Component&#39;s render.</p>
+<p>The methods return <code>false</code> (or <code>child</code>, for <code>replaceChild()</code>) and change nothing when <code>child</code> is not part of this Component&#39;s render. <code>insertBeforeChild()</code> also returns <code>false</code> when <code>child</code> is the root element, which has no place inside the render to insert before.</p>
+<p>The child methods and <code>refresh()</code> need the Component&#39;s first render, so they throw an <code>Error</code> when they are called in its constructor or in <code>render()</code>. Draw the first content in the TSX that <code>render()</code> returns, from a method that later updates call again.</p>
 <pre><code class="language-tsx">import { Component, type EmptyAttrs } from &quot;@velotype/velotype&quot;
 
 // A Component&#39;s child methods change one element inside what it rendered, without a refresh().
@@ -244,9 +251,11 @@ export class Panel extends Component&lt;EmptyAttrs&gt; {
             // replaceChild() returns the new element
             this.body = this.replaceChild(this.body, &lt;div&gt;{text}&lt;/div&gt;) as HTMLElement
 
-            // add to the end or start of an element
-            this.appendToChild(this.list, &lt;li&gt;third&lt;/li&gt;)
+            // add to the end or start of an element, or just before one
+            const third: HTMLElement = &lt;li&gt;third&lt;/li&gt;
+            this.appendToChild(this.list, third)
             this.prependToChild(this.list, &lt;li&gt;first&lt;/li&gt;)
+            this.insertBeforeChild(third, &lt;li&gt;between second and third&lt;/li&gt;)
 
             // replace all of an element&#39;s children
             this.replaceChildrenOfChild(this.list, [&lt;li&gt;one&lt;/li&gt;, &lt;li&gt;two&lt;/li&gt;])

@@ -155,7 +155,9 @@ replaceElementWithRoot(
 * A Component mounts and unmounts once. Once velotype removes it, it is released, and inserting its element again does not mount it (velotype warns in the console). Create a new Component instead
 * velotype mounts Components that are inserted through velotype: `replaceElementWithRoot()`, a Component's child methods, and RenderObjects. An element inserted with DOM methods such as `appendChild()` is not mounted
 * Likewise velotype unmounts Components that are removed through velotype: `removeElementRoot()`, a Component's child methods, `refresh()`, and RenderObjects. An element removed with DOM methods is not unmounted
-* The RenderObjects in a Component's fields mount and unmount with it (calling their `registerOnMount()` callbacks), and the ones in public fields are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a `#private` field
+* The RenderObjects in a Component's public fields mount and unmount with it (calling their `registerOnMount()` callbacks), and are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a `#private` field. velotype can't see a `#private` one, so see [Releasing a RenderObject](/docs/velotype/render-objects/#releasing-a-renderobject)
+* A Component kept in a public field of another is shown only inside that Component's render, and is unmounted and released with it. One shown somewhere else is unmounted there too, and stops working, so velotype warns ("Field Component shown outside its holder"). To share a Component, pass it in attrs or keep it in a `#private` field
+* velotype holds each Component from when it is created until it is released: when velotype takes it off the page, or with the Component that holds it in a public field. So create a Component only to place it, since one that is never placed is never released
 * Errors thrown by `mount()` and `unmount()` are reported with `reportError()`, and the other Components still run. See [Errors](/docs/velotype/events-and-errors/#when-code-throws)
 
 ### Prefer RenderObjects to refresh()
@@ -212,10 +214,13 @@ A Component's child methods change one element inside what it rendered, without 
 | `replaceChild(child, newChild)` | Replaces `child`, and returns the new element |
 | `appendToChild(child, newChild)` | Adds `newChild` to the end of `child` |
 | `prependToChild(child, newChild)` | Adds `newChild` to the start of `child` |
+| `insertBeforeChild(child, newChild)` | Puts `newChild` just before `child` (from 0.3.4) |
 | `replaceChildrenOfChild(child, newChildren)` | Replaces all of `child`'s children |
 | `removeChild(child)` | Removes `child` |
 
-The methods return `false` (or `child`, for `replaceChild()`) and change nothing when `child` is not part of this Component's render.
+The methods return `false` (or `child`, for `replaceChild()`) and change nothing when `child` is not part of this Component's render. `insertBeforeChild()` also returns `false` when `child` is the root element, which has no place inside the render to insert before.
+
+The child methods and `refresh()` need the Component's first render, so they throw an `Error` when they are called in its constructor or in `render()`. Draw the first content in the TSX that `render()` returns, from a method that later updates call again.
 
 ```tsx
 import { Component, type EmptyAttrs } from "@velotype/velotype"
@@ -233,9 +238,11 @@ export class Panel extends Component<EmptyAttrs> {
             // replaceChild() returns the new element
             this.body = this.replaceChild(this.body, <div>{text}</div>) as HTMLElement
 
-            // add to the end or start of an element
-            this.appendToChild(this.list, <li>third</li>)
+            // add to the end or start of an element, or just before one
+            const third: HTMLElement = <li>third</li>
+            this.appendToChild(this.list, third)
             this.prependToChild(this.list, <li>first</li>)
+            this.insertBeforeChild(third, <li>between second and third</li>)
 
             // replace all of an element's children
             this.replaceChildrenOfChild(this.list, [<li>one</li>, <li>two</li>])

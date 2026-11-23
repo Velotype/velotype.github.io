@@ -75,7 +75,7 @@ When a filter is set, the other data points stay in the Array with their rows ke
 
 The predicate is applied to data points added later, and to one changed with `setAt()`. Call `filter()` again when what it tests for has changed, such as the text in a search box.
 
-In a RenderObjectArray, the Components in a row that is filtered out stay mounted while it is out of the page, and a row added while filtered out mounts when it is first shown.
+In a RenderObjectArray, the Components in a row that is filtered out stay mounted while it is out of the page, and a row added while filtered out mounts when it is first shown. When a place where the Array is rendered leaves the page, the rows filtered out of that place are unmounted and released with it.
 
 Taking rows out of the page is faster than hiding them with `hidden` or `display: none`: the browser does less work for each change when a list has fewer rows, and showing them again is faster than rendering them again.
 

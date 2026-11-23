@@ -34,9 +34,9 @@ The docs and their examples were type-checked, and run, against these published 
 - @velotype/velomini 0.0.3: https://jsr.io/@velotype/velomini
 - @velotype/veloserver 0.3.2: https://jsr.io/@velotype/veloserver
 - @velotype/velossr 0.0.11: https://jsr.io/@velotype/velossr
-- @velotype/velotype 0.3.3: https://jsr.io/@velotype/velotype
+- @velotype/velotype 0.3.5: https://jsr.io/@velotype/velotype
 
-velodesign 0.4.1 is built on velotype 0.3.3, so use that velotype version with it.
+velodesign 0.4.1 is built on velotype 0.3.5, so use that velotype version with it.
 
 
 ---
@@ -56,7 +56,7 @@ Every example in these docs is a file that is type-checked against the published
 velochart is a [JSR package](https://jsr.io/@velotype/velochart) for Deno, built on velotype. Add it with the same velotype as the rest of your app, because mixing velotype versions in one app is not supported. The example below also uses velodesign for its theme.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.1 jsr:@velotype/velochart@0.0.3
+deno add jsr:@velotype/velotype@0.3.5 jsr:@velotype/velodesign@0.4.1 jsr:@velotype/velochart@0.0.3
 ```
 
 ```json
@@ -618,7 +618,7 @@ Every example in these docs is a file that is type-checked against the published
 velodesign is a [JSR package](https://jsr.io/@velotype/velodesign) for Deno. It is built on velotype, and velodesign 0.4.1 uses velotype 0.3, so add both and use the same velotype version everywhere in the app. Mixing velotype versions in one app is not supported.
 
 ```sh
-deno add jsr:@velotype/velotype@0.3.3 jsr:@velotype/velodesign@0.4.1
+deno add jsr:@velotype/velotype@0.3.5 jsr:@velotype/velodesign@0.4.1
 ```
 
 ```json
@@ -3608,7 +3608,9 @@ replaceElementWithRoot(
 * A Component mounts and unmounts once. Once velotype removes it, it is released, and inserting its element again does not mount it (velotype warns in the console). Create a new Component instead
 * velotype mounts Components that are inserted through velotype: `replaceElementWithRoot()`, a Component's child methods, and RenderObjects. An element inserted with DOM methods such as `appendChild()` is not mounted
 * Likewise velotype unmounts Components that are removed through velotype: `removeElementRoot()`, a Component's child methods, `refresh()`, and RenderObjects. An element removed with DOM methods is not unmounted
-* The RenderObjects in a Component's fields mount and unmount with it (calling their `registerOnMount()` callbacks), and the ones in public fields are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a `#private` field
+* The RenderObjects in a Component's public fields mount and unmount with it (calling their `registerOnMount()` callbacks), and are released when it unmounts. To share a RenderObject between Components, pass it in attrs or keep it in a `#private` field. velotype can't see a `#private` one, so see [Releasing a RenderObject](/docs/velotype/render-objects/#releasing-a-renderobject)
+* A Component kept in a public field of another is shown only inside that Component's render, and is unmounted and released with it. One shown somewhere else is unmounted there too, and stops working, so velotype warns ("Field Component shown outside its holder"). To share a Component, pass it in attrs or keep it in a `#private` field
+* velotype holds each Component from when it is created until it is released: when velotype takes it off the page, or with the Component that holds it in a public field. So create a Component only to place it, since one that is never placed is never released
 * Errors thrown by `mount()` and `unmount()` are reported with `reportError()`, and the other Components still run. See [Errors](/docs/velotype/events-and-errors/#when-code-throws)
 
 ### Prefer RenderObjects to refresh()
@@ -3665,10 +3667,13 @@ A Component's child methods change one element inside what it rendered, without 
 | `replaceChild(child, newChild)` | Replaces `child`, and returns the new element |
 | `appendToChild(child, newChild)` | Adds `newChild` to the end of `child` |
 | `prependToChild(child, newChild)` | Adds `newChild` to the start of `child` |
+| `insertBeforeChild(child, newChild)` | Puts `newChild` just before `child` (from 0.3.4) |
 | `replaceChildrenOfChild(child, newChildren)` | Replaces all of `child`'s children |
 | `removeChild(child)` | Removes `child` |
 
-The methods return `false` (or `child`, for `replaceChild()`) and change nothing when `child` is not part of this Component's render.
+The methods return `false` (or `child`, for `replaceChild()`) and change nothing when `child` is not part of this Component's render. `insertBeforeChild()` also returns `false` when `child` is the root element, which has no place inside the render to insert before.
+
+The child methods and `refresh()` need the Component's first render, so they throw an `Error` when they are called in its constructor or in `render()`. Draw the first content in the TSX that `render()` returns, from a method that later updates call again.
 
 ```tsx
 import { Component, type EmptyAttrs } from "@velotype/velotype"
@@ -3686,9 +3691,11 @@ export class Panel extends Component<EmptyAttrs> {
             // replaceChild() returns the new element
             this.body = this.replaceChild(this.body, <div>{text}</div>) as HTMLElement
 
-            // add to the end or start of an element
-            this.appendToChild(this.list, <li>third</li>)
+            // add to the end or start of an element, or just before one
+            const third: HTMLElement = <li>third</li>
+            this.appendToChild(this.list, third)
             this.prependToChild(this.list, <li>first</li>)
+            this.insertBeforeChild(third, <li>between second and third</li>)
 
             // replace all of an element's children
             this.replaceChildrenOfChild(this.list, [<li>one</li>, <li>two</li>])
@@ -3776,7 +3783,7 @@ Source: https://velotype.github.io/docs/velotype/render-objects/
 
 A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how velotype updates the page in place, without a virtual DOM.
 
-Create RenderObjects as fields of Component classes. Using them in any other way is advanced behavior.
+Create RenderObjects as public fields of Component classes, and velotype mounts and releases them with the Component. A RenderObject made anywhere else is released by the code that made it: see [Releasing a RenderObject](#releasing-a-renderobject).
 
 ## RenderObject
 
@@ -3827,8 +3834,7 @@ class PersonSelector extends Component<EmptyAttrs> {
 }
 
 // get() and set() do the same as reading and writing value
-const selector = new PersonSelector({}, [])
-void selector
+void PersonSelector
 
 // When a value that is an object or Array is changed in place, render it again with rerenderElements()
 class TagList extends Component<EmptyAttrs> {
@@ -3852,7 +3858,7 @@ When a value that is an object or an Array is changed in place, `!==` sees no ch
 ### Listening for changes
 
 * `registerOnChangeListener(listener, options)` runs `listener` after each change of `value`
-* `registerOnMount(onMount, onUnmount)` adds callbacks that run when the Component whose field holds the RenderObject mounts and unmounts
+* `registerOnMount(onMount, onUnmount)` adds callbacks that run when the Component whose public field holds the RenderObject mounts and unmounts, or the element whose `vtwith` lists it
 
 Both return the RenderObject, so they can be chained onto its creation. The options of `registerOnChangeListener()` are:
 
@@ -3932,6 +3938,52 @@ class ScoreBoard extends Component<EmptyAttrs> {
 }
 void ScoreBoard
 ```
+## Releasing a RenderObject
+
+velotype holds a RenderObject from when it is created until it is released, with the listeners it owns. It releases the ones in a Component's public fields when that Component unmounts. It can't see any other: one in a `#private` field, a Map, or a variable. One that is never released is held for as long as the page is open, with everything its render function refers to.
+
+* **A RenderObject a Component keeps** in a `#private` field, or makes again in `render()`, is released with `release()` from the Component's `unmount()`, and before the next one is made (from 0.3.5)
+* **A RenderObject made while drawing**, in a function component or in a method that returns elements, is listed in `vtwith={[...]}` on an element drawn with it. It mounts, unmounts, and is released with that element. The element may be the root that a function component, a Component's `render()`, or a RenderObject returns (from 0.3.5; before, such a root was wrapped in a `display: contents` element), and `refresh()` or a new value releases the ones of the root it replaces
+* **A RenderObject that is shared**, and is meant to outlive the Component that made it, is not released
+
+`release()` does not remove the elements the RenderObject has rendered, so release one only when it is shown nowhere else, and don't place it again. A RenderObjectArray releases its rows with it.
+
+```tsx
+import { Component, type EmptyAttrs, RenderObject, RenderObjectArray, replaceElementWithRoot } from "@velotype/velotype"
+
+// velotype releases the RenderObjects in a Component's public fields when it unmounts. Any other
+// is released by the code that made it.
+
+// A #private field: released in unmount() with release()
+class Notes extends Component<EmptyAttrs> {
+    #notes = new RenderObjectArray<string>({renderFunction: (note: string) => <li>{note}</li>})
+
+    override unmount() {
+        this.#notes.release()
+    }
+
+    override render() {
+        return <div>
+            <button type="button" onClick={() => this.#notes.push(`Note ${this.#notes.length + 1}`)}>Add a note</button>
+            <ul>{this.#notes}</ul>
+        </div>
+    }
+}
+
+// Made while drawing: listed in vtwith on an element drawn with it, here the function's root,
+// and released when that element leaves the page
+function Counter(attrs: {label: string}) {
+    const count = new RenderObject<number>(0, (n: number) => <strong>{String(n)}</strong>)
+    return <p vtwith={[count]}>
+        {attrs.label}: {count} <button type="button" onClick={() => count.set(count.get() + 1)}>+1</button>
+    </p>
+}
+
+replaceElementWithRoot(<div>
+    <Notes/>
+    <Counter label="Clicks"/>
+</div>, document.getElementById("app"))
+```
 ## RenderBasic
 
 `RenderBasic<DataType>` is a RenderObject for a `string`, `number`, `bigint`, or `boolean`. It renders its value as text inside a `<span style="display:contents;">` and updates that text in place, so it needs no render function.
@@ -3964,6 +4016,7 @@ void Counter
 |---|---|
 | `getElements()` | The elements this RenderObject has rendered. Advanced: use carefully |
 | `removeAll()` | Removes every element this RenderObject has rendered |
+| `release()` | Releases this RenderObject, for one velotype can't see (from 0.3.5). See [Releasing a RenderObject](#releasing-a-renderobject) |
 | `render(renderFunction, handleUpdate?)` | Renders one more element with a different render function than the default |
 
 ---
@@ -4236,7 +4289,7 @@ When a filter is set, the other data points stay in the Array with their rows ke
 
 The predicate is applied to data points added later, and to one changed with `setAt()`. Call `filter()` again when what it tests for has changed, such as the text in a search box.
 
-In a RenderObjectArray, the Components in a row that is filtered out stay mounted while it is out of the page, and a row added while filtered out mounts when it is first shown.
+In a RenderObjectArray, the Components in a row that is filtered out stay mounted while it is out of the page, and a row added while filtered out mounts when it is first shown. When a place where the Array is rendered leaves the page, the rows filtered out of that place are unmounted and released with it.
 
 Taking rows out of the page is faster than hiding them with `hidden` or `display: none`: the browser does less work for each change when a list has fewer rows, and showing them again is faster than rendering them again.
 
@@ -4718,6 +4771,7 @@ Everything `@velotype/velotype` exports, by area. Types are shown as they appear
 | `get replaceChild(): (child, newChild) => AnchorElement` | Replaces one element of this Component's render |
 | `get appendToChild(): (child, newChild) => boolean` | Adds to the end of an element |
 | `get prependToChild(): (child, newChild) => boolean` | Adds to the start of an element |
+| `get insertBeforeChild(): (child, newChild) => boolean` | Puts a new element just before an element (from 0.3.4) |
 | `get replaceChildrenOfChild(): (child, newChildren) => boolean` | Replaces all of an element's children |
 | `get removeChild(): (child) => boolean` | Removes an element |
 
@@ -4763,6 +4817,7 @@ See [Events and errors](/docs/velotype/events-and-errors/#errorboundary).
 | `render(renderFunction, handleUpdate?): AnchorElement` | Renders one more element with another render function |
 | `getElements(): AnchorElement[]` | The rendered elements. Advanced |
 | `removeAll(): void` | Removes every rendered element |
+| `release(): void` | Releases this RenderObject and the listeners it owns, for one in a `#private` field, a Map, or a variable (from 0.3.5) |
 | `readonly vtKey: number` | This RenderObject's key |
 
 See [RenderObjects](/docs/velotype/render-objects/).
@@ -4876,6 +4931,8 @@ See [Styling and raw HTML](/docs/velotype/styling-and-raw-html/).
 | `VelotypeEventListener` | `(event: VelotypeEvent) => void` |
 | `StyleSection` | A stylesheet that `setStylesheet()` added |
 | `HTMLAttrsType`, `SVGAttrsType`, `MATHAttrsType` | The attrs of `HTML`, `SVG`, and `MATH` |
+
+Every HTML element in TSX also takes `vtwith?: RenderObject<any>[]`: RenderObjects that mount, unmount, and are released with that element. See [Releasing a RenderObject](/docs/velotype/render-objects/#releasing-a-renderobject).
 
 The package also exports the DOM and JSX types (`HTMLAttributes`, event handler types, ARIA types, and CSS value types) that type-check TSX.
 

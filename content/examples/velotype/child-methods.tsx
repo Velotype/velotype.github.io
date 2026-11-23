@@ -13,9 +13,11 @@ export class Panel extends Component<EmptyAttrs> {
             // replaceChild() returns the new element
             this.body = this.replaceChild(this.body, <div>{text}</div>) as HTMLElement
 
-            // add to the end or start of an element
-            this.appendToChild(this.list, <li>third</li>)
+            // add to the end or start of an element, or just before one
+            const third: HTMLElement = <li>third</li>
+            this.appendToChild(this.list, third)
             this.prependToChild(this.list, <li>first</li>)
+            this.insertBeforeChild(third, <li>between second and third</li>)
 
             // replace all of an element's children
             this.replaceChildrenOfChild(this.list, [<li>one</li>, <li>two</li>])
