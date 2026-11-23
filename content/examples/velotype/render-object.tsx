@@ -40,8 +40,7 @@ class PersonSelector extends Component<EmptyAttrs> {
 }
 
 // get() and set() do the same as reading and writing value
-const selector = new PersonSelector({}, [])
-void selector
+void PersonSelector
 
 // When a value that is an object or Array is changed in place, render it again with rerenderElements()
 class TagList extends Component<EmptyAttrs> {

@@ -4,34 +4,34 @@
     "jsr:@velotype/velochart@0.0.3": "0.0.3",
     "jsr:@velotype/velodesign@0.4.1": "0.4.1",
     "jsr:@velotype/velodesign@~0.4.1": "0.4.1",
-    "jsr:@velotype/velotype@0.3.3": "0.3.3",
-    "jsr:@velotype/velotype@~0.3.1": "0.3.3"
+    "jsr:@velotype/velotype@0.3.5": "0.3.5",
+    "jsr:@velotype/velotype@~0.3.1": "0.3.5"
   },
   "jsr": {
     "@velotype/velochart@0.0.3": {
       "integrity": "3ecd25ae95e6d4496b1fc22e99272483a19770172f8d664c491902c74d7fb47e",
       "dependencies": [
         "jsr:@velotype/velodesign@~0.4.1",
-        "jsr:@velotype/velotype@0.3.3",
+        "jsr:@velotype/velotype@0.3.5",
         "jsr:@velotype/velotype@~0.3.1"
       ]
     },
     "@velotype/velodesign@0.4.1": {
       "integrity": "4474728f90af69c6e81b9b4ec1cb3d27b185a7b08b8b8a20d3e1cb4fdcd76df2",
       "dependencies": [
-        "jsr:@velotype/velotype@0.3.3",
+        "jsr:@velotype/velotype@0.3.5",
         "jsr:@velotype/velotype@~0.3.1"
       ]
     },
-    "@velotype/velotype@0.3.3": {
-      "integrity": "86b554962b03242d795172132d1f9be5b256cbdf3e840432e0ad641e61e60bdb"
+    "@velotype/velotype@0.3.5": {
+      "integrity": "f862e21bd9e62d277c4ca48559db2df77192279b510acd4321368ff22559a3fd"
     }
   },
   "workspace": {
     "dependencies": [
       "jsr:@velotype/velochart@0.0.3",
       "jsr:@velotype/velodesign@0.4.1",
-      "jsr:@velotype/velotype@0.3.3"
+      "jsr:@velotype/velotype@0.3.5"
     ]
   }
 }

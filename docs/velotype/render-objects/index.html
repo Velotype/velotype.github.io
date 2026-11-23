@@ -15,7 +15,7 @@
 <div id="app"><article id="doc">
 <h1 id="renderobjects">RenderObjects</h1>
 <p>A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how velotype updates the page in place, without a virtual DOM.</p>
-<p>Create RenderObjects as fields of Component classes. Using them in any other way is advanced behavior.</p>
+<p>Create RenderObjects as public fields of Component classes, and velotype mounts and releases them with the Component. A RenderObject made anywhere else is released by the code that made it: see <a href="#releasing-a-renderobject">Releasing a RenderObject</a>.</p>
 <h2 id="renderobject">RenderObject</h2>
 <p><code>new RenderObject&lt;DataType&gt;(initialValue, renderFunction)</code> holds a value and a function that renders a value into an element. Put the RenderObject in TSX as a child and it renders there. Put it in as many places as you like, and each one is rendered.</p>
 <p>Setting <code>value</code> (or calling <code>set()</code>) renders the new value only when it is a different value (<code>!==</code>). <code>get()</code> and <code>value</code> read it.</p>
@@ -61,8 +61,7 @@ class PersonSelector extends Component&lt;EmptyAttrs&gt; {
 }
 
 // get() and set() do the same as reading and writing value
-const selector = new PersonSelector({}, [])
-void selector
+void PersonSelector
 
 // When a value that is an object or Array is changed in place, render it again with rerenderElements()
 class TagList extends Component&lt;EmptyAttrs&gt; {
@@ -85,7 +84,7 @@ void TagList
 <h3 id="listening-for-changes">Listening for changes</h3>
 <ul>
 <li><code>registerOnChangeListener(listener, options)</code> runs <code>listener</code> after each change of <code>value</code></li>
-<li><code>registerOnMount(onMount, onUnmount)</code> adds callbacks that run when the Component whose field holds the RenderObject mounts and unmounts</li>
+<li><code>registerOnMount(onMount, onUnmount)</code> adds callbacks that run when the Component whose public field holds the RenderObject mounts and unmounts, or the element whose <code>vtwith</code> lists it</li>
 </ul>
 <p>Both return the RenderObject, so they can be chained onto its creation. The options of <code>registerOnChangeListener()</code> are:</p>
 <table>
@@ -174,6 +173,49 @@ class ScoreBoard extends Component&lt;EmptyAttrs&gt; {
 }
 void ScoreBoard
 </code></pre>
+<h2 id="releasing-a-renderobject">Releasing a RenderObject</h2>
+<p>velotype holds a RenderObject from when it is created until it is released, with the listeners it owns. It releases the ones in a Component&#39;s public fields when that Component unmounts. It can&#39;t see any other: one in a <code>#private</code> field, a Map, or a variable. One that is never released is held for as long as the page is open, with everything its render function refers to.</p>
+<ul>
+<li><strong>A RenderObject a Component keeps</strong> in a <code>#private</code> field, or makes again in <code>render()</code>, is released with <code>release()</code> from the Component&#39;s <code>unmount()</code>, and before the next one is made (from 0.3.5)</li>
+<li><strong>A RenderObject made while drawing</strong>, in a function component or in a method that returns elements, is listed in <code>vtwith={[...]}</code> on an element drawn with it. It mounts, unmounts, and is released with that element. The element may be the root that a function component, a Component&#39;s <code>render()</code>, or a RenderObject returns (from 0.3.5; before, such a root was wrapped in a <code>display: contents</code> element), and <code>refresh()</code> or a new value releases the ones of the root it replaces</li>
+<li><strong>A RenderObject that is shared</strong>, and is meant to outlive the Component that made it, is not released</li>
+</ul>
+<p><code>release()</code> does not remove the elements the RenderObject has rendered, so release one only when it is shown nowhere else, and don&#39;t place it again. A RenderObjectArray releases its rows with it.</p>
+<pre><code class="language-tsx">import { Component, type EmptyAttrs, RenderObject, RenderObjectArray, replaceElementWithRoot } from &quot;@velotype/velotype&quot;
+
+// velotype releases the RenderObjects in a Component&#39;s public fields when it unmounts. Any other
+// is released by the code that made it.
+
+// A #private field: released in unmount() with release()
+class Notes extends Component&lt;EmptyAttrs&gt; {
+    #notes = new RenderObjectArray&lt;string&gt;({renderFunction: (note: string) =&gt; &lt;li&gt;{note}&lt;/li&gt;})
+
+    override unmount() {
+        this.#notes.release()
+    }
+
+    override render() {
+        return &lt;div&gt;
+            &lt;button type=&quot;button&quot; onClick={() =&gt; this.#notes.push(`Note ${this.#notes.length + 1}`)}&gt;Add a note&lt;/button&gt;
+            &lt;ul&gt;{this.#notes}&lt;/ul&gt;
+        &lt;/div&gt;
+    }
+}
+
+// Made while drawing: listed in vtwith on an element drawn with it, here the function&#39;s root,
+// and released when that element leaves the page
+function Counter(attrs: {label: string}) {
+    const count = new RenderObject&lt;number&gt;(0, (n: number) =&gt; &lt;strong&gt;{String(n)}&lt;/strong&gt;)
+    return &lt;p vtwith={[count]}&gt;
+        {attrs.label}: {count} &lt;button type=&quot;button&quot; onClick={() =&gt; count.set(count.get() + 1)}&gt;+1&lt;/button&gt;
+    &lt;/p&gt;
+}
+
+replaceElementWithRoot(&lt;div&gt;
+    &lt;Notes/&gt;
+    &lt;Counter label=&quot;Clicks&quot;/&gt;
+&lt;/div&gt;, document.getElementById(&quot;app&quot;))
+</code></pre>
 <h2 id="renderbasic">RenderBasic</h2>
 <p><code>RenderBasic&lt;DataType&gt;</code> is a RenderObject for a <code>string</code>, <code>number</code>, <code>bigint</code>, or <code>boolean</code>. It renders its value as text inside a <code>&lt;span style=&quot;display:contents;&quot;&gt;</code> and updates that text in place, so it needs no render function.</p>
 <p>It adds <code>getString()</code> and <code>setString()</code>, which convert the value to and from a string.</p>
@@ -211,6 +253,10 @@ void Counter
 <tr>
 <td><code>removeAll()</code></td>
 <td>Removes every element this RenderObject has rendered</td>
+</tr>
+<tr>
+<td><code>release()</code></td>
+<td>Releases this RenderObject, for one velotype can&#39;t see (from 0.3.5). See <a href="#releasing-a-renderobject">Releasing a RenderObject</a></td>
 </tr>
 <tr>
 <td><code>render(renderFunction, handleUpdate?)</code></td>

@@ -29,6 +29,7 @@ Everything `@velotype/velotype` exports, by area. Types are shown as they appear
 | `get replaceChild(): (child, newChild) => AnchorElement` | Replaces one element of this Component's render |
 | `get appendToChild(): (child, newChild) => boolean` | Adds to the end of an element |
 | `get prependToChild(): (child, newChild) => boolean` | Adds to the start of an element |
+| `get insertBeforeChild(): (child, newChild) => boolean` | Puts a new element just before an element (from 0.3.4) |
 | `get replaceChildrenOfChild(): (child, newChildren) => boolean` | Replaces all of an element's children |
 | `get removeChild(): (child) => boolean` | Removes an element |
 
@@ -74,6 +75,7 @@ See [Events and errors](/docs/velotype/events-and-errors/#errorboundary).
 | `render(renderFunction, handleUpdate?): AnchorElement` | Renders one more element with another render function |
 | `getElements(): AnchorElement[]` | The rendered elements. Advanced |
 | `removeAll(): void` | Removes every rendered element |
+| `release(): void` | Releases this RenderObject and the listeners it owns, for one in a `#private` field, a Map, or a variable (from 0.3.5) |
 | `readonly vtKey: number` | This RenderObject's key |
 
 See [RenderObjects](/docs/velotype/render-objects/).
@@ -187,6 +189,8 @@ See [Styling and raw HTML](/docs/velotype/styling-and-raw-html/).
 | `VelotypeEventListener` | `(event: VelotypeEvent) => void` |
 | `StyleSection` | A stylesheet that `setStylesheet()` added |
 | `HTMLAttrsType`, `SVGAttrsType`, `MATHAttrsType` | The attrs of `HTML`, `SVG`, and `MATH` |
+
+Every HTML element in TSX also takes `vtwith?: RenderObject<any>[]`: RenderObjects that mount, unmount, and are released with that element. See [Releasing a RenderObject](/docs/velotype/render-objects/#releasing-a-renderobject).
 
 The package also exports the DOM and JSX types (`HTMLAttributes`, event handler types, ARIA types, and CSS value types) that type-check TSX.
 

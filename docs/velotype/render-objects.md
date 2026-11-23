@@ -2,7 +2,7 @@
 
 A RenderObject holds a value and renders it to the page. When the value changes, every place it was rendered updates, and nothing else does. This is how velotype updates the page in place, without a virtual DOM.
 
-Create RenderObjects as fields of Component classes. Using them in any other way is advanced behavior.
+Create RenderObjects as public fields of Component classes, and velotype mounts and releases them with the Component. A RenderObject made anywhere else is released by the code that made it: see [Releasing a RenderObject](#releasing-a-renderobject).
 
 ## RenderObject
 
@@ -53,8 +53,7 @@ class PersonSelector extends Component<EmptyAttrs> {
 }
 
 // get() and set() do the same as reading and writing value
-const selector = new PersonSelector({}, [])
-void selector
+void PersonSelector
 
 // When a value that is an object or Array is changed in place, render it again with rerenderElements()
 class TagList extends Component<EmptyAttrs> {
@@ -78,7 +77,7 @@ When a value that is an object or an Array is changed in place, `!==` sees no ch
 ### Listening for changes
 
 * `registerOnChangeListener(listener, options)` runs `listener` after each change of `value`
-* `registerOnMount(onMount, onUnmount)` adds callbacks that run when the Component whose field holds the RenderObject mounts and unmounts
+* `registerOnMount(onMount, onUnmount)` adds callbacks that run when the Component whose public field holds the RenderObject mounts and unmounts, or the element whose `vtwith` lists it
 
 Both return the RenderObject, so they can be chained onto its creation. The options of `registerOnChangeListener()` are:
 
@@ -158,6 +157,52 @@ class ScoreBoard extends Component<EmptyAttrs> {
 }
 void ScoreBoard
 ```
+## Releasing a RenderObject
+
+velotype holds a RenderObject from when it is created until it is released, with the listeners it owns. It releases the ones in a Component's public fields when that Component unmounts. It can't see any other: one in a `#private` field, a Map, or a variable. One that is never released is held for as long as the page is open, with everything its render function refers to.
+
+* **A RenderObject a Component keeps** in a `#private` field, or makes again in `render()`, is released with `release()` from the Component's `unmount()`, and before the next one is made (from 0.3.5)
+* **A RenderObject made while drawing**, in a function component or in a method that returns elements, is listed in `vtwith={[...]}` on an element drawn with it. It mounts, unmounts, and is released with that element. The element may be the root that a function component, a Component's `render()`, or a RenderObject returns (from 0.3.5; before, such a root was wrapped in a `display: contents` element), and `refresh()` or a new value releases the ones of the root it replaces
+* **A RenderObject that is shared**, and is meant to outlive the Component that made it, is not released
+
+`release()` does not remove the elements the RenderObject has rendered, so release one only when it is shown nowhere else, and don't place it again. A RenderObjectArray releases its rows with it.
+
+```tsx
+import { Component, type EmptyAttrs, RenderObject, RenderObjectArray, replaceElementWithRoot } from "@velotype/velotype"
+
+// velotype releases the RenderObjects in a Component's public fields when it unmounts. Any other
+// is released by the code that made it.
+
+// A #private field: released in unmount() with release()
+class Notes extends Component<EmptyAttrs> {
+    #notes = new RenderObjectArray<string>({renderFunction: (note: string) => <li>{note}</li>})
+
+    override unmount() {
+        this.#notes.release()
+    }
+
+    override render() {
+        return <div>
+            <button type="button" onClick={() => this.#notes.push(`Note ${this.#notes.length + 1}`)}>Add a note</button>
+            <ul>{this.#notes}</ul>
+        </div>
+    }
+}
+
+// Made while drawing: listed in vtwith on an element drawn with it, here the function's root,
+// and released when that element leaves the page
+function Counter(attrs: {label: string}) {
+    const count = new RenderObject<number>(0, (n: number) => <strong>{String(n)}</strong>)
+    return <p vtwith={[count]}>
+        {attrs.label}: {count} <button type="button" onClick={() => count.set(count.get() + 1)}>+1</button>
+    </p>
+}
+
+replaceElementWithRoot(<div>
+    <Notes/>
+    <Counter label="Clicks"/>
+</div>, document.getElementById("app"))
+```
 ## RenderBasic
 
 `RenderBasic<DataType>` is a RenderObject for a `string`, `number`, `bigint`, or `boolean`. It renders its value as text inside a `<span style="display:contents;">` and updates that text in place, so it needs no render function.
@@ -190,4 +235,5 @@ void Counter
 |---|---|
 | `getElements()` | The elements this RenderObject has rendered. Advanced: use carefully |
 | `removeAll()` | Removes every element this RenderObject has rendered |
+| `release()` | Releases this RenderObject, for one velotype can't see (from 0.3.5). See [Releasing a RenderObject](#releasing-a-renderobject) |
 | `render(renderFunction, handleUpdate?)` | Renders one more element with a different render function than the default |
